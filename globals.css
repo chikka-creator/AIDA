@@ -1,0 +1,345 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to bottom, #7ec8d8, #ffffff);
+  scroll-behavior: smooth;
+}
+
+/* ====== NAVBAR STRUCTURE ====== */
+.header {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px 40px;
+  background: transparent;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.logo-img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: brightness(0) invert(1); 
+}
+
+
+/* ====== NAVBAR CONTAINER ====== */
+.nav-container {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 25px;
+  padding: 1px 1px;
+  backdrop-filter: blur(12px);
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  left: -9px;
+  list-style: none;
+}
+.nav-list {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* indikator putih aktif */
+.nav-indicator {
+  position: absolute;
+  top: -3.5;
+left: 0px;
+  transform: translateY(-50%);
+  height: 32px; 
+  background: white;
+  border-radius: 20px;
+  transition: transform 0.35s ease, width 0.35s ease;
+  z-index: 1;
+}
+
+/* teks di atas indikator */
+.nav-item a {
+  position: relative;
+  z-index: 2;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #1a4c8b;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-item.active a {
+  color: #1a4c8b;
+  font-weight: 700;
+}
+
+.nav-item:hover a {
+  color: #003366;
+}
+
+
+
+
+/* ====== NAV ITEMS ====== */
+.nav-item a {
+  text-decoration: none;
+  font-family: "Poppins", sans-serif;
+  color: #184a80;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  padding: 6px 10px;
+  border-radius: 14px;
+}
+
+.nav-item:hover a {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.nav-item.active a {
+  background: #ffffff;
+  color: #0e4b7a;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
+/* ====== LANGUAGE BUTTON ====== */
+.lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  color: #184a80;
+  font-size: 14px;
+  padding: 5px 10px;
+  transition: all 0.25s ease;
+}
+
+.flag {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.lang-text {
+  transition: all 0.25s ease;
+}
+
+.lang-btn:hover .flag {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.lang-btn:hover .lang-text {
+  transform: translateY(-1px);
+  opacity: 0.8;
+}
+
+.arrow {
+  font-size: 10px;
+  color: #184a80;
+  transition: transform 0.25s ease;
+}
+
+.lang-btn:hover .arrow {
+  transform: rotate(180deg);
+}
+
+/* ====== DROPDOWN MENU ====== */
+.dropdown-menu {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  padding: 6px 0;
+  width: 100px;
+  animation: fadeIn 0.2s ease forwards;
+  z-index: 9999;
+}
+
+.dropdown-menu li {
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-out {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+/* Animation for dropdown */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ====== FADE-IN SLIDE NAVBAR ====== */
+.header {
+  opacity: 0;
+  transform: translateY(-25px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.header.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ========== HERO ========== */
+.hero {
+  margin-top: 120px;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2), transparent);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.hero-img {
+  width: 320px;
+  border-radius: 10px;
+  transition: transform 0.4s ease;
+}
+
+.hero-img:hover {
+  transform: scale(1.05);
+}
+
+.hero-title {
+  font-size: 64px;
+  color: white;
+  margin: 10px 0 0;
+}
+
+.hero-sub {
+  display: block;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  color: #f0f0f0;
+}
+
+/* ========== ABOUT ========== */
+.about {
+  text-align: center;
+  padding: 80px 20px;
+  animation: fadeIn 1.2s ease-in-out;
+}
+
+.about h2 {
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+.about h3 {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.quote {
+  font-style: italic;
+  margin: 20px auto;
+  color: #444;
+}
+
+.gallery {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 25px 0;
+}
+
+.gallery img {
+  width: 150px;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.gallery img:hover {
+  transform: scale(1.07);
+}
+
+blockquote {
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 15px;
+  color: #333;
+}
+
+/* ========== FOOTER ========== */
+.footer {
+  background: #0b1c25;
+  color: white;
+  text-align: center;
+  padding: 25px 10px;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.socials a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+  font-size: 18px;
+  transition: transform 0.3s;
+}
+
+.socials a:hover {
+  transform: scale(1.2);
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+@keyframes fadeDown {
+  from {opacity: 0; transform: translateY(-5px);}
+  to {opacity: 1; transform: translateY(0);}
+}
