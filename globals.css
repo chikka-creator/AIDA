@@ -49,7 +49,7 @@ body {
   display: flex;
   align-items: center;
   gap: 20px;
-  left: -9px;
+  left: -10px;
   list-style: none;
 }
 .nav-list {
@@ -221,49 +221,126 @@ left: 0px;
   transform: translateY(0);
 }
 
-/* ========== HERO ========== */
-.hero {
-  margin-top: 120px;
+/* =============== HERO SECTION =============== */
+.hero-section {
   position: relative;
-  text-align: center;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #2e9da8, #6ec7d1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
-.hero-overlay {
+/* Background logo besar yang berputar */
+.rotating-logo {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.2), transparent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 0;
 }
 
+.rotating-logo img {
+  width: 60%;
+  max-width: 700px;
+  opacity: 0.3;
+  animation: spin 40s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Konten utama */
 .hero-content {
   position: relative;
-  z-index: 1;
-  animation: fadeIn 1s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  z-index: 2;
 }
 
-.hero-img {
-  width: 320px;
-  border-radius: 10px;
-  transition: transform 0.4s ease;
-}
-
-.hero-img:hover {
-  transform: scale(1.05);
-}
-
+/* Teks besar kiri-kanan */
 .hero-title {
-  font-size: 64px;
+  font-family: "Times New Roman", serif;
+  font-size: 8rem;
   color: white;
-  margin: 10px 0 0;
+  letter-spacing: 2px;
+  user-select: none;
+  position: relative;
 }
 
-.hero-sub {
-  display: block;
-  font-size: 28px;
-  font-weight: 300;
-  letter-spacing: 2px;
-  color: #f0f0f0;
+.hero-title.left {
+left: 32px;
+z-index: -1;
 }
+
+.hero-title.right {
+right: 30px;
+z-index: -1;
+
+}
+
+/* Gambar tengah */
+.hero-image-wrapper {
+  position: relative;
+  width: 340px;
+  height: 240px;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.hero-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+
+.hero-image.active {
+  opacity: 1;
+}
+
+/* Subtitle "creative" di bawah kiri */
+.hero-subtitle {
+  position: absolute;
+  bottom: 15%;
+  left: 22%;
+  color: white;
+  font-size: 1.4rem;
+  font-family: "Georgia", serif;
+  font-weight: 400;
+}
+
+/* Responsif */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 4rem;
+  }
+
+  .hero-image-wrapper {
+    width: 240px;
+    height: 160px;
+  }
+
+  .hero-subtitle {
+    left: 18%;
+    font-size: 1.1rem;
+  }
+}
+
 
 /* ========== ABOUT ========== */
 .about {
