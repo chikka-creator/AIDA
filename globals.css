@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: "Poppins", sans-serif;
-  background: linear-gradient(to bottom, #7ec8d8, #ffffff);
+  background: linear-gradient(180deg, #135D66, #B1FFFC);
   scroll-behavior: smooth;
 }
 
@@ -10,13 +10,15 @@ body {
   width: 100%;
   position: fixed;
   top: 0;
-  left: 0;
+  left: -50px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 18px 40px;
   background: transparent;
   z-index: 100;
+  filter: drop-shadow(-10px 20px 10px rgba(0, 0, 0, 0.5));
+
 }
 
 .logo {
@@ -228,7 +230,7 @@ left: 0px;
   position: relative;
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, #3db5ad 0%, #6dd5ed 100%);
+  background: linear-gradient(135deg, #135D66 0%, #B1FFFC 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,9 +265,9 @@ left: 0px;
 ============================= */
 .star-left {
   position: absolute;
-  bottom: -5%;
+  bottom: -20%;
   left: -4%;
-  width: 32%;
+  width: 36%;
   opacity: 0.85;
   z-index: 2;
   transform: rotate(-37deg);
@@ -322,52 +324,191 @@ transform: rotate(37deg);
 }
 
 
-/* ========== ABOUT ========== */
-.about {
-  text-align: center;
-  padding: 80px 20px;
-  animation: fadeIn 1.2s ease-in-out;
+/* ====== ABOUT SECTION ====== */
+.about-section {
+  padding: 80px 60px;
+  background: #fff;
 }
 
-.about h2 {
-  font-size: 32px;
-  margin-bottom: 5px;
+.about-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 
-.about h3 {
-  font-size: 22px;
-  font-weight: 500;
+/* Kiri (teks) */
+.about-left {
+  flex: 1;
+  min-width: 300px;
 }
 
-.quote {
+.about-left h3 {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.about-left .star {
+  margin-left: 8px;
+  animation: rotateStar 6s linear infinite;
+}
+
+@keyframes rotateStar {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.about-quote {
+  font-weight: 600;
+  margin-top: 15px;
+  font-size: 1.2rem;
+}
+
+.about-testimony {
+  margin-top: 15px;
   font-style: italic;
-  margin: 20px auto;
   color: #444;
 }
 
-.gallery {
+.about-owner {
+  margin-top: 10px;
+  font-weight: 700;
+}
+/* teks bagian bawah */
+.about-desc{
+  background-color: #4FB7B3;
+  padding: 10px;
+  border-radius: 10px;
+}
+.star-bg{
+  position: absolute;
+  top: -5%;
+  left: -10%;
+  width: 39%;
+  opacity: 0.2;
+  z-index: 1;
+  transform: rotate(-35deg);
+}
+/* ====== FOTO SHAPES (3D depth tajam) ====== */
+.photo-layout {
+  flex: 1.3;
+  min-width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  gap: 10px;
+  top: -30px;
+  perspective: 2000px;
+}
+
+/* Spotlight di bawah */
+.photo-shadow {
+  position: absolute;
+  bottom: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  height: 100px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3), transparent 75%);
+  filter: blur(14px);
+  z-index: -1;
+}
+
+.photo-row {
   display: flex;
   justify-content: center;
-  gap: 15px;
-  margin: 25px 0;
+  align-items: flex-end;
+  gap: 20px;
 }
 
-.gallery img {
-  width: 150px;
-  border-radius: 10px;
-  transition: transform 0.3s ease;
+.top-row .photo-shape {
+  width: 120px;
+  height: 230px;
 }
 
-.gallery img:hover {
-  transform: scale(1.07);
+.bottom-row .photo-shape {
+  width: 400px;
+  height: 130px;
 }
 
-blockquote {
-  max-width: 600px;
-  margin: 0 auto;
-  font-size: 15px;
-  color: #333;
+/* Foto umum */
+.photo-shape {
+  position: relative;
+  overflow: hidden;
+  background: #ccc;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  transform-style: preserve-3d;
 }
+
+.photo-shape:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 18px 40px rgba(0, 177, 177, 0.45);
+}
+
+.photo-img {
+  object-fit: cover;
+  filter: brightness(0.97);
+}
+
+/* ====== SHAPES ====== */
+
+/* kiri atas — lebih condong ke kanan dan sedikit maju */
+.shape-left {
+  clip-path: polygon(50% 0, 100% 0, 55% 100%, 0% 100%);
+  transform: rotateY(28deg) translateZ(35px);
+  transform-origin: right center;
+}
+
+/* kanan atas — lebih condong ke kiri dan sedikit maju */
+.shape-right {
+  clip-path: polygon(0% 0, 50% 0, 100% 100%, 45% 100%);
+  transform: rotateY(-28deg) translateZ(35px);
+  transform-origin: left center;
+}
+
+/* tengah kiri dan kanan tetap sedikit miring ringan */
+.shape-center-left {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  transform: rotateY(8deg) translateZ(10px);
+}
+
+.shape-center-right {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  transform: rotateY(-8deg) translateZ(10px);
+}
+
+/* bawah menghadap ke atas */
+.shape-bottom {
+  clip-path: polygon(0 100%, 10% 0, 90% 0, 100% 100%);
+  transform: rotateX(-15deg) translateZ(25px);
+}
+
+/* Tambahan shading samping agar depth lebih terasa */
+.shape-left::after,
+.shape-right::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to center,
+    rgba(0, 0, 0, 0.25),
+    transparent 60%
+  );
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.shape-left:hover::after,
+.shape-right:hover::after {
+  opacity: 0.1;
+}
+
 
 /* ========== FOOTER ========== */
 .footer {
