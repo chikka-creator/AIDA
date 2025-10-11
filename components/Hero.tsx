@@ -1,48 +1,19 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
+import React from "react";
+import "../globals.css";
 export default function HomePage() {
-  const images = [
-    "/images/photo1.jpg",
-    "/images/photo2.jpg",
-    "/images/photo3.jpg",
-  ]; // ganti dengan foto kamu sendiri di /public/images/
-  const [currentImage, setCurrentImage] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % images.length);
-    }, 4000); // ganti gambar setiap 4 detik
-    return () => clearInterval(interval);
-  }, [images.length]);
-
   return (
-    <section className="hero-section">
-      <div className="rotating-logo">
-        <img src="/logo.png" alt="AIDA Logo Background" />
+    <main className="home-container">
+      {/* Background decorations */}
+      <img src="/aida-star.png" alt="left decoration" className="star-left" />
+      <img src="/aida-star.png" alt="right decoration" className="star-right" />
+      <img src="/aida-star.png" alt="background decoration" className="star-bg-left" />
+      <img src="/aida-star.png" alt="background decoration" className="star-bg-right" />
+
+      {/* Title content */}
+      <div className="text-content">
+        <h1 className="title">AIDA</h1>
+        <p className="subtitle">creative</p>
       </div>
-
-      <div className="hero-content">
-        <h1 className="hero-title left">AIDA</h1>
-
-        <div className="hero-image-wrapper">
-          {images.map((img, index) => (
-            <img
-              key={index}
-              src={img}
-              alt={`slide-${index}`}
-              className={`hero-image ${
-                index === currentImage ? "active" : ""
-              }`}
-            />
-          ))}
-        </div>
-
-        <h1 className="hero-title right">AIDA</h1>
-
-        <p className="hero-subtitle">creative</p>
-      </div>
-    </section>
+    </main>
   );
 }

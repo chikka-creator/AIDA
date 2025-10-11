@@ -221,123 +221,103 @@ left: 0px;
   transform: translateY(0);
 }
 
-/* =============== HERO SECTION =============== */
-.hero-section {
+/* =============================
+   Main Section
+============================= */
+.home-container {
   position: relative;
   width: 100%;
   height: 100vh;
-  background: linear-gradient(135deg, #135D66, #B1FFFC);
+  background: linear-gradient(135deg, #3db5ad 0%, #6dd5ed 100%);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
 
-/* Background logo besar yang berputar */
-.rotating-logo {
-  position: absolute;
-  inset: 0;
-  display: flex;
+/* =============================
+   Text Content
+============================= */
+.text-content {
+  position: relative;
+  z-index: 5;
+  text-align: center;
   justify-content: center;
-  align-items: center;
-  z-index: 0;
+  color: #ffffff;
 }
 
-.rotating-logo img {
-  width: 60%;
-  max-width: 700px;
-  opacity: 0.3;
-  animation: spin 40s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Konten utama */
-.hero-content {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  z-index: 2;
-}
-
-/* Teks besar kiri-kanan */
-.hero-title {
-  font-family: "Times New Roman", serif;
-  font-size: 8rem;
-  color: white;
-  letter-spacing: 2px;
-  user-select: none;
-  position: relative;
-}
-
-.hero-title.left {
-left: 32px;
-z-index: -1;
-}
-
-.hero-title.right {
-right: 30px;
-z-index: -1;
-
-}
-
-/* Gambar tengah */
-.hero-image-wrapper {
-  position: relative;
-  width: 340px;
-  height: 240px;
-  overflow: hidden;
-  border-radius: 2px;
-}
-
-.hero-image {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 20px;
-  opacity: 0;
-  transition: opacity 1.2s ease-in-out;
-}
-
-.hero-image.active {
-  opacity: 1;
-}
-
-/* Subtitle "creative" di bawah kiri */
-.hero-subtitle {
-  position: absolute;
-  bottom: 15%;
-  left: 22%;
-  color: white;
-  font-size: 1.4rem;
-  font-family: "Georgia", serif;
+.title {
+  font-size: 10rem;
   font-weight: 400;
+  margin-top: -2rem;
+  letter-spacing: 3px;
 }
 
-/* Responsif */
+.subtitle {
+  font-size: 3rem;
+  margin-top: -10rem;
+}
+
+/* =============================
+   Decorative Logos
+============================= */
+.star-left {
+  position: absolute;
+  bottom: -5%;
+  left: -4%;
+  width: 32%;
+  opacity: 0.85;
+  z-index: 2;
+  transform: rotate(-37deg);
+  filter: drop-shadow(-10px 10px 10px rgba(0, 0, 0, 0.5));
+}
+
+.star-right {
+  position: absolute;
+  top: -5%;
+  right: -5%;
+  width: 30%;
+  opacity: 0.9;
+  z-index: 2;
+  transform: perspective(1000px) rotateY(30deg);
+transform: rotate(37deg);
+  filter: drop-shadow(10px 10px 10px rgba(0, 0, 0, 0.5));
+}
+
+.star-bg-left{
+  position: absolute;
+  top: -19%;
+  left: -10%;
+  width: 39%;
+  opacity: 0.2;
+  z-index: 1;
+  transform: rotate(-35deg);
+}
+.star-bg-right{
+  position: absolute;
+  bottom: -19%;
+  right: -10%;
+  width: 39%;
+  opacity: 0.2;
+  z-index: 1;
+  transform: rotate(-35deg);
+}
+
+/* =============================
+   Responsiveness
+============================= */
 @media (max-width: 768px) {
-  .hero-title {
-    font-size: 4rem;
+  .title {
+    font-size: 5rem;
   }
 
-  .hero-image-wrapper {
-    width: 240px;
-    height: 160px;
+  .subtitle {
+    font-size: 2rem;
   }
 
-  .hero-subtitle {
-    left: 18%;
-    font-size: 1.1rem;
+  .star-left,
+  .star-right {
+    width: 40%;
   }
 }
 
