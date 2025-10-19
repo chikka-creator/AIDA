@@ -380,6 +380,8 @@ left: 0px;
   padding: 8px 14px;
   border-radius: 20px;
   font-weight: 600;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 /* add button - small circular */
@@ -394,9 +396,13 @@ left: 0px;
   cursor: pointer;
   transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
+
 .add-btn:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
 .add-btn:active { transform: scale(0.96); }
 
+
+.price-text:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+.price-text:active { transform: scale(0.96); }
 /* ---------- pagination ---------- */
 .pagination {
   display: flex;
