@@ -1,7 +1,8 @@
 import Image from "next/image";
 import "./globals.css";
 import Navbar from "./Navbar";
-
+import Footer from "../components/Footer";
+import KopiJotos from "./KopiJotos";
 
 export default function Home() {
   return (
@@ -26,6 +27,7 @@ export default function Home() {
             <Image src="/gambar3.jpg" alt="Social Media Management" fill className="img" />
             <div className="overlay">Social Media Management</div>
           </div>
+        <p className="client">More Client</p>
         </div>
       </section>
 
@@ -50,7 +52,7 @@ export default function Home() {
   </div>
 
   <p className="villa-sub">Photography & Drone</p>
-</section>
+</section> 
 
 {/* SECTION: GRAHA PADEL CLUB (copy 1:1 UI) */}
 <section className="padel-section" aria-labelledby="padel-title">
@@ -70,12 +72,12 @@ export default function Home() {
 
       <div className="padel-top-gallery">
         <div className="padel-top-left">
-          <img src="/padel1.jpg" alt="Padel vertical" />
+          <img src="/padel3.jpg" alt="Padel vertical" />
         </div>
 
         <div className="padel-top-right">
           <img src="/padel2.jpg" alt="Padel small top" className="small-top" />
-          <img src="/padel3.jpg" alt="Padel small bottom" className="small-bottom" />
+          <img src="/padel6.jpg" alt="Padel small bottom" className="small-bottom" />
         </div>
       </div>
     </div>
@@ -89,7 +91,7 @@ export default function Home() {
       </div>
 
       <div className="padel-bottom-center">
-        <img src="/padel5.jpg" alt="Padel bottom center" />
+        <img src="/padel1.jpg" alt="Padel bottom center" />
       </div>
 
       <div className="padel-bottom-right">
@@ -111,23 +113,10 @@ export default function Home() {
 
 
       {/* SECTION 3 */}
-      <section className="kopi">
-        <h2>KOPI JOTOS</h2>
-        <div className="kopi-content">
-          <Image src="/img5.jpg" alt="Coffee" width={250} height={200} />
-          <Image src="/img1.jpg" alt="Coffee Menu" width={250} height={200} />
-          <Image src="/img2.jpg" alt="Coffee Drinks" width={250} height={200} />
-        </div>
-        <p>
-          Instagrammable food & story concept cafe with warm ambiance, aesthetic visuals, and our creative photography
-          support for your brand identity.
-        </p>
-      </section>
+      <KopiJotos />
 
       {/* FOOTER */}
-      <footer className="footer">
-        <p>© 2025 Creative Studio — All rights reserved.</p>
-      </footer>
+            <Footer />
     </main>
   );
 }

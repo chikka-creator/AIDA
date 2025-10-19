@@ -71,7 +71,7 @@ body {
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  top: -3.5;
+  top: 0px;
 left: 0px;
   transform: translateY(-50%);
   height: 32px; 
@@ -254,6 +254,15 @@ left: 0px;
   overflow: hidden;
   border-radius: 10px;
 }
+.client{
+  position: relative;
+  text-align: center;
+  top: 350px;
+  justify-content: center;
+  right: 400px;
+  z-index: 999;
+  font-size: 1.5rem;
+}
 .hero-box-vidio {
   position: relative;
   top: 70px;
@@ -266,6 +275,7 @@ left: 0px;
 .hero-box.wide {
   width: 760px;
   height: 280px;
+  left: 77px;
 }
 
 .hero-box .img {
@@ -359,8 +369,10 @@ background-size: cover;
 /* section container + background + overlay */
 .padel-section {
   position: relative;
-  background: linear-gradient(180deg, rgba(15,15,15,0.95) 0%, rgba(30,30,30,0.88) 100%),
-              url("/padel-bg.jpg") center/cover no-repeat;
+ background-image: url("/bg-padel2.webp");
+background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   min-height: 820px; /* desktop baseline to match UI */
   display: flex;
   align-items: center;
@@ -489,7 +501,7 @@ background-size: cover;
 /* left two-image area (full width image) */
 .padel-bottom-left img {
   width: 100%;
-  height: 140px;
+  height: 300px;
   object-fit: cover;
   border-radius: 4px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.48);
@@ -499,7 +511,7 @@ background-size: cover;
 /* center image (close-up paddles) */
 .padel-bottom-center img {
   width: 100%;
-  height: 140px;
+  height: 300px;
   object-fit: cover;
   border-radius: 4px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.48);
@@ -571,25 +583,118 @@ background-size: cover;
   .padel-title-wrap h2 { font-size: 36px; }
 }
 
-/* KOPI SECTION */
-.kopi {
-  text-align: center;
-  padding: 60px 0;
-  background-color: #202020;
-}
-
-.kopi-content {
+/* KOPI JOTOS */
+.kopi-section {
+  width: 100%;
+  padding: 5rem 2rem;
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 20px 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rem;
 }
 
-.kopi p {
-  max-width: 600px;
-  margin: 0 auto;
-  color: #ccc;
+.kopi-grid {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1rem;
+  position: relative;
 }
+
+/* ukuran tiap item */
+.kopi-img {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.kopi-img.wide {
+  grid-column: span 1;
+  height: 240px;
+}
+
+.kopi-img.tall {
+  height: 490px; /* lebih panjang ke bawah */
+}
+
+/* posisi tengah bawah */
+.kopi-img.bottom-center {
+  grid-column: 2 / span 1;
+  grid-row: 2;
+  height: 240px;
+  margin-top: -257px;
+}
+
+/* animasi fade in */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-in.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* teks bagian bawah */
+.kopi-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1100px;
+  gap: 1rem;
+}
+
+.kopi-left h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.kopi-left p {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.kopi-right {
+  flex: 1;
+  text-align: right;
+}
+
+.kopi-desc {
+  margin-top: 30px;
+  font-size: 1rem;
+  justify-content: center;
+  text-align: end;
+  justify-items: center;
+  line-height: 1.7;
+  opacity: 0.9;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .kopi-grid {
+    grid-template-columns: 1fr;
+  }
+  .kopi-img.bottom-center {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .kopi-text {
+    flex-direction: column;
+    text-align: center;
+  }
+  .kopi-right {
+    text-align: center;
+  }
+}
+
 
 /* FOOTER */
 .footer {
