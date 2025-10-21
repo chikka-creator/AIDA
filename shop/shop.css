@@ -61,8 +61,8 @@ body{
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  top: -3px;
-left: 0px;
+  top: 0;
+left: 0;
   transform: translateY(-50%);
   height: 32px; 
   background: white;
