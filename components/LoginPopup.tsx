@@ -63,7 +63,7 @@ export default function LoginPopup({ open, onClose }: LoginPopupProps) {
 
           <button className="authBtn appleBtn" onClick={() => signIn('apple')}>
             <img
-              src="https://www.svgrepo.com/show/303128/apple-logo.svg"
+              src="/apple.png"
               alt="Apple"
               width={18}
               height={18}
