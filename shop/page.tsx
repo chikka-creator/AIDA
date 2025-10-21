@@ -25,7 +25,7 @@ const productsData: Product[] = [
 ];
 
 // default popup mode for cart, can be set to "center" if desired
-const popupMode: "center" | "right" = "center";
+const popupMode: "right" | "center" = "right";
 
 export default function ShopPage() {
   // search state (real-time)
