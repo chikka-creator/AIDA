@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import "./shop.css";
 import Navbar from "./Navbar";
-
+import Login from "../components/LoginButton";
 type Product = {
   id: number;
   name: string;
@@ -25,7 +25,7 @@ const productsData: Product[] = [
 ];
 
 // default popup mode for cart, can be set to "center" if desired
-const popupMode: "right" | "center" = "right";
+const popupMode: "center" | "right" = "center";
 
 export default function ShopPage() {
   // search state (real-time)
@@ -129,6 +129,7 @@ export default function ShopPage() {
       </div>
 
       {/* cart icon sticky */}
+      <Login />
       <button className="cart-icon" aria-label="Open cart" onClick={openCart}>
         🛒
         {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}

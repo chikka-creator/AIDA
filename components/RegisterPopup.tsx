@@ -1,36 +1,32 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
-import RegisterPopup from './RegisterPopup';
 import './popup.css';
 
-interface LoginPopupProps {
+interface RegisterPopupProps {
+  onBack: () => void;
   onClose: () => void;
 }
 
-export default function LoginPopup({ onClose }: LoginPopupProps) {
-  const [showRegister, setShowRegister] = useState(false);
-  const [formData, setFormData] = useState({ username: '', password: '' });
+export default function RegisterPopup({ onBack, onClose }: RegisterPopupProps) {
+  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [closing, setClosing] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!formData.username || !formData.password)
+    if (!formData.username || !formData.email || !formData.password)
       return setError('Please fill in all fields.');
     if (formData.password.length < 8)
       return setError('Password must be at least 8 characters long.');
-    alert('Login success (mock)');
+    alert('Register success (mock)');
   };
 
-  // Fade-out animation handler
   const handleClose = () => {
     setClosing(true);
     setTimeout(onClose, 350);
   };
 
-  // Click outside handler
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       const card = document.querySelector('.popupCard');
@@ -42,9 +38,6 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  if (showRegister)
-    return <RegisterPopup onBack={() => setShowRegister(false)} onClose={onClose} />;
-
   return (
     <div className={`popupOverlay ${closing ? 'closing' : ''}`}>
       <div className="popupCard">
@@ -55,14 +48,21 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
         <div className="popupRight">
           <img src="/aida-star.png" alt="Logo" className="popupLogoSmall" onClick={handleClose} />
 
-          <h2 className="popupTitle">User Login</h2>
+          <h2 className="popupTitle">Sign Up</h2>
 
-          <form onSubmit={handleLogin} className="popupForm">
+          <form onSubmit={handleRegister} className="popupForm">
             <input
               type="text"
               placeholder="Username"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              className="popupInput"
+            />
+            <input
+              type="text"
+              placeholder="Email / Whatsapp"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="popupInput"
             />
             <input
@@ -73,37 +73,11 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
               className="popupInput"
             />
             {error && <p className="popupError">{error}</p>}
-            <button type="submit" className="popupBtnMain">Login</button>
-
-            <div className="popupDivider"></div>
-
-            <button
-              type="button"
-              className="popupBtnGoogle"
-              onClick={() => signIn('google')}
-            >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" 
-              width={'18px'}
-              
-              />
-              Sign in with Google
-            </button>
-
-            <button
-              type="button"
-              className="popupBtnApple"
-              onClick={() => signIn('apple')}
-            >
-              <img src="/apple.png" alt="Apple"
-              width={'18px'}
-              
-              />
-              Sign in with Apple
-            </button>
+            <button type="submit" className="popupBtnMain">Get Started</button>
           </form>
 
-          <p className="popupSwitchText" onClick={() => setShowRegister(true)}>
-            Create Your Account →
+          <p className="popupSwitchText" onClick={onBack}>
+            Already have an account? <span>Sign in</span>
           </p>
         </div>
       </div>

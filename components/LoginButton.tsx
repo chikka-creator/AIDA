@@ -1,18 +1,34 @@
-// components/LoginButton.tsx
 'use client';
-import React from 'react';
-import styles from './LoginPopup.module.css';
+import React, { useState } from 'react';
+import LoginPopup from './LoginPopup';
+import "./popup.css";
 
-interface Props {
-  onOpen: () => void;
-}
+export default function Page() {
+  const [showLogin, setShowLogin] = useState(false);
 
-export default function LoginButton({ onOpen }: Props) {
   return (
-    <div className={styles.loginButtonWrapper}>
-      <button className={styles.loginTopBtn} onClick={onOpen}>
+    <>
+      <button
+        onClick={() => setShowLogin(true)}
+        className='btn-login'
+        style={{
+          position: 'fixed',
+          top: '20px',
+          right: '30px',
+          background: '#246E76',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '10px',
+          padding: '10px 18px',
+          fontFamily: 'Poppins, sans-serif',
+          fontWeight: 500,
+          cursor: 'pointer',
+          
+        }}
+      >
         Login
       </button>
-    </div>
+      {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
+    </>
   );
 }
