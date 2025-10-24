@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 .btn-login{
-  z-index: 20;
+  z-index: 200;
   position: relative;
 margin-right: 80px;
-margin-top: 5px;
+margin-top: 10px;
 }
 .popupOverlay {
   position: fixed;
@@ -184,6 +184,7 @@ margin-top: 5px;
 .popupBtnGoogle {
   background: #fff;
   border: 1px solid #ccc;
+  color: black;
 }
 .popupBtnApple {
   background: #000;
