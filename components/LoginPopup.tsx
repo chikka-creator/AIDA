@@ -55,7 +55,7 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
         <div className="popupRight">
           <img src="/aida-star.png" alt="Logo" className="popupLogoSmall" onClick={handleClose} />
 
-          <h2 className="popupTitle">User Login</h2>
+          <h2 className="popupTitle">Login</h2>
 
           <form onSubmit={handleLogin} className="popupForm">
             <input

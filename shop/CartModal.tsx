@@ -14,6 +14,8 @@ export default function Cart({
 }) {
   const [closing, setClosing] = useState(false);
   const total = items.reduce((s, it) => s + it.qty * it.p.price, 0);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'failed'>('idle');
+
 
   const handleClose = () => {
     setClosing(true);

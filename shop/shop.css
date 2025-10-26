@@ -352,7 +352,7 @@ left: 0px;
 }
 .card:hover {
   transform: translateY(-6px) scale(1.5);
-  box-shadow: 0 20px 30px white;
+  box-shadow: 0 10px 20px grey;
 }
 .card-media img {
   width: 100%;
