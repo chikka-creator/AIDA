@@ -260,17 +260,44 @@ left: 0px;
   font-weight: 400;
   margin-top: -2rem;
   letter-spacing: 3px;
+  margin-left: -1170px;
 }
 
 .subtitle {
   font-size: 3rem;
   margin-left: 210px;
   margin-top: -10rem;
+  margin-left: -1000px;
 }
 
 /* =============================
    Decorative Logos
 ============================= */
+.background{
+  width: 600px;
+  opacity: 0.2;
+  position: relative;
+  top: 0;
+  left: 300px;
+  animation: rotate 10s linear infinite;
+}
+.background2{
+  width: 600px;
+  opacity: 0.2;
+  position: relative;
+  top: 0;
+  left: -300px;
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
 .star-left {
   position: absolute;
   bottom: -20%;
@@ -376,7 +403,16 @@ transform: rotate(37deg);
   height: 30px;
   position: relative;
   top: 6px;
+  animation: rotate 10s linear infinite;
 }
+@keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
 .about-quote {
   font-size: 1.2rem;
   font-style: italic;
