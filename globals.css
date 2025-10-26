@@ -371,7 +371,12 @@ transform: rotate(37deg);
   font-weight: 500;
   margin-bottom: 20px;
 }
-
+.about-subtitle img{
+  width: 30px;
+  height: 30px;
+  position: relative;
+  top: 6px;
+}
 .about-quote {
   font-size: 1.2rem;
   font-style: italic;

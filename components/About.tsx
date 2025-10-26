@@ -10,7 +10,7 @@ export default function About() {
         {/* === TEKS KIRI === */}
         <div className="about-left">
           <h2 className="about-title">About us</h2>
-          <h3 className="about-subtitle">Aida Creative Agency ✦</h3>
+          <h3 className="about-subtitle">Aida Creative Agency <img src="./aida-star.png" alt="" /></h3>
           <p className="about-quote">“WE RUN YOUR SOCIALS SO YOU CAN RUN YOUR BUSINESS”</p>
           <p className="about-testimony">
             “Aida Creative made our brand content look much more professional on
