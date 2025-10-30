@@ -1,8 +1,9 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
-import RegisterPopup from './RegisterPopup';
-import './popup.css';
+"use client";
+import React, { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import RegisterPopup from "./RegisterPopup";
+import "./popup.css";
 
 interface LoginPopupProps {
   onClose: () => void;
@@ -10,18 +11,53 @@ interface LoginPopupProps {
 
 export default function LoginPopup({ onClose }: LoginPopupProps) {
   const [showRegister, setShowRegister] = useState(false);
-  const [formData, setFormData] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
   const [closing, setClosing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  // Auto-close popup if user is already signed in
+  useEffect(() => {
+    if (session) {
+      handleClose();
+    }
+  }, [session]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     if (!formData.username || !formData.password)
-      return setError('Please fill in all fields.');
+      return setError("Please fill in all fields.");
     if (formData.password.length < 8)
-      return setError('Password must be at least 8 characters long.');
-    alert('Login success (mock)');
+      return setError("Password must be at least 8 characters long.");
+    alert("Login success (mock)");
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Trigger Google sign-in
+      const result = await signIn("google", {
+        callbackUrl: "/", // Redirect to home after sign-in
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Failed to sign in with Google. Please try again.");
+        setLoading(false);
+      } else if (result?.ok) {
+        // Successfully signed in
+        handleClose();
+      }
+    } catch (err) {
+      console.error("Google sign-in error:", err);
+      setError("An error occurred. Please try again.");
+      setLoading(false);
+    }
   };
 
   // Fade-out animation handler
@@ -33,27 +69,35 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
   // Click outside handler
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
-      const card = document.querySelector('.popupCard');
+      const card = document.querySelector(".popupCard");
       if (card && !card.contains(e.target as Node)) {
         handleClose();
       }
     };
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
   if (showRegister)
-    return <RegisterPopup onBack={() => setShowRegister(false)} onClose={onClose} />;
+    return (
+      <RegisterPopup onBack={() => setShowRegister(false)} onClose={onClose} />
+    );
 
   return (
-    <div className={`popupOverlay ${closing ? 'closing' : ''}`}>
+    <div className={`popupOverlay ${closing ? "closing" : ""}`}>
       <div className="popupCard">
         <div className="popupLeft">
           <img src="/aida-star.png" alt="Logo" className="popupLogoLarge" />
         </div>
 
         <div className="popupRight">
-          <img src="/aida-star.png" alt="Logo" className="popupLogoSmall" onClick={handleClose} />
+          <img
+            src="/aida-star.png"
+            alt="Logo"
+            className="popupLogoSmall"
+            onClick={handleClose}
+            style={{ cursor: "pointer" }}
+          />
 
           <h2 className="popupTitle">Login</h2>
 
@@ -62,31 +106,41 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
               type="text"
               placeholder="Username"
               value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
               className="popupInput"
+              disabled={loading}
             />
             <input
               type="password"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
               className="popupInput"
+              disabled={loading}
             />
             {error && <p className="popupError">{error}</p>}
-            <button type="submit" className="popupBtnMain">Login</button>
+            <button type="submit" className="popupBtnMain" disabled={loading}>
+              {loading ? "Loading..." : "Login"}
+            </button>
 
             <div className="popupDivider"></div>
 
             <button
               type="button"
               className="popupBtnGoogle"
-              onClick={() => signIn('google')}
+              onClick={handleGoogleSignIn}
+              disabled={loading}
             >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" 
-              width={'18px'}
-              
+              <img
+                src="https://www.svgrepo.com/show/475656/google-color.svg"
+                alt="Google"
+                width={"18px"}
               />
-              Sign in with Google
+              {loading ? "Signing in..." : "Sign in with Google"}
             </button>
           </form>
 
