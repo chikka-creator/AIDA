@@ -72,7 +72,7 @@ body {
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  top: 0px;
+  margin-top: 3px;
 left: 0px;
   transform: translateY(-50%);
   height: 32px; 
@@ -89,18 +89,18 @@ left: 0px;
   padding: 8px 10px;
   border-radius: 10px;
   text-decoration: none;
-  color: #1a4c8b;
+  color: #5292e0;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .nav-item.active a {
-  color: #1a4c8b;
+  color: #74b5fb;
   font-weight: 700;
 }
 
 .nav-item:hover a {
-  color: #003366;
+  color: #74b5fb;
 }
 
 
@@ -110,7 +110,7 @@ left: 0px;
 .nav-item a {
   text-decoration: none;
   font-family: "Poppins", sans-serif;
-  color: #184a80;
+  color: #74b5fb;
   font-weight: 500;
   font-size: 14px;
   transition: all 0.2s ease;
@@ -121,10 +121,9 @@ left: 0px;
 .nav-item:hover a {
   background: rgba(255, 255, 255, 0.4);
 }
-
 .nav-item.active a {
   background: #ffffff;
-  color: #0e4b7a;
+  color: #74b5fb;
   box-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
 }
 
@@ -258,10 +257,11 @@ left: 0px;
 .client{
   position: relative;
   text-align: center;
-  top: 300px;
+  top: 400px;
+  color: white;
   justify-content: center;
   right: 400px;
-  z-index: 999;
+  z-index: 100;
   font-size: 3rem;
 }
 /* HERO BOX VIDEO - Updated untuk YouTube iframe */
@@ -312,7 +312,7 @@ left: 0px;
 .hero-box.wide {
   width: 760px;
   height: 280px;
-  left: 140px;
+  left: 0;
 }
 
 .hero-box .img {
@@ -336,7 +336,7 @@ left: 0px;
 .villa {
   position: relative;
   text-align: center;
-background-image: url("/bg-section.jpg");
+background-image: url("/bg-section.webp");
 background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -625,7 +625,7 @@ background-size: cover;
   width: 100%;
   padding: 5rem 2rem;
   display: flex;
-  background-image: url("/bg-section.jpg");
+  background-image: url("/bg-section.webp");
 background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
