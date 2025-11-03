@@ -14,7 +14,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-row">
           <div className="hero-box">
-            <Image src="/gambar1.jpg" alt="Photography" fill className="img" />
+            <Image src="/gambar1.webp" alt="Photography" fill className="img" />
             <div className="overlay">Photography</div>
           </div>
           <div className="hero-box-vidio">
@@ -30,10 +30,10 @@ export default function Home() {
         </div>
         <div className="hero-row">
           <div className="hero-box wide">
-            <Image src="/gambar3.jpg" alt="Social Media Management" fill className="img" />
+            <Image src="/gambar3.webp" alt="Social Media Management" fill className="img" />
             <div className="overlay">Social Media Management</div>
           </div>
-        <p className="client">More Client</p>
+        {/* <p className="client">More Client</p>x */}
         </div>
       </section>
 
@@ -41,9 +41,9 @@ export default function Home() {
       {/* SECTION: VILLA SAHABAT TRAWAS */}
 <section className="villa">
   <div className="villa-gallery">
-    <Image src="/fotovilla.jpg" alt="Villa 1" width={300} height={380} className="villa-photo" />
-    <Image src="/fotovilla2.jpg" alt="Villa 2" width={300} height={380} className="villa-photo" />
-    <Image src="/fotovilla3.jpg" alt="Villa 3" width={300} height={380} className="villa-photo" />
+    <Image src="/fotovilla.webp" alt="Villa 1" width={300} height={380} className="villa-photo" />
+    <Image src="/fotovilla2.webp" alt="Villa 2" width={300} height={380} className="villa-photo" />
+    <Image src="/fotovilla3.webp" alt="Villa 3" width={300} height={380} className="villa-photo" />
   </div>
 
   <h2 className="villa-title">VILLA SAHABAT TRAWAS</h2>
@@ -78,12 +78,12 @@ export default function Home() {
 
       <div className="padel-top-gallery">
         <div className="padel-top-left">
-          <img src="/padel3.jpg" alt="Padel vertical" />
+          <img src="/padel3.webp" alt="Padel vertical" />
         </div>
 
         <div className="padel-top-right">
-          <img src="/padel2.jpg" alt="Padel small top" className="small-top" />
-          <img src="/padel6.jpg" alt="Padel small bottom" className="small-bottom" />
+          <img src="/padel2.webp" alt="Padel small top" className="small-top" />
+          <img src="/padel6.webp" alt="Padel small bottom" className="small-bottom" />
         </div>
       </div>
     </div>
@@ -93,11 +93,11 @@ export default function Home() {
     {/* ROW BAWAH */}
     <div className="padel-bottom">
       <div className="padel-bottom-left">
-        <img src="/padel4.jpg" alt="Padel bottom left" />
+        <img src="/padel4.webp" alt="Padel bottom left" />
       </div>
 
       <div className="padel-bottom-center">
-        <img src="/padel1.jpg" alt="Padel bottom center" />
+        <img src="/padel1.webp" alt="Padel bottom center" />
       </div>
 
       <div className="padel-bottom-right">
