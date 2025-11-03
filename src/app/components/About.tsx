@@ -10,33 +10,33 @@ export default function About() {
         {/* === TEKS KIRI === */}
         <div className="about-left">
           <h2 className="about-title">About us</h2>
-          <h3 className="about-subtitle">Aida Creative Agency <img src="./aida-star.png" alt="" /></h3>
+          <h3 className="about-subtitle">Aida Creative Agency <img src="./aida-star.webp" alt="" /></h3>
           <p className="about-quote">“WE RUN YOUR SOCIALS SO YOU CAN RUN YOUR BUSINESS”</p>
           <p className="about-testimony">
             “Aida Creative made our brand content look much more professional on
             social media. Our engagement has increased significantly!”
           </p>
-          <p className="about-owner">— Owner of <img src="/logo-kopi.png" alt="" /></p>
+          <p className="about-owner">— Owner of <img src="/logo-kopi.webp" alt="" /></p>
         </div>
 
        <div className="photo-grid">
   <div className="photo photo1">
-    <Image src="/gambar1.jpg" alt="gambar Photo 1" fill />
+    <Image src="/gambar1.webp" alt="gambar Photo 1" fill />
   </div>
   <div className="photo photo2">
-    <Image src="/gambar2.jpg" alt="gambar Photo 2" fill />
+    <Image src="/gambar2.webp" alt="gambar Photo 2" fill />
   </div>
   <div className="photo photo3">
-    <Image src="/gambar3.jpg" alt="gambar Photo 3" fill />
+    <Image src="/gambar3.webp" alt="gambar Photo 3" fill />
   </div>
   <div className="photo photo4">
-    <Image src="/gambar4.jpg" alt="gambar Photo 4" fill />
+    <Image src="/gambar4.webp" alt="gambar Photo 4" fill />
   </div>
   <div className="photo photo5">
-    <Image src="/gambar5.jpg" alt="gambar Photo 5" fill />
+    <Image src="/gambar5.webp" alt="gambar Photo 5" fill />
   </div>
   <div className="photo photo6">
-    <Image src="/gambar6.jpg" alt="gambar Photo 6" fill />
+    <Image src="/gambar6.webp" alt="gambar Photo 6" fill />
   </div>
 </div>
 

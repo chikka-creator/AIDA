@@ -90,7 +90,7 @@ useEffect(() => {
   return (
    <header className={`header ${animate ? "show" : ""}`}>
   <div className="logo">
-    <img src="../aida-star.png" alt="Aida Creative Logo" className="logo-img" />
+    <img src="../aida-star.webp" alt="Aida Creative Logo" className="logo-img" />
   </div>
       <nav className="nav-container">
         <ul className="nav-list" ref={navRef}>
