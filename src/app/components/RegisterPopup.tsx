@@ -42,11 +42,11 @@ export default function RegisterPopup({ onBack, onClose }: RegisterPopupProps) {
     <div className={`popupOverlay ${closing ? 'closing' : ''}`}>
       <div className="popupCard">
         <div className="popupLeft">
-          <img src="/aida-star.png" alt="Logo" className="popupLogoLarge" />
+          <img src="/aida-star.webp" alt="Logo" className="popupLogoLarge" />
         </div>
 
         <div className="popupRight">
-          <img src="/aida-star.png" alt="Logo" className="popupLogoSmall" onClick={handleClose} />
+          <img src="/aida-star.webp" alt="Logo" className="popupLogoSmall" onClick={handleClose} />
 
           <h2 className="popupTitle">Sign Up</h2>
 

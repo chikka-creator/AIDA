@@ -16,63 +16,63 @@ export default function ShopPage() {
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar1'
+      image: '/gambar1.webp'
     },
     {
       id: 2,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar2'
+      image: '/gambar2.webp'
     },
     {
       id: 3,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar3'
+      image: '/gambar3.webp'
     },
     {
       id: 4,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar4'
+      image: '/gambar4.webp'
     },
     {
       id: 5,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar5'
+      image: '/gambar5.webp'
     },
     {
       id: 6,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar6'
+      image: '/gambar6.webp'
     },
     {
       id: 7,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar7'
+      image: '/gambar7.webp'
     },
     {
       id: 8,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar8'
+      image: '/gambar8.webp'
     },
     {
       id: 9,
       title: 'BROMO PRESET',
       description: 'Lorem ipsum hic est hac',
       price: 'Rp 15k',
-      image: '/gambar9'
+      image: '/gambar9.webp'
     }
   ]);
 

@@ -31,22 +31,22 @@ export default function KopiJotos() {
       <div className="kopi-grid">
         {/* kiri atas */}
         <div className="kopi-img tall fade-in">
-          <Image src="/gambar1.jpg" alt="Kopi 1" fill className="obj-cover" />
+          <Image src="/kopi1.webp" alt="1" fill className="obj-cover" />
         </div>
 
         {/* tengah atas */}
         <div className="kopi-img wide fade-in">
-          <Image src="/gambar2.jpg" alt="Kopi 2" fill className="obj-cover" />
+          <Image src="/kopi2.webp" alt="2" fill className="obj-cover" />
         </div>
 
         {/* kanan atas */}
         <div className="kopi-img tall fade-in">
-          <Image src="/gambar3.jpg" alt="Kopi 3" fill className="obj-cover" />
+          <Image src="/kopi3.webp" alt="3" fill className="obj-cover" />
         </div>
 
         {/* tengah bawah (benar-benar di tengah) */}
         <div className="kopi-img bottom-center fade-in">
-          <Image src="/gambar4.jpg" alt="Kopi 4" fill className="obj-cover" />
+          <Image src="/kopi4.webp" alt="4" fill className="obj-cover" />
         </div>
       </div>
 

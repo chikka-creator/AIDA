@@ -69,6 +69,7 @@ margin-top: 10px;
   width: 400px;
   transform: rotate(-12deg);
   opacity: 0.25;
+  animation: rotate 20s linear infinite; 
 }
 
 /* Right Section */
@@ -83,7 +84,14 @@ margin-top: 10px;
   justify-content: center;
   padding: 2rem;
 }
-
+@keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
 .popupLogoSmall {
   position: absolute;
   top: 16px;
