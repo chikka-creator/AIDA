@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="footer-content">
         <div className="footer-icons" role="navigation" aria-label="social links">
           <a
-            href="https://instagram.com"
+            href="https://www.instagram.com/aidacreative.id?igsh=MWFqazB1bGhrYm9lMg=="
             target="_blank"
             rel="noopener noreferrer"
             className="icon-link"
@@ -24,7 +24,7 @@ export default function Footer() {
           </a>
 
           <a
-            href="https://youtube.com"
+            href="http://www.youtube.com/@stephenhko"
             target="_blank"
             rel="noopener noreferrer"
             className="icon-link"
@@ -38,7 +38,7 @@ export default function Footer() {
           </a>
 
           <a
-            href="https://wa.me/"
+            href="https://wa.me/+6281231477488"
             target="_blank"
             rel="noopener noreferrer"
             className="icon-link"
