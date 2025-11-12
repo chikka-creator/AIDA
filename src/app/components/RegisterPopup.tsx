@@ -1,5 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import './popup.css';
 
 interface RegisterPopupProps {
@@ -8,18 +10,73 @@ interface RegisterPopupProps {
 }
 
 export default function RegisterPopup({ onBack, onClose }: RegisterPopupProps) {
-  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+  const router = useRouter();
+  const [formData, setFormData] = useState({ 
+    username: '', 
+    email: '', 
+    password: '',
+    name: '' 
+  });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [closing, setClosing] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!formData.username || !formData.email || !formData.password)
-      return setError('Please fill in all fields.');
-    if (formData.password.length < 8)
-      return setError('Password must be at least 8 characters long.');
-    alert('Register success (mock)');
+    setLoading(true);
+
+    if (!formData.username || !formData.email || !formData.password) {
+      setError('Please fill in all required fields.');
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Register user
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Registration failed');
+        setLoading(false);
+        return;
+      }
+
+      // Auto login after successful registration
+      const result = await signIn('credentials', {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Registration successful but login failed. Please login manually.');
+        setLoading(false);
+        return;
+      }
+
+      // Success
+      router.refresh();
+      handleClose();
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('An error occurred during registration');
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -46,7 +103,13 @@ export default function RegisterPopup({ onBack, onClose }: RegisterPopupProps) {
         </div>
 
         <div className="popupRight">
-          <img src="/aida-star.webp" alt="Logo" className="popupLogoSmall" onClick={handleClose} />
+          <img 
+            src="/aida-star.webp" 
+            alt="Logo" 
+            className="popupLogoSmall" 
+            onClick={handleClose}
+            style={{ cursor: 'pointer' }}
+          />
 
           <h2 className="popupTitle">Sign Up</h2>
 
@@ -57,26 +120,47 @@ export default function RegisterPopup({ onBack, onClose }: RegisterPopupProps) {
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               className="popupInput"
+              disabled={loading}
             />
             <input
               type="text"
-              placeholder="Email / Whatsapp"
+              placeholder="Full Name (optional)"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="popupInput"
+              disabled={loading}
+            />
+            <input
+              type="email"
+              placeholder="Email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="popupInput"
+              disabled={loading}
             />
             <input
               type="password"
-              placeholder="Password"
+              placeholder="Password (min. 8 characters)"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="popupInput"
+              disabled={loading}
             />
             {error && <p className="popupError">{error}</p>}
-            <button type="submit" className="popupBtnMain">Get Started</button>
+            <button 
+              type="submit" 
+              className="popupBtnMain"
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Get Started'}
+            </button>
           </form>
 
-          <p className="popupSwitchText" onClick={onBack}>
+          <p 
+            className="popupSwitchText" 
+            onClick={() => !loading && onBack()}
+            style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
+          >
             Already have an account? <span>Sign in</span>
           </p>
         </div>
