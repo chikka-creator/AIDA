@@ -4,7 +4,7 @@ import ProductCard from './ProductCard';
 import ProductModal from './ProductModal';
 import CartModal from './CartModal';
 import Navbar from "./Navbar";
-import Login from "../components/LoginButton";
+import AuthButton from "../components/AuthButton";
 import './shop.css';
 import '../globals.css';
 
@@ -91,7 +91,7 @@ export default function Page() {
         <nav className="topbar">
           <div className="nav-items">
                   <Navbar />
-                  <Login />
+                  <AuthButton />
           </div>
           <div className="cart-icon" onClick={() => setCartOpen(true)}>
             🛒
