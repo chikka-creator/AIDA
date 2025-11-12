@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import RegisterPopup from './RegisterPopup';
 import './popup.css';
@@ -11,15 +11,18 @@ interface LoginPopupProps {
 
 export default function LoginPopup({ onClose }: LoginPopupProps) {
   const router = useRouter();
+  const { update } = useSession();
   const [showRegister, setShowRegister] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [closing, setClosing] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     if (!formData.email || !formData.password) {
@@ -47,9 +50,15 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
         return;
       }
 
-      // Success - refresh and close
-      router.refresh();
-      handleClose();
+      if (result?.ok) {
+        setSuccess('Login successful! Redirecting...');
+        // Update the session state immediately
+        setTimeout(() => {
+          router.refresh();
+          handleClose();
+        }, 500);
+        return;
+      }
     } catch (error) {
       console.error('Login error:', error);
       setError('An error occurred during login');
@@ -123,13 +132,14 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
               className="popupInput"
               disabled={loading}
             />
-            {error && <p className="popupError">{error}</p>}
+            {error && <p className="popupError" style={{ color: '#d32f2f' }}>{error}</p>}
+            {success && <p className="popupError" style={{ color: '#4caf50' }}>{success}</p>}
             <button 
               type="submit" 
               className="popupBtnMain"
               disabled={loading}
             >
-              {loading ? 'Loading...' : 'Login'}
+              {loading ? 'Logging in...' : 'Login'}
             </button>
 
             <div className="popupDivider"></div>
