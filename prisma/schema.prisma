@@ -31,7 +31,6 @@ model User {
   username      String?       @unique
   password      String?       // hashed password (null for OAuth users)
   name          String?
-  phone         String?
   
   authProvider  AuthProvider  @default(EMAIL)
   role          UserRole      @default(CUSTOMER)
