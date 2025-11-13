@@ -17,10 +17,10 @@ export const metadata = {
   description: "Creative Landing" 
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${poppins.className} ${playfair.className}`}>
-      <body>{children}</body>
-    </html>
+    <div className={`${poppins.className} ${playfair.className}`}>
+      {children}
+    </div>
   );
 }
