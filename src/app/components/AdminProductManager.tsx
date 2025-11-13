@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Camera, FolderOpen, X, Edit3, Trash2, PlusCircle } from 'lucide-react';
 
-type Stage = 'closed' | 'edit' | 'add';
+// Add proper type definition
+interface AdminProductManagerProps {
+  onProductAdded: (product: any) => void;
+}
 
-export default function AdminProductManager({ onProductAdded }) {
-  const [stage, setStage] = useState<Stage>('closed');
+export default function AdminProductManager({ onProductAdded }: AdminProductManagerProps) {
+  const [stage, setStage] = useState<'closed' | 'edit' | 'add'>('closed');
   const [isAnimating, setIsAnimating] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,8 +87,8 @@ export default function AdminProductManager({ onProductAdded }) {
         throw new Error(data.error || 'Failed to create product');
       }
 
-      // Success
-      onProductAdded?.(data);
+      // Success - call the callback
+      onProductAdded(data);
       closeAll();
     } catch (err: any) {
       setError(err.message);
