@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "./Navbar";
 import Footer from "../components/Footer";
 import KopiJotos from "./KopiJotos";
+import AuthButton from "../components/AuthButton";
 
 export default function Home() {
   return (

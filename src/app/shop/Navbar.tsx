@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { JSX } from "react/jsx-runtime";
 
 export default function Navbar(): JSX.Element {
   const [active, setActive] = useState<string>("home");
