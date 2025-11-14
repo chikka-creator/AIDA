@@ -252,6 +252,7 @@ left: 0px;
 .text-content {
   position: relative;
   z-index: 5;
+  font-family: "Poppins", bold;
   text-align: center;
   justify-content: center;
   color: #ffffff;
@@ -260,6 +261,7 @@ left: 0px;
 .title {
   font-size: 10rem;
   font-weight: 400;
+  font-family: "Poppins", bold;
   margin-top: -2rem;
   letter-spacing: 3px;
   margin-left: -1170px;
@@ -269,6 +271,7 @@ left: 0px;
   font-size: 3rem;
   margin-left: 210px;
   margin-top: -10rem;
+  font-family: "Poppins", bold;
   margin-left: -1000px;
 }
 
