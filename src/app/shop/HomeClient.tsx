@@ -1,21 +1,20 @@
-// src/app/components/HomeClient.tsx
+// src/app/shop/HomeClient.tsx
 'use client';
 
-import React, { useState } from 'react';
-import LoginButton from '../components/LoginButton';
+import { useState } from 'react';
+import AuthButton from '../components/AuthButton';
 import LoginPopup from '../components/LoginPopup';
 
 export default function HomeClient() {
   const [showLogin, setShowLogin] = useState(false);
-  // default variant bisa diubah: 'card' | 'modal'
 
   return (
     <>
-      {/* Tombol Login di kanan atas */}
-      <LoginButton onOpen={() => setShowLogin(true)} />
+      {/* Auth Button (shows Login or User Menu based on session) */}
+      <AuthButton />
 
-      {/* Popup Login */}
-      <LoginPopup open={showLogin} onClose={() => setShowLogin(false)}/>
+      {/* Optional: If you want a separate login popup trigger */}
+      {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
     </>
   );
 }
