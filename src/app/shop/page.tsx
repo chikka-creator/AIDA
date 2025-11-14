@@ -150,7 +150,7 @@ export default function Page() {
         <div style={{
           position: 'fixed',
           top: '100px',
-          right: '30px',
+          left: '30px',
           zIndex: 100,
           display: 'flex',
           flexDirection: 'column',
@@ -178,7 +178,7 @@ export default function Page() {
         <div style={{
           position: 'fixed',
           top: '160px',
-          right: '30px',
+          left: '30px',
           zIndex: 99,
           background: 'white',
           padding: '20px',
