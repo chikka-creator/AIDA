@@ -7,16 +7,30 @@ import ProductModal from './ProductModal';
 import CartModal from './CartModal';
 import Navbar from "./Navbar";
 import AuthButton from "../components/AuthButton";
+import AdminProductManager from '../components/AdminProductManager';
 import './shop.css';
 import '../globals.css';
 
-export type Product = {
+// Database Product type (from Prisma)
+type DBProduct = {
   id: string;
   title: string;
   subtitle: string | null;
   description: string;
   price: number;
   thumbnailUrl: string;
+  category: string;
+  status: string;
+};
+
+// Component Product type (what your components expect)
+export type Product = {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  price: number;
+  image: string;
   category: string;
   status: string;
 };
@@ -65,8 +79,21 @@ export default function Page() {
         throw new Error('Failed to fetch products');
       }
 
-      const data = await response.json();
-      setProducts(data);
+      const data: DBProduct[] = await response.json();
+      
+      // Transform database products to component products
+      const transformedProducts: Product[] = data.map(p => ({
+        id: p.id,
+        title: p.title,
+        subtitle: p.subtitle || '',
+        description: p.description,
+        price: p.price,
+        image: p.thumbnailUrl, // Map thumbnailUrl to image
+        category: p.category,
+        status: p.status,
+      }));
+      
+      setProducts(transformedProducts);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching products:', err);
@@ -159,8 +186,7 @@ export default function Page() {
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
           width: '400px',
         }}>
-          {/* Admin product management UI will go here */}
-          <p style={{ color: '#333', marginBottom: '10px' }}>Admin Panel - Coming Soon</p>
+          <AdminProductManager onProductAdded={handleProductAdded} />
         </div>
       )}
 
@@ -188,11 +214,7 @@ export default function Page() {
             {products.map((p, i) => (
               <ProductCard
                 key={p.id}
-                product={{
-                  ...p,
-                  image: p.thumbnailUrl,
-                  subtitle: p.subtitle || '',
-                }}
+                product={p}
                 index={i}
                 onClick={() => openModal(p)}
                 onAdd={(ev?: React.MouseEvent) => {
@@ -208,11 +230,7 @@ export default function Page() {
       {/* product modal */}
       {selected && (
         <ProductModal
-          product={{
-            ...selected,
-            image: selected.thumbnailUrl,
-            subtitle: selected.subtitle || '',
-          }}
+          product={selected}
           onClose={closeModal}
           onAdd={() => {
             addToCart(selected.id);
@@ -224,14 +242,7 @@ export default function Page() {
       {cartOpen && (
         <CartModal
           onClose={() => setCartOpen(false)}
-          items={cartItems.map(item => ({
-            ...item,
-            p: {
-              ...item.p,
-              image: item.p.thumbnailUrl,
-              subtitle: item.p.subtitle || '',
-            }
-          }))}
+          items={cartItems}
           onRemove={(id: string) => removeFromCart(id)}
         />
       )}
