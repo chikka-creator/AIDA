@@ -87,7 +87,6 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
         throw new Error(data.error || 'Failed to create product');
       }
 
-      // Success - call the callback
       onProductAdded(data);
       closeAll();
     } catch (err: any) {
@@ -98,7 +97,13 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   };
 
   return (
-    <div style={{ display: 'inline-block', position: 'relative' }}>
+    <div style={{ 
+      display: 'inline-block', 
+      position: 'relative',
+      width: '100%',
+      maxWidth: '400px',
+      margin: '0 auto'
+    }}>
       <div
         style={{
           backgroundColor: stage === 'closed' ? '#135D66' : 'transparent',
@@ -107,8 +112,9 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
           padding: stage === 'closed' ? '10px 18px' : '0',
           color: stage === 'closed' ? '#222' : 'inherit',
           cursor: stage === 'closed' ? 'pointer' : 'default',
-          width: stage === 'closed' ? '120px' : (stage === 'edit' ? '500px' : '400px'),
-          height: stage === 'closed' ? '40px' : (stage === 'edit' ? '200px' : '520px'),
+          width: '100%',
+          maxWidth: stage === 'closed' ? '120px' : '100%',
+          height: stage === 'closed' ? '40px' : (stage === 'edit' ? '180px' : '500px'),
           display: 'flex',
           alignItems: stage === 'closed' ? 'center' : 'stretch',
           justifyContent: stage === 'closed' ? 'center' : 'stretch',
@@ -116,6 +122,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
           transition: isAnimating ? 'all 0.36s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
           boxShadow: stage !== 'closed' ? '0 10px 30px rgba(0, 0, 0, 0.08)' : '0 2px 6px rgba(0, 0, 0, 0.05)',
           background: stage === 'add' ? '#ffffff' : (stage === 'edit' ? '#0f6d66' : '#135D66'),
+          margin: '0 auto',
         }}
         onClick={() => {
           if (stage === 'closed') openToEdit();
@@ -198,7 +205,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   animation: showContent ? 'contentFadeIn 0.28s ease forwards' : 'contentFadeOut 0.22s ease forwards',
                 }}
               >
-                <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px' }}>
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
                   <button
                     style={{
                       display: 'flex',
@@ -206,10 +213,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       gap: '12px',
                       padding: '10px 18px',
                       borderRadius: '28px',
-                      background: 'rgba(255,255,255,0.12)',
-                      color: 'black',
+                      background: 'rgba(15,109,102,0.9)',
+                      color: 'white',
                       border: 'none',
-                      minWidth: '200px',
+                      width: '90%',
+                      maxWidth: '240px',
                       justifyContent: 'center',
                       cursor: 'pointer',
                       fontSize: '16px',
@@ -227,10 +235,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       gap: '12px',
                       padding: '10px 18px',
                       borderRadius: '28px',
-                      background: 'rgba(255,255,255,0.08)',
-                      color: 'black',
+                      background: 'rgba(0,0,0,0.05)',
+                      color: '#333',
                       border: 'none',
-                      minWidth: '200px',
+                      width: '90%',
+                      maxWidth: '240px',
                       justifyContent: 'center',
                       cursor: 'pointer',
                       fontSize: '16px',
@@ -251,18 +260,21 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   alignItems: 'stretch',
                   justifyContent: 'flex-start',
                   gap: '12px',
+                  padding: '14px',
                   animation: showContent ? 'contentFadeIn 0.28s ease forwards' : 'contentFadeOut 0.22s ease forwards',
+                  overflowY: 'auto',
+                  maxHeight: 'calc(500px - 54px)',
                 }}
               >
-                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', padding: '10px 6px' }}>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <button
                     style={{
                       background: '#0f6d66',
                       color: 'white',
                       border: 'none',
                       borderRadius: '10px',
-                      width: '150px',
-                      height: '92px',
+                      width: '140px',
+                      height: '80px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
@@ -271,8 +283,8 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       cursor: 'pointer',
                     }}
                   >
-                    <Camera size={28} />
-                    <span>Take Photo</span>
+                    <Camera size={24} />
+                    <span style={{ fontSize: '14px' }}>Take Photo</span>
                   </button>
 
                   <button
@@ -281,8 +293,8 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       color: 'white',
                       border: 'none',
                       borderRadius: '10px',
-                      width: '150px',
-                      height: '92px',
+                      width: '140px',
+                      height: '80px',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
@@ -291,8 +303,8 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       cursor: 'pointer',
                     }}
                   >
-                    <FolderOpen size={28} />
-                    <span>Add Photo</span>
+                    <FolderOpen size={24} />
+                    <span style={{ fontSize: '14px' }}>Add Photo</span>
                   </button>
                 </div>
 
@@ -300,8 +312,8 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '12px',
-                    padding: '4px 18px 18px 18px',
+                    gap: '10px',
+                    padding: '4px 8px',
                   }}
                   onSubmit={handleSubmit}
                 >
@@ -310,7 +322,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       background: '#f2f2f2',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '12px',
+                      padding: '10px',
                       fontSize: '14px',
                       outline: 'none',
                     }}
@@ -324,7 +336,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       background: '#f2f2f2',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '12px',
+                      padding: '10px',
                       fontSize: '14px',
                       outline: 'none',
                     }}
@@ -337,7 +349,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       background: '#f2f2f2',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '12px',
+                      padding: '10px',
                       fontSize: '14px',
                       outline: 'none',
                     }}
@@ -351,7 +363,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       background: '#f2f2f2',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '12px',
+                      padding: '10px',
                       fontSize: '14px',
                       outline: 'none',
                     }}
@@ -366,7 +378,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       background: '#f2f2f2',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '12px',
+                      padding: '10px',
                       fontSize: '14px',
                       outline: 'none',
                     }}
@@ -377,12 +389,12 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   />
 
                   {error && (
-                    <div style={{ color: '#f44336', fontSize: '14px', padding: '8px' }}>
+                    <div style={{ color: '#f44336', fontSize: '13px', padding: '4px' }}>
                       {error}
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', marginTop: '6px' }}>
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center', marginTop: '6px' }}>
                     <button
                       type="button"
                       style={{
@@ -392,6 +404,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                         padding: '8px 14px',
                         borderRadius: '8px',
                         cursor: 'pointer',
+                        fontSize: '14px',
                       }}
                       onClick={closeAll}
                       disabled={loading}
@@ -409,6 +422,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                         borderRadius: '8px',
                         cursor: loading ? 'not-allowed' : 'pointer',
                         opacity: loading ? 0.6 : 1,
+                        fontSize: '14px',
                       }}
                       disabled={loading}
                     >
