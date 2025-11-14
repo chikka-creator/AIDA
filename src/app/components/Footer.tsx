@@ -38,7 +38,7 @@ export default function Footer() {
           </a>
 
           <a
-            href="https://wa.me/+6281231477488"
+            href="https://wa.me/+6285156288171"
             target="_blank"
             rel="noopener noreferrer"
             className="icon-link"
@@ -52,7 +52,7 @@ export default function Footer() {
           </a>
         </div>
 
-        <h3 className="footer-name">Stephen Herbert</h3>
+        <h3 className="footer-name">@aidacreative.id</h3>
 
         <p className="footer-text">
           Copyright © 2025 Aida Creative
