@@ -184,7 +184,7 @@ export default function Page() {
           padding: '20px',
           borderRadius: '12px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          width: '400px',
+          width: 'fit-content',
         }}>
           <AdminProductManager onProductAdded={handleProductAdded} />
         </div>

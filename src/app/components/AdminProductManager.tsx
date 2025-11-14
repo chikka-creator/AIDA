@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
-import { Camera, FolderOpen, X, Edit3, Trash2, PlusCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, FolderOpen, X, Edit3, Trash2, PlusCircle, Edit, Search } from 'lucide-react';
 
-// Add proper type definition
+interface Product {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string;
+  price: number;
+  thumbnailUrl: string;
+  category: string;
+  status: string;
+}
+
 interface AdminProductManagerProps {
   onProductAdded: (product: any) => void;
 }
 
 export default function AdminProductManager({ onProductAdded }: AdminProductManagerProps) {
-  const [stage, setStage] = useState<'closed' | 'edit' | 'add'>('closed');
+  const [stage, setStage] = useState<'closed' | 'edit' | 'add' | 'manage'>('closed');
   const [isAnimating, setIsAnimating] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -20,6 +34,27 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     thumbnailUrl: '',
     category: 'LIGHTROOM_PRESET',
   });
+
+  // Fetch products when entering manage mode
+  useEffect(() => {
+    if (stage === 'manage') {
+      fetchProducts();
+    }
+  }, [stage]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/products');
+      if (!response.ok) throw new Error('Failed to fetch products');
+      const data = await response.json();
+      setProducts(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openToEdit = () => {
     if (isAnimating || stage !== 'closed') return;
@@ -37,6 +72,50 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     setShowContent(false);
     setTimeout(() => {
       setStage('add');
+      setEditingProduct(null);
+      setFormData({
+        title: '',
+        subtitle: '',
+        description: '',
+        price: '',
+        thumbnailUrl: '',
+        category: 'LIGHTROOM_PRESET',
+      });
+      setTimeout(() => {
+        setShowContent(true);
+        setIsAnimating(false);
+      }, 350);
+    }, 220);
+  };
+
+  const goToManageProducts = () => {
+    if (isAnimating || stage !== 'edit') return;
+    setIsAnimating(true);
+    setShowContent(false);
+    setTimeout(() => {
+      setStage('manage');
+      setTimeout(() => {
+        setShowContent(true);
+        setIsAnimating(false);
+      }, 350);
+    }, 220);
+  };
+
+  const backToEdit = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setShowContent(false);
+    setTimeout(() => {
+      setStage('edit');
+      setEditingProduct(null);
+      setFormData({
+        title: '',
+        subtitle: '',
+        description: '',
+        price: '',
+        thumbnailUrl: '',
+        category: 'LIGHTROOM_PRESET',
+      });
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -50,6 +129,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     setShowContent(false);
     setTimeout(() => {
       setStage('closed');
+      setEditingProduct(null);
       setFormData({
         title: '',
         subtitle: '',
@@ -71,8 +151,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     setLoading(true);
 
     try {
-      const response = await fetch('/api/products', {
-        method: 'POST',
+      const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
+      const method = editingProduct ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -84,11 +167,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create product');
+        throw new Error(data.error || `Failed to ${editingProduct ? 'update' : 'create'} product`);
       }
 
       onProductAdded(data);
-      closeAll();
+      backToEdit();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -96,32 +179,97 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     }
   };
 
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setFormData({
+      title: product.title,
+      subtitle: product.subtitle || '',
+      description: product.description,
+      price: product.price.toString(),
+      thumbnailUrl: product.thumbnailUrl,
+      category: product.category,
+    });
+    
+    setIsAnimating(true);
+    setShowContent(false);
+    setTimeout(() => {
+      setStage('add');
+      setTimeout(() => {
+        setShowContent(true);
+        setIsAnimating(false);
+      }, 350);
+    }, 220);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+
+      setProducts(products.filter(p => p.id !== id));
+      onProductAdded(null); // Trigger refresh in parent
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(p =>
+    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getStageWidth = () => {
+    if (stage === 'closed') return '120px';
+    if (stage === 'edit') return '500px';
+    if (stage === 'add') return '400px';
+    if (stage === 'manage') return '700px';
+    return '120px';
+  };
+
+  const getStageHeight = () => {
+    if (stage === 'closed') return '40px';
+    if (stage === 'edit') return '180px';
+    if (stage === 'add') return '500px';
+    if (stage === 'manage') return '600px';
+    return '40px';
+  };
+
   return (
     <div style={{ 
       display: 'inline-block', 
       position: 'relative',
       width: '100%',
-      maxWidth: '400px',
+      maxWidth: '800px',
       margin: '0 auto'
     }}>
       <div
         style={{
           backgroundColor: stage === 'closed' ? '#135D66' : 'transparent',
           border: stage === 'closed' ? '1px solid #e5e4e0' : 'none',
-          borderRadius: stage === 'closed' ? '14px' : (stage === 'edit' ? '18px' : '18px'),
+          borderRadius: stage === 'closed' ? '14px' : '18px',
           padding: stage === 'closed' ? '10px 18px' : '0',
           color: stage === 'closed' ? '#222' : 'inherit',
           cursor: stage === 'closed' ? 'pointer' : 'default',
           width: '100%',
-          maxWidth: stage === 'closed' ? '120px' : '100%',
-          height: stage === 'closed' ? '40px' : (stage === 'edit' ? '180px' : '500px'),
+          maxWidth: getStageWidth(),
+          height: getStageHeight(),
           display: 'flex',
           alignItems: stage === 'closed' ? 'center' : 'stretch',
           justifyContent: stage === 'closed' ? 'center' : 'stretch',
           overflow: 'hidden',
           transition: isAnimating ? 'all 0.36s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
           boxShadow: stage !== 'closed' ? '0 10px 30px rgba(0, 0, 0, 0.08)' : '0 2px 6px rgba(0, 0, 0, 0.05)',
-          background: stage === 'add' ? '#ffffff' : (stage === 'edit' ? '#0f6d66' : '#135D66'),
+          background: stage === 'add' || stage === 'manage' ? '#ffffff' : (stage === 'edit' ? '#0f6d66' : '#135D66'),
           margin: '0 auto',
         }}
         onClick={() => {
@@ -134,8 +282,9 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
           </span>
         )}
 
-        {(stage === 'edit' || stage === 'add' || isAnimating) && (
+        {(stage === 'edit' || stage === 'add' || stage === 'manage' || isAnimating) && (
           <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {/* Header */}
             <div
               style={{
                 display: 'flex',
@@ -145,7 +294,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                 gap: '8px',
                 borderTopLeftRadius: '18px',
                 borderTopRightRadius: '18px',
-                background: stage === 'add' ? '#0f6d66' : 'transparent',
+                background: (stage === 'add' || stage === 'manage') ? '#0f6d66' : 'transparent',
                 color: 'white',
               }}
             >
@@ -166,7 +315,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   <Edit3 size={20} />
                 </div>
                 <div style={{ fontSize: '18px', fontWeight: '500', color: 'inherit' }}>
-                  {stage === 'edit' ? 'Edit' : 'Add Product'}
+                  {stage === 'edit' ? 'Edit' : stage === 'manage' ? 'Manage Products' : editingProduct ? 'Edit Product' : 'Add Product'}
                 </div>
               </div>
 
@@ -192,10 +341,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
               </button>
             </div>
 
+            {/* Edit View */}
             {stage === 'edit' && (
               <div
                 style={{
-                  padding: '14px',
+                  padding: '5px',
                   flex: 1,
                   display: showContent ? 'flex' : 'none',
                   alignItems: 'center',
@@ -244,14 +394,148 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       cursor: 'pointer',
                       fontSize: '16px',
                     }}
+                    onClick={goToManageProducts}
                   >
-                    <Trash2 size={22} />
+                    <Edit size={22} />
                     <span>Manage Products</span>
                   </button>
                 </div>
               </div>
             )}
 
+            {/* Manage Products View */}
+            {stage === 'manage' && (
+              <div
+                style={{
+                  display: showContent ? 'flex' : 'none',
+                  flexDirection: 'column',
+                  padding: '14px',
+                  gap: '12px',
+                  animation: showContent ? 'contentFadeIn 0.28s ease forwards' : 'contentFadeOut 0.22s ease forwards',
+                  overflowY: 'auto',
+                  maxHeight: '500px',
+                }}
+              >
+                {/* Search */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #ddd',
+                      fontSize: '14px',
+                    }}
+                  />
+                  <Search size={20} style={{ color: '#666' }} />
+                </div>
+
+                {/* Product List */}
+                {loading ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                    Loading...
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                    No products found
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '10px',
+                          background: '#f9f9f9',
+                          borderRadius: '8px',
+                          border: '1px solid #eee',
+                        }}
+                      >
+                        <img
+                          src={product.thumbnailUrl}
+                          alt={product.title}
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            objectFit: 'cover',
+                            borderRadius: '6px',
+                          }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: '600', fontSize: '14px', color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {product.title}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#666' }}>
+                            IDR{product.price}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleEdit(product)}
+                          style={{
+                            background: '#0f6d66',
+                            color: 'white',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <Edit size={14} />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          style={{
+                            background: '#f44336',
+                            color: 'white',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                          }}
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={backToEdit}
+                  style={{
+                    marginTop: '12px',
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    color: '#0f6d66',
+                    border: '1px solid #0f6d66',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                  }}
+                >
+                  Back
+                </button>
+              </div>
+            )}
+
+            {/* Add/Edit Product View */}
             {stage === 'add' && (
               <div
                 style={{
@@ -406,10 +690,10 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                         cursor: 'pointer',
                         fontSize: '14px',
                       }}
-                      onClick={closeAll}
+                      onClick={backToEdit}
                       disabled={loading}
                     >
-                      Cancel
+                      Back
                     </button>
 
                     <button
@@ -426,7 +710,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       }}
                       disabled={loading}
                     >
-                      {loading ? 'Adding...' : 'Add Product'}
+                      {loading ? (editingProduct ? 'Updating...' : 'Adding...') : (editingProduct ? 'Update Product' : 'Add Product')}
                     </button>
                   </div>
                 </form>
