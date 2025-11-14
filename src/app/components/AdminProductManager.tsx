@@ -45,12 +45,18 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await fetch('/api/products');
-      if (!response.ok) throw new Error('Failed to fetch products');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      
       const data = await response.json();
       setProducts(data);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Failed to fetch products');
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -81,6 +87,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
         thumbnailUrl: '',
         category: 'LIGHTROOM_PRESET',
       });
+      setError('');
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -94,6 +101,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     setShowContent(false);
     setTimeout(() => {
       setStage('manage');
+      setError('');
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -116,6 +124,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
         thumbnailUrl: '',
         category: 'LIGHTROOM_PRESET',
       });
+      setError('');
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -150,6 +159,13 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     setError('');
     setLoading(true);
 
+    // Validation
+    if (!formData.title || !formData.description || !formData.price || !formData.thumbnailUrl) {
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
+
     try {
       const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
@@ -170,10 +186,20 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
         throw new Error(data.error || `Failed to ${editingProduct ? 'update' : 'create'} product`);
       }
 
+      // Success - notify parent and refresh
       onProductAdded(data);
-      backToEdit();
+      
+      // Show success message briefly
+      const successMsg = editingProduct ? 'Product updated successfully!' : 'Product created successfully!';
+      setError(''); // Clear any previous errors
+      
+      // Go back to edit view
+      setTimeout(() => {
+        backToEdit();
+      }, 500);
+      
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -201,23 +227,31 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     }, 220);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
 
     try {
       setLoading(true);
+      setError('');
+      
       const response = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete product');
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete product');
       }
 
+      // Update local state
       setProducts(products.filter(p => p.id !== id));
-      onProductAdded(null); // Trigger refresh in parent
+      
+      // Notify parent component
+      onProductAdded(null);
+      
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Failed to delete product');
+      console.error('Delete error:', err);
     } finally {
       setLoading(false);
     }
@@ -239,7 +273,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   const getStageHeight = () => {
     if (stage === 'closed') return '40px';
     if (stage === 'edit') return '180px';
-    if (stage === 'add') return '500px';
+    if (stage === 'add') return '520px';
     if (stage === 'manage') return '600px';
     return '40px';
   };
@@ -434,6 +468,12 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   <Search size={20} style={{ color: '#666' }} />
                 </div>
 
+                {error && (
+                  <div style={{ color: '#f44336', fontSize: '13px', padding: '8px', background: '#ffebee', borderRadius: '6px' }}>
+                    {error}
+                  </div>
+                )}
+
                 {/* Product List */}
                 {loading ? (
                   <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
@@ -441,7 +481,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   </div>
                 ) : filteredProducts.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                    No products found
+                    {searchQuery ? 'No products found matching your search' : 'No products available'}
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -473,40 +513,44 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                             {product.title}
                           </div>
                           <div style={{ fontSize: '12px', color: '#666' }}>
-                            IDR{product.price}
+                            IDR {product.price.toLocaleString()}
                           </div>
                         </div>
                         <button
                           onClick={() => handleEdit(product)}
+                          disabled={loading}
                           style={{
                             background: '#0f6d66',
                             color: 'white',
                             border: 'none',
                             padding: '6px 12px',
                             borderRadius: '6px',
-                            cursor: 'pointer',
+                            cursor: loading ? 'not-allowed' : 'pointer',
                             fontSize: '12px',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
+                            opacity: loading ? 0.5 : 1,
                           }}
                         >
                           <Edit size={14} />
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product.id, product.title)}
+                          disabled={loading}
                           style={{
                             background: '#f44336',
                             color: 'white',
                             border: 'none',
                             padding: '6px 12px',
                             borderRadius: '6px',
-                            cursor: 'pointer',
+                            cursor: loading ? 'not-allowed' : 'pointer',
                             fontSize: '12px',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
+                            opacity: loading ? 0.5 : 1,
                           }}
                         >
                           <Trash2 size={14} />
@@ -519,6 +563,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
 
                 <button
                   onClick={backToEdit}
+                  disabled={loading}
                   style={{
                     marginTop: '12px',
                     padding: '8px 16px',
@@ -526,8 +571,9 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                     color: '#0f6d66',
                     border: '1px solid #0f6d66',
                     borderRadius: '8px',
-                    cursor: 'pointer',
+                    cursor: loading ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
+                    opacity: loading ? 0.5 : 1,
                   }}
                 >
                   Back
@@ -547,7 +593,7 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   padding: '14px',
                   animation: showContent ? 'contentFadeIn 0.28s ease forwards' : 'contentFadeOut 0.22s ease forwards',
                   overflowY: 'auto',
-                  maxHeight: 'calc(500px - 54px)',
+                  maxHeight: 'calc(520px - 54px)',
                 }}
               >
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -592,14 +638,13 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                   </button>
                 </div>
 
-                <form
+                <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '10px',
                     padding: '4px 8px',
                   }}
-                  onSubmit={handleSubmit}
                 >
                   <input
                     style={{
@@ -610,10 +655,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       fontSize: '14px',
                       outline: 'none',
                     }}
-                    placeholder="Product Title"
+                    placeholder="Product Title *"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
+                    disabled={loading}
                   />
                   <input
                     style={{
@@ -627,8 +673,9 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                     placeholder="Subtitle"
                     value={formData.subtitle}
                     onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                    disabled={loading}
                   />
-                  <input
+                  <textarea
                     style={{
                       background: '#f2f2f2',
                       border: 'none',
@@ -636,11 +683,15 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       padding: '10px',
                       fontSize: '14px',
                       outline: 'none',
+                      minHeight: '60px',
+                      fontFamily: 'inherit',
+                      resize: 'vertical',
                     }}
-                    placeholder="Description"
+                    placeholder="Description *"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     required
+                    disabled={loading}
                   />
                   <input
                     style={{
@@ -652,10 +703,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       outline: 'none',
                     }}
                     type="number"
-                    placeholder="Price (IDR)"
+                    placeholder="Price (IDR) *"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     required
+                    disabled={loading}
                   />
                   <input
                     style={{
@@ -666,14 +718,36 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       fontSize: '14px',
                       outline: 'none',
                     }}
-                    placeholder="Image URL"
+                    placeholder="Image URL *"
                     value={formData.thumbnailUrl}
                     onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
                     required
+                    disabled={loading}
                   />
 
+                  <select
+                    style={{
+                      background: '#f2f2f2',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px',
+                      fontSize: '14px',
+                      outline: 'none',
+                    }}
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    disabled={loading}
+                  >
+                    <option value="LIGHTROOM_PRESET">Lightroom Preset</option>
+                    <option value="PHOTOSHOP_ACTION">Photoshop Action</option>
+                    <option value="LUT">LUT</option>
+                    <option value="TEMPLATE">Template</option>
+                    <option value="BUNDLE">Bundle</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+
                   {error && (
-                    <div style={{ color: '#f44336', fontSize: '13px', padding: '4px' }}>
+                    <div style={{ color: '#f44336', fontSize: '13px', padding: '8px', background: '#ffebee', borderRadius: '6px' }}>
                       {error}
                     </div>
                   )}
@@ -687,8 +761,9 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                         border: '1px solid #ddd',
                         padding: '8px 14px',
                         borderRadius: '8px',
-                        cursor: 'pointer',
+                        cursor: loading ? 'not-allowed' : 'pointer',
                         fontSize: '14px',
+                        opacity: loading ? 0.5 : 1,
                       }}
                       onClick={backToEdit}
                       disabled={loading}
@@ -708,12 +783,13 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                         opacity: loading ? 0.6 : 1,
                         fontSize: '14px',
                       }}
+                      onClick={handleSubmit}
                       disabled={loading}
                     >
                       {loading ? (editingProduct ? 'Updating...' : 'Adding...') : (editingProduct ? 'Update Product' : 'Add Product')}
                     </button>
                   </div>
-                </form>
+                </div>
               </div>
             )}
           </div>

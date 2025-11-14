@@ -1,10 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/src/lib/prisma";
 import { compare } from "bcrypt";
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -21,7 +21,6 @@ const handler = NextAuth({
           throw new Error("Invalid credentials");
         }
 
-        // Find user in database
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
@@ -30,20 +29,17 @@ const handler = NextAuth({
           throw new Error("Invalid email or password");
         }
 
-        // Compare password with hashed password in database
         const passwordMatch = await compare(credentials.password, user.password);
 
         if (!passwordMatch) {
           throw new Error("Invalid email or password");
         }
 
-        // Update lastLogin timestamp
         await prisma.user.update({
           where: { id: user.id },
           data: { lastLogin: new Date() },
         });
 
-        // Return user object if password matches
         return {
           id: user.id,
           email: user.email,
@@ -60,14 +56,11 @@ const handler = NextAuth({
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Handle OAuth sign-in and user creation
       if (account?.provider === "google" && profile && profile.email) {
-        // Check if user already exists
         let existingUser = await prisma.user.findUnique({
           where: { email: profile.email },
         });
 
-        // Create user if they don't exist
         if (!existingUser) {
           try {
             existingUser = await prisma.user.create({
@@ -76,7 +69,7 @@ const handler = NextAuth({
                 name: profile.name,
                 authProvider: "GOOGLE",
                 role: "CUSTOMER",
-                emailVerified: true, // Google accounts are pre-verified
+                emailVerified: true,
               },
             });
           } catch (error) {
@@ -85,7 +78,6 @@ const handler = NextAuth({
           }
         }
 
-        // Update lastLogin timestamp for this user (newly created or existing)
         try {
           await prisma.user.update({
             where: { id: existingUser.id },
@@ -93,10 +85,8 @@ const handler = NextAuth({
           });
         } catch (err) {
           console.error("Error updating lastLogin for Google user:", err);
-          // don't block sign-in for timestamp update failures
         }
 
-        // Check if Account already exists
         const existingAccount = await prisma.account.findUnique({
           where: {
             provider_providerAccountId: {
@@ -106,7 +96,6 @@ const handler = NextAuth({
           },
         });
 
-        // Create Account record if it doesn't exist
         if (!existingAccount) {
           try {
             await prisma.account.create({
@@ -148,6 +137,8 @@ const handler = NextAuth({
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: true,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
