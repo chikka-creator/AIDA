@@ -1,16 +1,19 @@
 // src/app/api/products/[id]/route.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { prisma } from "@/src/lib/prisma";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 // GET single product
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!product) {
@@ -33,12 +36,12 @@ export async function GET(
 // PUT - Update product (Admin only)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
-    if (!session?.user) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -46,7 +49,7 @@ export async function PUT(
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+      where: { email: session.user.email },
       select: { role: true },
     });
 
@@ -57,22 +60,23 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
     const body = await request.json();
     
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title: body.title,
         subtitle: body.subtitle,
         description: body.description,
         price: body.price ? parseInt(body.price) : undefined,
         category: body.category,
-        status: body.status,
+        status: body.status || "ACTIVE",
         thumbnailUrl: body.thumbnailUrl,
-        imageUrls: body.imageUrls,
+        imageUrls: body.imageUrls || [],
         fileUrl: body.fileUrl,
         fileSize: body.fileSize ? parseInt(body.fileSize) : null,
-        tags: body.tags,
+        tags: body.tags || [],
       },
     });
 
@@ -89,12 +93,12 @@ export async function PUT(
 // DELETE - Delete product (Admin only)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
-    if (!session?.user) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -102,7 +106,7 @@ export async function DELETE(
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+      where: { email: session.user.email },
       select: { role: true },
     });
 
@@ -113,11 +117,13 @@ export async function DELETE(
       );
     }
 
+    const { id } = await params;
+    
     await prisma.product.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
     return NextResponse.json(
