@@ -25,7 +25,6 @@ body {
   padding: 18px 40px;
   background: transparent;
   z-index: 100;
-  filter: drop-shadow(-10px 20px 6px rgba(0, 0, 0, 0.509));
 
 }
 
@@ -72,7 +71,7 @@ body {
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  top: -3px;
+  top: 0px;
 left: 0px;
   transform: translateY(-50%);
   height: 32px; 
@@ -137,7 +136,7 @@ left: 0px;
   border: none;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
-    color: #74b5fb;
+    color: white;
   font-size: 14px;
   padding: 5px 10px;
   transition: all 0.25s ease;
@@ -271,7 +270,7 @@ left: 0px;
   font-size: 3rem;
   margin-left: 210px;
   margin-top: -10rem;
-  font-family: "Poppins", bold;
+  font-family: "Poppins", sans-serif;
   margin-left: -1000px;
 }
 
@@ -337,8 +336,8 @@ transform: rotate(37deg);
 }
 .star-bg-right{
   position: absolute;
-  bottom: -19%;
-  right: -10%;
+  bottom: -25%;
+  right: -12%;
   width: 39%;
   opacity: 0.2;
   z-index: 1;
@@ -549,7 +548,10 @@ transform: rotate(37deg);
   line-height: 1.6;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-
+.about-owner img {
+  top: 12px;
+  border-radius: 10px;
+}
 .about-icon {
   position: absolute;
   top: -14px;
@@ -598,11 +600,12 @@ transform: rotate(37deg);
 .footer-overlay {
   position: absolute;
   inset: 0;
-  background-image: url("/aida-star.png");
+  background-image: url("/aida-star.webp");
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 260px auto;
+  background-size: 220px auto;
   opacity: 0.20;
+  transform: rotate(50deg);
   pointer-events: none;
 }
 

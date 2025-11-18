@@ -149,8 +149,8 @@ export default function AuthButton() {
         style={{
           position: 'fixed',
           top: '20px',
-          right: '30px',
-          background: '#246E76',
+          right: '-70px',
+          background: '#2fafbeff',
           color: '#fff',
           border: 'none',
           borderRadius: '10px',
@@ -164,11 +164,11 @@ export default function AuthButton() {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'scale(1.05)';
-          e.currentTarget.style.background = '#1d5b61';
+          e.currentTarget.style.background = '#2fafbeff';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.background = '#246E76';
+          e.currentTarget.style.background = '#2fafbeff';
         }}
       >
         Login

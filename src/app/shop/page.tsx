@@ -150,7 +150,7 @@ export default function Page() {
         <div style={{
           position: 'fixed',
           top: '100px',
-          right: '30px',
+          left: '30px',
           zIndex: 100,
           display: 'flex',
           flexDirection: 'column',
@@ -177,14 +177,14 @@ export default function Page() {
       {isAdmin && showAdminPanel && (
         <div style={{
           position: 'fixed',
-          top: '160px',
-          right: '30px',
+          top: '150px',
+          left: '30px',
           zIndex: 99,
           background: 'white',
           padding: '20px',
           borderRadius: '12px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          width: '400px',
+          width: 'auto',
         }}>
           <AdminProductManager onProductAdded={handleProductAdded} />
         </div>
