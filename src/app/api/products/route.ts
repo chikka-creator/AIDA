@@ -1,7 +1,8 @@
 // src/app/api/products/route.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { prisma } from "@/src/lib/prisma";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 // GET all active products
 export async function GET() {
@@ -28,22 +29,32 @@ export async function GET() {
 // POST - Create new product (Admin only)
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
-    if (!session?.user) {
+    console.log("Session:", session);
+    
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized - Please login" },
         { status: 401 }
       );
     }
 
-    // Check if user is admin
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
-      select: { role: true },
+      where: { email: session.user.email },
+      select: { role: true, email: true },
     });
 
-    if (user?.role !== "ADMIN") {
+    console.log("User found:", user);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    if (user.role !== "ADMIN") {
       return NextResponse.json(
         { error: "Forbidden - Admin access required" },
         { status: 403 }
@@ -51,6 +62,8 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+    console.log("Request body:", body);
+    
     const {
       title,
       subtitle,
@@ -64,10 +77,17 @@ export async function POST(request: Request) {
       tags,
     } = body;
 
-    // Validation
     if (!title || !description || !price || !thumbnailUrl) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields: title, description, price, and thumbnailUrl are required" },
+        { status: 400 }
+      );
+    }
+
+    const parsedPrice = parseInt(price);
+    if (isNaN(parsedPrice)) {
+      return NextResponse.json(
+        { error: "Price must be a valid number" },
         { status: 400 }
       );
     }
@@ -75,24 +95,26 @@ export async function POST(request: Request) {
     const product = await prisma.product.create({
       data: {
         title,
-        subtitle,
+        subtitle: subtitle || null,
         description,
-        price: parseInt(price),
+        price: parsedPrice,
         category: category || "LIGHTROOM_PRESET",
         status: "ACTIVE",
         thumbnailUrl,
         imageUrls: imageUrls || [],
-        fileUrl,
+        fileUrl: fileUrl || null,
         fileSize: fileSize ? parseInt(fileSize) : null,
         tags: tags || [],
       },
     });
 
+    console.log("Product created:", product);
+
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
     console.error("Error creating product:", error);
     return NextResponse.json(
-      { error: "Failed to create product" },
+      { error: "Failed to create product", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }

@@ -183,7 +183,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
       const data = await response.json();
 
       if (!response.ok) {
+<<<<<<< HEAD
         throw new Error(`${data.error || 'Failed to'} ${editingProduct ? 'update' : 'create'} product`);
+=======
+        throw new Error(data.error || `Failed to ${editingProduct ? 'update' : 'create'} product`);
+>>>>>>> f02dd6cf3e94d6c4f2c74835138ed839855018cc
       }
 
       // Success - notify parent and refresh
@@ -228,7 +232,11 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   };
 
   const handleDelete = async (id: string, title: string) => {
+<<<<<<< HEAD
         if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+=======
+    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+>>>>>>> f02dd6cf3e94d6c4f2c74835138ed839855018cc
 
     try {
       setLoading(true);

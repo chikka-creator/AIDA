@@ -1,4 +1,3 @@
-// components/CanvaEmbed.tsx
 import React from 'react';
 
 interface CanvaEmbedProps {
