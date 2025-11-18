@@ -26,7 +26,6 @@
   padding: 18px 40px;
   background: transparent;
   z-index: 100;
-  filter: drop-shadow(-10px 20px 10px rgba(0, 0, 0, 0.5));
 
 }
 
@@ -74,7 +73,7 @@
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  top: -3px;
+  margin-top: -2.7px;
 left: 0px;
   transform: translateY(-50%);
   height: 32px; 
@@ -237,7 +236,7 @@ left: 0px;
 }
 
 .hero-title {
-  font-family: Georgia, serif;
+  font-family: "Poppins", sans-serif;
   font-size: 160px;
   color: #eaf6f6;
   text-align: center;
@@ -247,23 +246,62 @@ left: 0px;
   position: relative;
   z-index: 1;
 }
-.cart-icon{
+.cart-icon {
   font-size: 1.5rem;
   cursor: pointer;
   background-color: black;
   border-radius: 50px;
   padding: 10px;
   z-index: 200;
-  left: 1179px;
-  top: 25px;
   position: fixed;
+  /* Ubah dari left ke right untuk konsistensi */
+  right: 90px;
+  top: 25px;
   transition: transform 0.4s ease;
 }
-.cart-icon:hover{ 
-  transform: scale(1.1);
 
+.cart-icon:hover { 
+  transform: scale(1.1);
 }
 
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .cart-icon {
+    right: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cart-icon {
+    right: 90px;
+    top: 25px;
+    font-size: 1.3rem;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cart-icon {
+    right: 15px;
+    top: 15px;
+    font-size: 1.2rem;
+    padding: 8px;
+  }
+}
 /* products wrap which overlaps hero */
 .products-wrap {
   max-width: 1200px;

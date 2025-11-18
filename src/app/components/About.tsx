@@ -16,7 +16,7 @@ export default function About() {
             “Aida Creative made our brand content look much more professional on
             social media. Our engagement has increased significantly!”
           </p>
-          <p className="about-owner">— Owner of <img src="/logo-kopi.webp" alt="" /></p>
+          <p className="about-owner">— Owner of <img src="/kopijotos.webp" alt="" /></p>
         </div>
 
        <div className="photo-grid">

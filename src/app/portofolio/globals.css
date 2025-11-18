@@ -37,7 +37,6 @@ body {
   padding: 18px 40px;
   background: transparent;
   z-index: 100;
-  filter: drop-shadow(-10px 20px 10px rgba(0, 0, 0, 0.5));
 
 }
 
@@ -83,7 +82,7 @@ body {
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  margin-top: 3px;
+  margin-top: 0;
 left: 0px;
   transform: translateY(-50%);
   height: 32px; 
@@ -242,6 +241,15 @@ left: 0px;
   transform: translateY(0);
 }
 /* HERO SECTION */
+.Services{
+  position: absolute;
+  text-align: center;
+  top: 30px;
+  color: white;
+  justify-content: center;
+  font-size: 2rem;
+  z-index: 100;
+}
 .hero {
   display: flex;
   flex-direction: column;
@@ -342,7 +350,64 @@ left: 0px;
   color: white;
   background: rgba(0, 0, 0, 0.35);
 }
+/* Canva Presentation Section */
+.canva-section {
+  width: 100%;
+  max-width: 1400px;
+  margin: 4rem auto;
+  padding: 0 2rem;
+  
+}
 
+.canva-embed-container {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  transition: box-shadow 0.3s ease;
+}
+
+.canva-embed-container:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.canva-showcase {
+  margin: 0 auto;
+}
+
+/* Responsive untuk Presentation */
+@media (max-width: 1024px) {
+  .canva-section {
+    max-width: 100%;
+    padding: 0 1.5rem;
+  }
+  
+  .canva-embed-container {
+    height: 500px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .canva-section {
+    padding: 0 1rem;
+    margin: 2rem auto;
+  }
+  
+  .canva-embed-container {
+    height: 400px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .canva-section {
+    margin: 1.5rem auto;
+  }
+  
+  .canva-embed-container {
+    height: 350px !important;
+    border-radius: 8px;
+  }
+}
 /* ===== VILLA SAHABAT TRAWAS SECTION ===== */
 .villa {
   position: relative;
