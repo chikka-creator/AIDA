@@ -177,22 +177,16 @@ export default function Page() {
       {isAdmin && showAdminPanel && (
         <div style={{
           position: 'fixed',
-<<<<<<< HEAD
           top: '150px',
-=======
           top: '160px',
->>>>>>> f02dd6cf3e94d6c4f2c74835138ed839855018cc
           left: '30px',
           zIndex: 99,
           background: 'white',
           padding: '20px',
           borderRadius: '12px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-<<<<<<< HEAD
           width: 'auto',
-=======
           width: 'fit-content',
->>>>>>> f02dd6cf3e94d6c4f2c74835138ed839855018cc
         }}>
           <AdminProductManager onProductAdded={handleProductAdded} />
         </div>
