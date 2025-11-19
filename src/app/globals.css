@@ -549,7 +549,7 @@ transform: rotate(37deg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .about-owner img {
-  top: 12px;
+  top: 5px;
   border-radius: 10px;
 }
 .about-icon {
@@ -588,6 +588,7 @@ transform: rotate(37deg);
   width: 100%;
   background: linear-gradient(90deg, #4FB7B3 0%, #466A93 100%);
   color: #000;
+  font-family: "Poppins", bold;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -658,13 +659,13 @@ transform: rotate(37deg);
   margin: 6px 0 4px;
   font-weight: 600;
   font-size: 1.05rem;
-  color: rgba(0,0,0,0.9);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .footer-text {
   margin: 0;
   font-size: 0.87rem;
-  color: rgba(0,0,0,0.75);
+  color: rgba(255, 255, 255, 0.75);
   line-height: 1.4;
 }
 

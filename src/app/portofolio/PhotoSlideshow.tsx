@@ -5,12 +5,16 @@ import Image from "next/image";
 
 export default function PhotoSlideshow() {
   const photos = [
-    "/gambar1.webp",
-    "/fotovilla.webp",
-    "/fotovilla2.webp",
-    "/fotovilla3.webp",
-    "/padel1.webp",
-    "/padel2.webp"
+    "/foto1.webp",
+    "/foto2.webp",
+    "/foto3.webp",
+    "/foto4.webp",
+    "/foto5.webp",
+    "/foto6.webp",
+    "/foto7.webp",
+    "/foto8.webp",
+    "/foto9.webp",
+    "/foto10.webp"
   ];
   
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
