@@ -21,6 +21,7 @@ type Purchase = {
       id: string;
       title: string;
       thumbnailUrl: string;
+      status: string;
     };
   }[];
 };
@@ -105,7 +106,7 @@ export default function MyPurchasesPage() {
             <AuthButton />
           </div>
         </nav>
-        <h1 className="hero-title" style={{ fontSize: '120px' }}>MY PURCHASES</h1>
+        <h1 className="hero-title" style={{ fontSize: '90px' }}>PURCHASE HISTORY</h1>
       </header>
 
       <section style={{
@@ -115,6 +116,43 @@ export default function MyPurchasesPage() {
         position: 'relative',
         zIndex: 2
       }}>
+        {/* Quick Navigation */}
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          marginBottom: '30px',
+          justifyContent: 'center'
+        }}>
+          <button
+            onClick={() => router.push('/owned-products')}
+            style={{
+              padding: '10px 20px',
+              background: 'transparent',
+              color: 'white',
+              border: '2px solid #246E76',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            My Library
+          </button>
+          <button
+            onClick={() => router.push('/purchases')}
+            style={{
+              padding: '10px 20px',
+              background: '#246E76',
+              color: 'white',
+              border: 'none',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              fontWeight: '600'
+            }}
+          >
+            Purchase History
+          </button>
+        </div>
+
         {error && (
           <div style={{
             background: '#ffebee',
@@ -225,7 +263,8 @@ export default function MyPurchasesPage() {
                         gap: '16px',
                         padding: '12px',
                         background: 'rgba(255,255,255,0.03)',
-                        borderRadius: '12px'
+                        borderRadius: '12px',
+                        position: 'relative'
                       }}
                     >
                       <img
@@ -245,27 +284,16 @@ export default function MyPurchasesPage() {
                         <div style={{ color: '#9e9e9e', fontSize: '14px' }}>
                           IDR {item.priceAtPurchase.toLocaleString()}
                         </div>
+                        {item.product.status === 'ARCHIVED' && (
+                          <div style={{
+                            color: '#ff9800',
+                            fontSize: '12px',
+                            marginTop: '4px'
+                          }}>
+                            ⚠️ Product archived
+                          </div>
+                        )}
                       </div>
-                      {purchase.paymentStatus === 'COMPLETED' && (
-                        <button
-                          style={{
-                            padding: '8px 16px',
-                            background: 'var(--teal)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '600'
-                          }}
-                          onClick={() => {
-                            // Handle download
-                            alert('Download functionality coming soon!');
-                          }}
-                        >
-                          Download
-                        </button>
-                      )}
                     </div>
                   ))}
                 </div>
