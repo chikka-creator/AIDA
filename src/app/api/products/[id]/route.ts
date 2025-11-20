@@ -91,6 +91,7 @@ export async function PUT(
 }
 
 // DELETE - Delete product (Admin only)
+// FIXED: Now sets status to ARCHIVED instead of deleting
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -119,11 +120,35 @@ export async function DELETE(
 
     const { id } = await params;
     
-    await prisma.product.delete({
-      where: { id },
+    // Check if product has been purchased
+    const purchaseCount = await prisma.purchaseItem.count({
+      where: { productId: id },
     });
 
-    return NextResponse.json({ success: true, message: "Product deleted successfully" });
+    if (purchaseCount > 0) {
+      // Product has been purchased - archive it instead of deleting
+      await prisma.product.update({
+        where: { id },
+        data: { status: "ARCHIVED" },
+      });
+
+      return NextResponse.json({ 
+        success: true, 
+        message: "Product archived successfully (has purchase history)",
+        archived: true 
+      });
+    } else {
+      // Product has never been purchased - safe to delete
+      await prisma.product.delete({
+        where: { id },
+      });
+
+      return NextResponse.json({ 
+        success: true, 
+        message: "Product deleted successfully",
+        archived: false 
+      });
+    }
   } catch (error) {
     console.error("Error deleting product:", error);
     return NextResponse.json(
