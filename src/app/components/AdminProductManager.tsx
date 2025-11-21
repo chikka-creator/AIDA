@@ -1,7 +1,16 @@
-
-// src/app/components/AdminProductManager.tsx
-import React, { useState, useEffect, useRef } from 'react';
-import { Camera, FolderOpen, X, Edit3, Trash2, PlusCircle, Edit, Search, RefreshCw, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Camera,
+  FolderOpen,
+  X,
+  Edit3,
+  Trash2,
+  PlusCircle,
+  Edit,
+  Search,
+  RefreshCw,
+  Check,
+} from "lucide-react";
 
 interface Product {
   id: string;
@@ -19,7 +28,11 @@ interface AdminProductManagerProps {
 }
 
 // Camera Modal Component
-function CameraModal({ isOpen, onClose, onCapture }: {
+function CameraModal({
+  isOpen,
+  onClose,
+  onCapture,
+}: {
   isOpen: boolean;
   onClose: () => void;
   onCapture: (imageFile: File) => void;
@@ -27,13 +40,18 @@ function CameraModal({ isOpen, onClose, onCapture }: {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [facingMode, setFacingMode] = useState<"user" | "environment">(
+    "environment"
+  );
   const [isMobile, setIsMobile] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const mobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        );
       setIsMobile(mobile);
     };
     checkMobile();
@@ -51,58 +69,64 @@ function CameraModal({ isOpen, onClose, onCapture }: {
   const startCamera = async () => {
     try {
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       }
 
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: facingMode,
           width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        }
+          height: { ideal: 1080 },
+        },
       };
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const mediaStream = await navigator.mediaDevices.getUserMedia(
+        constraints
+      );
       setStream(mediaStream);
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
     } catch (error) {
-      console.error('Error accessing camera:', error);
-      alert('Unable to access camera. Please check permissions.');
+      console.error("Error accessing camera:", error);
+      alert("Unable to access camera. Please check permissions.");
     }
   };
 
   const stopCamera = () => {
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
       setStream(null);
     }
   };
 
   const switchCamera = () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   };
 
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
+
+      const context = canvas.getContext("2d");
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        canvas.toBlob((blob: Blob | null) => {
-          if (blob) {
-            const imageUrl = URL.createObjectURL(blob);
-            setCapturedImage(imageUrl);
-          }
-        }, 'image/jpeg', 0.95);
+
+        canvas.toBlob(
+          (blob: Blob | null) => {
+            if (blob) {
+              const imageUrl = URL.createObjectURL(blob);
+              setCapturedImage(imageUrl);
+            }
+          },
+          "image/jpeg",
+          0.95
+        );
       }
     }
   };
@@ -114,13 +138,19 @@ function CameraModal({ isOpen, onClose, onCapture }: {
   const confirmPhoto = () => {
     if (capturedImage && canvasRef.current) {
       // Convert canvas to File object
-      canvasRef.current.toBlob((blob: Blob | null) => {
-        if (blob) {
-          const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-          onCapture(file);
-          handleClose();
-        }
-      }, 'image/jpeg', 0.95);
+      canvasRef.current.toBlob(
+        (blob: Blob | null) => {
+          if (blob) {
+            const file = new File([blob], `photo-${Date.now()}.jpg`, {
+              type: "image/jpeg",
+            });
+            onCapture(file);
+            handleClose();
+          }
+        },
+        "image/jpeg",
+        0.95
+      );
     }
   };
 
@@ -133,56 +163,62 @@ function CameraModal({ isOpen, onClose, onCapture }: {
   if (!isOpen) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(0, 0, 0, 0.95)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1002,
-      animation: 'fadeIn 0.3s ease',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '800px',
-        height: '90vh',
-        background: '#000',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0, 0, 0, 0.95)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1002,
+        animation: "fadeIn 0.3s ease",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "800px",
+          height: "90vh",
+          background: "#000",
+          borderRadius: "16px",
+          overflow: "hidden",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {/* Header */}
-        <div style={{
-          padding: '16px',
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10,
-        }}>
-          <h3 style={{ color: 'white', margin: 0, fontSize: '18px' }}>
-            {capturedImage ? 'Preview' : 'Take Photo'}
+        <div
+          style={{
+            padding: "16px",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+          }}
+        >
+          <h3 style={{ color: "white", margin: 0, fontSize: "18px" }}>
+            {capturedImage ? "Preview" : "Take Photo"}
           </h3>
           <button
             onClick={handleClose}
             style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '36px',
-              height: '36px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'white',
+              background: "rgba(255,255,255,0.2)",
+              border: "none",
+              borderRadius: "50%",
+              width: "36px",
+              height: "36px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "white",
             }}
           >
             <X size={20} />
@@ -190,14 +226,16 @@ function CameraModal({ isOpen, onClose, onCapture }: {
         </div>
 
         {/* Camera View / Preview */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#000',
-          position: 'relative',
-        }}>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#000",
+            position: "relative",
+          }}
+        >
           {!capturedImage ? (
             <>
               <video
@@ -206,51 +244,53 @@ function CameraModal({ isOpen, onClose, onCapture }: {
                 playsInline
                 muted
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
                 }}
               />
-              <canvas ref={canvasRef} style={{ display: 'none' }} />
+              <canvas ref={canvasRef} style={{ display: "none" }} />
             </>
           ) : (
             <img
               src={capturedImage}
               alt="Captured"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
               }}
             />
           )}
         </div>
 
         {/* Controls */}
-        <div style={{
-          padding: '24px',
-          background: 'rgba(0,0,0,0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '20px',
-        }}>
+        <div
+          style={{
+            padding: "24px",
+            background: "rgba(0,0,0,0.7)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "20px",
+          }}
+        >
           {!capturedImage ? (
             <>
               {isMobile && (
                 <button
                   onClick={switchCamera}
                   style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '50px',
-                    height: '50px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    color: 'white',
+                    background: "rgba(255,255,255,0.2)",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "50px",
+                    height: "50px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "white",
                   }}
                 >
                   <RefreshCw size={24} />
@@ -260,35 +300,39 @@ function CameraModal({ isOpen, onClose, onCapture }: {
               <button
                 onClick={capturePhoto}
                 style={{
-                  background: 'white',
-                  border: '4px solid #246E76',
-                  borderRadius: '50%',
-                  width: '70px',
-                  height: '70px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
+                  background: "white",
+                  border: "4px solid #246E76",
+                  borderRadius: "50%",
+                  width: "70px",
+                  height: "70px",
+                  cursor: "pointer",
+                  transition: "transform 0.2s",
                 }}
-                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                onMouseDown={(e) =>
+                  (e.currentTarget.style.transform = "scale(0.95)")
+                }
+                onMouseUp={(e) =>
+                  (e.currentTarget.style.transform = "scale(1)")
+                }
               />
 
-              {isMobile && <div style={{ width: '50px' }} />}
+              {isMobile && <div style={{ width: "50px" }} />}
             </>
           ) : (
             <>
               <button
                 onClick={retakePhoto}
                 style={{
-                  background: '#f44336',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '60px',
-                  height: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: 'white',
+                  background: "#f44336",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "60px",
+                  height: "60px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "white",
                 }}
               >
                 <X size={28} />
@@ -297,16 +341,16 @@ function CameraModal({ isOpen, onClose, onCapture }: {
               <button
                 onClick={confirmPhoto}
                 style={{
-                  background: '#246E76',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '60px',
-                  height: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: 'white',
+                  background: "#246E76",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "60px",
+                  height: "60px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "white",
                 }}
               >
                 <Check size={28} />
@@ -561,7 +605,8 @@ function DeleteConfirmationPopup({
         }
       `}</style>
     </div>
-  );
+  )
+  return null;
 }
 
 export default function AdminProductManager({
@@ -853,13 +898,8 @@ export default function AdminProductManager({
         throw new Error(data.error || "Failed to delete product");
       }
 
-      // Update local state
       setProducts(products.filter((p) => p.id !== deleteConfirm.product!.id));
-
-      // Notify parent component
       onProductAdded(null);
-
-      // Close confirmation popup
       setDeleteConfirm({ isOpen: false, product: null });
     } catch (err: any) {
       setError(err.message || "Failed to delete product");
@@ -1295,295 +1335,297 @@ export default function AdminProductManager({
 
               {/* Add/Edit Product View */}
               {stage === "add" && (
-          <div className="photo-row">
-            <button
-              type="button"
-              onClick={() => setCameraOpen(true)}
-              disabled={uploadingImage}
-              style={{
-                background: uploadingImage ? '#999' : '#0f6d66',
-                color: 'white',
-                border: 'none',
-                borderRadius: '10px',
-                width: '140px',
-                height: '80px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                cursor: uploadingImage ? 'not-allowed' : 'pointer',
-                opacity: uploadingImage ? 0.6 : 1,
-              }}
-            >
-              {uploadingImage ? (
-                <span>Uploading...</span>
-              ) : (
-                <>
-                  <Camera size={24} />
-                  <span style={{ fontSize: '14px' }}>Take Photo</span>
-                </>
-              )}
-            </button>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileUpload}
-              disabled={uploadingImage}
-              style={{ display: 'none' }}
-            />
-
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingImage}
-              style={{
-                background: uploadingImage ? '#999' : '#0f6d66',
-                color: 'white',
-                border: 'none',
-                borderRadius: '10px',
-                width: '140px',
-                height: '80px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                cursor: uploadingImage ? 'not-allowed' : 'pointer',
-                opacity: uploadingImage ? 0.6 : 1,
-              }}
-            >
-              {uploadingImage ? (
-                <span>Uploading...</span>
-              ) : (
-                <>
-                  <FolderOpen size={24} />
-                  <span style={{ fontSize: '14px' }}>Add Photo</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Image Preview */}
-        {formData.thumbnailUrl && stage === "add" && (
-          <div style={{
-            padding: '10px',
-            textAlign: 'center',
-          }}>
-            <img
-              src={formData.thumbnailUrl}
-              alt="Preview"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '200px',
-                borderRadius: '8px',
-                objectFit: 'cover',
-              }}
-            />
-          </div>
-        )}
-
-                  <div
+                <div className="photo-row">
+                  <button
+                    type="button"
+                    onClick={() => setCameraOpen(true)}
+                    disabled={uploadingImage}
                     style={{
+                      background: uploadingImage ? "#999" : "#0f6d66",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "10px",
+                      width: "140px",
+                      height: "80px",
                       display: "flex",
                       flexDirection: "column",
-                      gap: "10px",
-                      padding: "4px 8px",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      cursor: uploadingImage ? "not-allowed" : "pointer",
+                      opacity: uploadingImage ? 0.6 : 1,
                     }}
                   >
-                    <input
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      placeholder="Product Title *"
-                      value={formData.title}
-                      onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
-                      }
-                      required
-                      disabled={loading}
-                    />
-                    <input
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      placeholder="Subtitle"
-                      value={formData.subtitle}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subtitle: e.target.value })
-                      }
-                      disabled={loading}
-                    />
-                    <textarea
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                        minHeight: "60px",
-                        fontFamily: "inherit",
-                        resize: "vertical",
-                      }}
-                      placeholder="Description *"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          description: e.target.value,
-                        })
-                      }
-                      required
-                      disabled={loading}
-                    />
-                    <input
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      type="number"
-                      placeholder="Price (IDR) *"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      required
-                      disabled={loading}
-                    />
-                    <input
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      placeholder="Image URL *"
-                      value={formData.thumbnailUrl}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          thumbnailUrl: e.target.value,
-                        })
-                      }
-                      required
-                      disabled={loading}
-                    />
-
-                    <select
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData({ ...formData, category: e.target.value })
-                      }
-                      disabled={loading}
-                    >
-                      <option value="LIGHTROOM_PRESET">Lightroom Preset</option>
-                      <option value="PHOTOSHOP_ACTION">Photoshop Action</option>
-                      <option value="LUT">LUT</option>
-                      <option value="TEMPLATE">Template</option>
-                      <option value="BUNDLE">Bundle</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-
-                    {error && (
-                      <div
-                        style={{
-                          color: "#f44336",
-                          fontSize: "13px",
-                          padding: "8px",
-                          background: "#ffebee",
-                          borderRadius: "6px",
-                        }}
-                      >
-                        {error}
-                      </div>
+                    {uploadingImage ? (
+                      <span>Uploading...</span>
+                    ) : (
+                      <>
+                        <Camera size={24} />
+                        <span style={{ fontSize: "14px" }}>Take Photo</span>
+                      </>
                     )}
+                  </button>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginTop: "6px",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        style={{
-                          background: "transparent",
-                          color: "#777777",
-                          border: "1px solid #ddd",
-                          padding: "8px 14px",
-                          borderRadius: "8px",
-                          cursor: loading ? "not-allowed" : "pointer",
-                          fontSize: "14px",
-                          opacity: loading ? 0.5 : 1,
-                        }}
-                        onClick={backToEdit}
-                        disabled={loading}
-                      >
-                        Back
-                      </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    disabled={uploadingImage}
+                    style={{ display: "none" }}
+                  />
 
-                      <button
-                        type="submit"
-                        style={{
-                          background: "#0f6d66",
-                          color: "white",
-                          border: "none",
-                          padding: "8px 18px",
-                          borderRadius: "8px",
-                          cursor: loading ? "not-allowed" : "pointer",
-                          opacity: loading ? 0.6 : 1,
-                          fontSize: "14px",
-                        }}
-                        onClick={handleSubmit}
-                        disabled={loading}
-                      >
-                        {loading
-                          ? editingProduct
-                            ? "Updating..."
-                            : "Adding..."
-                          : editingProduct
-                          ? "Update Product"
-                          : "Add Product"}
-                      </button>
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    style={{
+                      background: uploadingImage ? "#999" : "#0f6d66",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "10px",
+                      width: "140px",
+                      height: "80px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      cursor: uploadingImage ? "not-allowed" : "pointer",
+                      opacity: uploadingImage ? 0.6 : 1,
+                    }}
+                  >
+                    {uploadingImage ? (
+                      <span>Uploading...</span>
+                    ) : (
+                      <>
+                        <FolderOpen size={24} />
+                        <span style={{ fontSize: "14px" }}>Add Photo</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
-            </div>
-        </div>
 
-        <style>{`
+              {/* Image Preview */}
+              {formData.thumbnailUrl && stage === "add" && (
+                <div
+                  style={{
+                    padding: "10px",
+                    textAlign: "center",
+                  }}
+                >
+                  <img
+                    src={formData.thumbnailUrl}
+                    alt="Preview"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "200px",
+                      borderRadius: "8px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  padding: "4px 8px",
+                }}
+              >
+                <input
+                  style={{
+                    background: "#f2f2f2",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                  placeholder="Product Title *"
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
+                  required
+                  disabled={loading}
+                />
+                <input
+                  style={{
+                    background: "#f2f2f2",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                  placeholder="Subtitle"
+                  value={formData.subtitle}
+                  onChange={(e) =>
+                    setFormData({ ...formData, subtitle: e.target.value })
+                  }
+                  disabled={loading}
+                />
+                <textarea
+                  style={{
+                    background: "#f2f2f2",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                    minHeight: "60px",
+                    fontFamily: "inherit",
+                    resize: "vertical",
+                  }}
+                  placeholder="Description *"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      description: e.target.value,
+                    })
+                  }
+                  required
+                  disabled={loading}
+                />
+                <input
+                  style={{
+                    background: "#f2f2f2",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                  type="number"
+                  placeholder="Price (IDR) *"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
+                  required
+                  disabled={loading}
+                />
+                <input
+                  style={{
+                    background: "#f2f2f2",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                  placeholder="Image URL *"
+                  value={formData.thumbnailUrl}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      thumbnailUrl: e.target.value,
+                    })
+                  }
+                  required
+                  disabled={loading}
+                />
+
+                <select
+                  style={{
+                    background: "#f2f2f2",
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                  }}
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  disabled={loading}
+                >
+                  <option value="LIGHTROOM_PRESET">Lightroom Preset</option>
+                  <option value="PHOTOSHOP_ACTION">Photoshop Action</option>
+                  <option value="LUT">LUT</option>
+                  <option value="TEMPLATE">Template</option>
+                  <option value="BUNDLE">Bundle</option>
+                  <option value="OTHER">Other</option>
+                </select>
+
+                {error && (
+                  <div
+                    style={{
+                      color: "#f44336",
+                      fontSize: "13px",
+                      padding: "8px",
+                      background: "#ffebee",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    {error}
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: "6px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    style={{
+                      background: "transparent",
+                      color: "#777777",
+                      border: "1px solid #ddd",
+                      padding: "8px 14px",
+                      borderRadius: "8px",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      fontSize: "14px",
+                      opacity: loading ? 0.5 : 1,
+                    }}
+                    onClick={backToEdit}
+                    disabled={loading}
+                  >
+                    Back
+                  </button>
+
+                  <button
+                    type="submit"
+                    style={{
+                      background: "#0f6d66",
+                      color: "white",
+                      border: "none",
+                      padding: "8px 18px",
+                      borderRadius: "8px",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      opacity: loading ? 0.6 : 1,
+                      fontSize: "14px",
+                    }}
+                    onClick={handleSubmit}
+                    disabled={loading}
+                  >
+                    {loading
+                      ? editingProduct
+                        ? "Updating..."
+                        : "Adding..."
+                      : editingProduct
+                      ? "Update Product"
+                      : "Add Product"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <style>{`
           @keyframes contentFadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
