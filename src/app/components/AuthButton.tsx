@@ -148,8 +148,8 @@ export default function AuthButton() {
         className="btn-login"
         style={{
           position: 'fixed',
-          top: '20px',
-          right: '-70px',
+          top: '14px',
+          right: '-65px',
           background: '#2fafbeff',
           color: '#fff',
           border: 'none',

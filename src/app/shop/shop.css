@@ -255,8 +255,8 @@ left: 0px;
   z-index: 200;
   position: fixed;
   /* Ubah dari left ke right untuk konsistensi */
-  right: 90px;
-  top: 25px;
+  right: 100px;
+  top: 20px;
   transition: transform 0.4s ease;
 }
 
