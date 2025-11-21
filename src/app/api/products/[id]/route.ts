@@ -41,6 +41,8 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions);
     
+    console.log("Update request - Session:", session);
+    
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -53,6 +55,8 @@ export async function PUT(
       select: { role: true },
     });
 
+    console.log("Update request - User:", user);
+
     if (user?.role !== "ADMIN") {
       return NextResponse.json(
         { error: "Forbidden - Admin access required" },
@@ -63,35 +67,57 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
     
+    console.log("Update request - ID:", id);
+    console.log("Update request - Body:", body);
+
+    // Validate required fields
+    if (!body.title || !body.description || !body.price || !body.thumbnailUrl) {
+      return NextResponse.json(
+        { error: "Missing required fields: title, description, price, and thumbnailUrl" },
+        { status: 400 }
+      );
+    }
+
+    // Parse price
+    const parsedPrice = typeof body.price === 'string' ? parseInt(body.price) : body.price;
+    if (isNaN(parsedPrice)) {
+      return NextResponse.json(
+        { error: "Price must be a valid number" },
+        { status: 400 }
+      );
+    }
+
+    // Update product
     const product = await prisma.product.update({
       where: { id },
       data: {
         title: body.title,
-        subtitle: body.subtitle,
+        subtitle: body.subtitle || null,
         description: body.description,
-        price: body.price ? parseInt(body.price) : undefined,
-        category: body.category,
+        price: parsedPrice,
+        category: body.category || "LIGHTROOM_PRESET",
         status: body.status || "ACTIVE",
         thumbnailUrl: body.thumbnailUrl,
         imageUrls: body.imageUrls || [],
-        fileUrl: body.fileUrl,
+        fileUrl: body.fileUrl || null,
         fileSize: body.fileSize ? parseInt(body.fileSize) : null,
         tags: body.tags || [],
       },
     });
 
+    console.log("Update request - Updated product:", product);
+
     return NextResponse.json(product);
   } catch (error) {
     console.error("Error updating product:", error);
     return NextResponse.json(
-      { error: "Failed to update product" },
+      { error: "Failed to update product", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
 }
 
 // DELETE - Delete product (Admin only)
-// FIXED: Now sets status to ARCHIVED instead of deleting
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
