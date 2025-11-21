@@ -32,6 +32,7 @@ export default function MyPurchasesPage() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [hoveredBtn, setHoveredBtn] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -125,28 +126,46 @@ export default function MyPurchasesPage() {
         }}>
           <button
             onClick={() => router.push('/owned-products')}
+            onMouseEnter={() => setHoveredBtn('library')}
+            onMouseLeave={() => setHoveredBtn(null)}
             style={{
-              padding: '10px 20px',
+              padding: '10px 40px',
               background: 'transparent',
               color: 'white',
+              position: 'relative',
+              top:'10px',
               border: '2px solid #246E76',
               borderRadius: '10px',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
+              transform: hoveredBtn === 'library' ? 'translateY(-3px)' : 'translateY(0)',
+              boxShadow: hoveredBtn === 'library' 
+                ? '0 8px 20px rgba(36, 110, 118, 0.4)' 
+                : '0 4px 10px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.3s ease'
             }}
           >
             My Library
           </button>
           <button
             onClick={() => router.push('/purchases')}
+            onMouseEnter={() => setHoveredBtn('history')}
+            onMouseLeave={() => setHoveredBtn(null)}
             style={{
               padding: '10px 20px',
               background: '#246E76',
               color: 'white',
               border: 'none',
+              position: 'relative',
+              top:'10px',
               borderRadius: '10px',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
+              transform: hoveredBtn === 'history' ? 'translateY(-3px)' : 'translateY(0)',
+              boxShadow: hoveredBtn === 'history' 
+                ? '0 8px 20px rgba(36, 110, 118, 0.4)' 
+                : '0 4px 10px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.3s ease'
             }}
           >
             Purchase History

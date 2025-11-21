@@ -29,6 +29,7 @@ export default function OwnedProductsPage() {
   const [ownedProducts, setOwnedProducts] = useState<OwnedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [hoveredBtn, setHoveredBtn] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -66,15 +67,12 @@ export default function OwnedProductsPage() {
       return;
     }
 
-    // Open download in new tab
     window.open(fileUrl, '_blank');
 
-    // Update download count (optional - you can create an API endpoint for this)
     try {
       await fetch(`/api/user/owned-products/${productId}/download`, {
         method: 'POST',
       });
-      // Refresh the list to update download count
       fetchOwnedProducts();
     } catch (err) {
       console.error('Failed to update download count:', err);
@@ -125,28 +123,46 @@ export default function OwnedProductsPage() {
         }}>
           <button
             onClick={() => router.push('/owned-products')}
+            onMouseEnter={() => setHoveredBtn('library')}
+            onMouseLeave={() => setHoveredBtn(null)}
             style={{
-              padding: '10px 20px',
+              padding: '10px 40px',
               background: '#246E76',
               color: 'white',
+              position: 'relative',
+              top:'10px',
               border: 'none',
               borderRadius: '10px',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
+              transform: hoveredBtn === 'library' ? 'translateY(-3px)' : 'translateY(0)',
+              boxShadow: hoveredBtn === 'library' 
+                ? '0 8px 20px rgba(36, 110, 118, 0.4)' 
+                : '0 4px 10px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.3s ease'
             }}
           >
             My Library
           </button>
           <button
             onClick={() => router.push('/purchases')}
+            onMouseEnter={() => setHoveredBtn('history')}
+            onMouseLeave={() => setHoveredBtn(null)}
             style={{
               padding: '10px 20px',
               background: 'transparent',
               color: 'white',
+               position: 'relative',
+              top:'10px',
               border: '2px solid #246E76',
               borderRadius: '10px',
               cursor: 'pointer',
-              fontWeight: '600'
+              fontWeight: '600',
+              transform: hoveredBtn === 'history' ? 'translateY(-3px)' : 'translateY(0)',
+              boxShadow: hoveredBtn === 'history' 
+                ? '0 8px 20px rgba(36, 110, 118, 0.4)' 
+                : '0 4px 10px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.3s ease'
             }}
           >
             Purchase History
