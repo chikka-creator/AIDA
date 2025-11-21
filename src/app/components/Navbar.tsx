@@ -3,8 +3,11 @@
 import { useState, useRef, useEffect, JSX } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar(): JSX.Element {
+  const router = useRouter();
+  const pathname = usePathname();
   const [active, setActive] = useState<string>("home");
   const [indicator, setIndicator] = useState<{ x: number; width: number }>({ x: 0, width: 0 });
   const navRef = useRef<HTMLUListElement | null>(null);
@@ -16,6 +19,12 @@ export default function Navbar(): JSX.Element {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const languages = ["ENG", "IND", "JPN"];
+
+  const navItems = [
+    { label: "home", path: "/" },
+    { label: "portofolio", path: "/portofolio" },
+    { label: "shop", path: "/shop" },
+  ];
 
   const getFlag = (lang: string) => {
     switch (lang) {
@@ -30,7 +39,11 @@ export default function Navbar(): JSX.Element {
     }
   };
 
-  // Tutup dropdown jika klik di luar
+  const handleNavigation = (path: string, label: string) => {
+    setActive(label);
+    router.push(path);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (langOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
@@ -41,7 +54,6 @@ export default function Navbar(): JSX.Element {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [langOpen]);
 
-  // Posisi dropdown agar sejajar
   useEffect(() => {
     if (langOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
@@ -60,47 +72,55 @@ export default function Navbar(): JSX.Element {
     }, 200);
   };
 
-  // Efek muncul lembut navbar
   useEffect(() => {
     const timeout = setTimeout(() => setAnimate(true), 100);
     return () => clearTimeout(timeout);
   }, []);
 
- // Hitung posisi indikator aktif dengan lebih akurat
-useEffect(() => {
-  if (!navRef.current) return;
-  const activeLink = navRef.current.querySelector(`.nav-item.active a`);
-  if (activeLink) {
-    const linkEl = activeLink as HTMLElement;
-    const rect = linkEl.getBoundingClientRect();
-    const parentRect = navRef.current.getBoundingClientRect();
+  useEffect(() => {
+    if (pathname === "/") {
+      setActive("home");
+    } else if (pathname === "/portofolio") {
+      setActive("portofolio");
+    } else if (pathname === "/shop") {
+      setActive("shop");
+    }
+  }, [pathname]);
 
-    // ambil margin kecil agar indikator pas dengan area klik a
-    const newX = rect.left - parentRect.left - 8; // padding kiri kecil
-    const newWidth = rect.width + 16; // tambahkan padding horizontal
+  useEffect(() => {
+    if (!navRef.current) return;
+    const activeLink = navRef.current.querySelector(`.nav-item.active a`);
+    if (activeLink) {
+      const linkEl = activeLink as HTMLElement;
+      const rect = linkEl.getBoundingClientRect();
+      const parentRect = navRef.current.getBoundingClientRect();
 
-    setIndicator({
-      x: newX,
-      width: newWidth,
-    });
-  }
-}, [active]);
+      const newX = rect.left - parentRect.left - 8;
+      const newWidth = rect.width + 16;
 
+      setIndicator({
+        x: newX,
+        width: newWidth,
+      });
+    }
+  }, [active]);
 
   return (
-   <header className={`header ${animate ? "show" : ""}`}>
-  <div className="logo">
-    <img src="./hd.webp" alt="Aida Creative Logo" className="logo-img" />
-  </div>
+    <header className={`header ${animate ? "show" : ""}`}>
+      <div className="logo">
+        <img src="./hd.webp" alt="Aida Creative Logo" className="logo-img" />
+      </div>
       <nav className="nav-container">
         <ul className="nav-list" ref={navRef}>
-          {["home", "portofolio", "shop"].map((item) => (
+          {navItems.map((item) => (
             <li
-              key={item}
-              className={`nav-item ${active === item ? "active" : ""}`}
-              onClick={() => setActive(item)}
+              key={item.label}
+              className={`nav-item ${active === item.label ? "active" : ""}`}
+              onClick={() => handleNavigation(item.path, item.label)}
             >
-              <Link href={`#${item}`}>{item.charAt(0).toUpperCase() + item.slice(1)}</Link>
+              <Link href={item.path}>
+                {item.label.charAt(0).toUpperCase() + item.label.slice(1)}
+              </Link>
             </li>
           ))}
 
@@ -112,7 +132,6 @@ useEffect(() => {
             </button>
           </li>
 
-          {/* indikator aktif */}
           <span
             className="nav-indicator"
             style={{
@@ -123,7 +142,6 @@ useEffect(() => {
         </ul>
       </nav>
 
-      {/* Dropdown Bahasa */}
       {langOpen &&
         createPortal(
           <ul
