@@ -157,16 +157,6 @@ export default function LoginPopup({ onClose }: LoginPopupProps) {
               />
               Sign in with Google
             </button>
-
-            <button
-              type="button"
-              className="popupBtnApple"
-              onClick={() => setError('Apple sign in is not configured yet')}
-              disabled={loading}
-            >
-              <img src="/apple.webp" alt="Apple" width={'18px'} />
-              Sign in with Apple
-            </button>
           </form>
 
           <p 

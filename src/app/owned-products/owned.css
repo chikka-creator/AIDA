@@ -1,0 +1,217 @@
+/* ====== NAVBAR STRUCTURE ====== */
+.header {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: -10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px 40px;
+  background: transparent;
+  z-index: 100;
+
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.logo-img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: brightness(0) invert(1); 
+}
+
+
+/* ====== NAVBAR CONTAINER ====== */
+.nav-container {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 25px;
+  padding: 1px 1px;
+  backdrop-filter: blur(12px);
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  left: -10px;
+  list-style: none;
+}
+.nav-list {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* indikator putih aktif */
+.nav-indicator {
+  position: absolute;
+  margin-top: -4px;
+left: 0px;
+  transform: translateY(-50%);
+  height: 32px; 
+  background: white;
+  border-radius: 20px;
+  transition: transform 0.35s ease, width 0.35s ease;
+  z-index: 1;
+}
+
+/* teks di atas indikator */
+.nav-item a {
+  position: relative;
+  z-index: 2;
+  padding: 8px 10px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #5292e0;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-item.active a {
+  color: #74b5fb;
+  font-weight: 700;
+}
+
+.nav-item:hover a {
+  color: #74b5fb;
+}
+
+
+
+
+/* ====== NAV ITEMS ====== */
+.nav-item a {
+  text-decoration: none;
+  font-family: "Poppins", sans-serif;
+  color: #74b5fb;
+  left: -30px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  padding: 6px 10px;
+  border-radius: 14px;
+}
+
+.nav-item:hover a {
+  background: rgba(255, 255, 255, 0.4);
+}
+.nav-item.active a {
+  background: #ffffff;
+  color: #74b5fb;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
+/* ====== LANGUAGE BUTTON ====== */
+.lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  color: #184a80;
+  font-size: 14px;
+  margin-left: -40px;
+  padding: 5px 10px;
+  transition: all 0.25s ease;
+}
+
+.flag {
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+}
+
+.lang-text {
+  transition: all 0.25s ease;
+}
+
+.lang-btn:hover .flag {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.lang-btn:hover .lang-text {
+  transform: translateY(-1px);
+  opacity: 0.8;
+}
+
+.arrow {
+  font-size: 10px;
+  color: #184a80;
+  transition: transform 0.25s ease;
+}
+
+.lang-btn:hover .arrow {
+  transform: rotate(180deg);
+}
+
+/* ====== DROPDOWN MENU ====== */
+.dropdown-menu {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  padding: 6px 0;
+  width: 100px;
+  animation: fadeIn 0.2s ease forwards;
+  z-index: 9999;
+}
+
+.dropdown-menu li {
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-out {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+/* Animation for dropdown */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ====== FADE-IN SLIDE NAVBAR ====== */
+.header {
+  opacity: 0;
+  transform: translateY(-25px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.header.show {
+  opacity: 1;
+  transform: translateY(0);
+}

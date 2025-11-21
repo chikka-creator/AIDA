@@ -1,4 +1,3 @@
-// src/app/owned-products/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
@@ -6,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '../shop/Navbar';
 import AuthButton from '../components/AuthButton';
 import '../shop/shop.css';
+import "./owned.css";
 
 type OwnedProduct = {
   id: string;
