@@ -1,3 +1,5 @@
+
+// src/app/components/AdminProductManager.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, FolderOpen, X, Edit3, Trash2, PlusCircle, Edit, Search, RefreshCw, Check } from 'lucide-react';
 
@@ -14,6 +16,314 @@ interface Product {
 
 interface AdminProductManagerProps {
   onProductAdded: (product: any) => void;
+}
+
+// Camera Modal Component
+function CameraModal({ isOpen, onClose, onCapture }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onCapture: (imageFile: File) => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [isMobile, setIsMobile] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+    };
+    checkMobile();
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      startCamera();
+    }
+    return () => {
+      stopCamera();
+    };
+  }, [isOpen, facingMode]);
+
+  const startCamera = async () => {
+    try {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: facingMode,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      };
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(mediaStream);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      alert('Unable to access camera. Please check permissions.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const switchCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob: Blob | null) => {
+          if (blob) {
+            const imageUrl = URL.createObjectURL(blob);
+            setCapturedImage(imageUrl);
+          }
+        }, 'image/jpeg', 0.95);
+      }
+    }
+  };
+
+  const retakePhoto = () => {
+    setCapturedImage(null);
+  };
+
+  const confirmPhoto = () => {
+    if (capturedImage && canvasRef.current) {
+      // Convert canvas to File object
+      canvasRef.current.toBlob((blob: Blob | null) => {
+        if (blob) {
+          const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+          onCapture(file);
+          handleClose();
+        }
+      }, 'image/jpeg', 0.95);
+    }
+  };
+
+  const handleClose = () => {
+    stopCamera();
+    setCapturedImage(null);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0, 0, 0, 0.95)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1002,
+      animation: 'fadeIn 0.3s ease',
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '800px',
+        height: '90vh',
+        background: '#000',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '16px',
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}>
+          <h3 style={{ color: 'white', margin: 0, fontSize: '18px' }}>
+            {capturedImage ? 'Preview' : 'Take Photo'}
+          </h3>
+          <button
+            onClick={handleClose}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'white',
+            }}
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Camera View / Preview */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#000',
+          position: 'relative',
+        }}>
+          {!capturedImage ? (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
+            </>
+          ) : (
+            <img
+              src={capturedImage}
+              alt="Captured"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+            />
+          )}
+        </div>
+
+        {/* Controls */}
+        <div style={{
+          padding: '24px',
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '20px',
+        }}>
+          {!capturedImage ? (
+            <>
+              {isMobile && (
+                <button
+                  onClick={switchCamera}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '50px',
+                    height: '50px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'white',
+                  }}
+                >
+                  <RefreshCw size={24} />
+                </button>
+              )}
+
+              <button
+                onClick={capturePhoto}
+                style={{
+                  background: 'white',
+                  border: '4px solid #246E76',
+                  borderRadius: '50%',
+                  width: '70px',
+                  height: '70px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                }}
+                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
+                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              />
+
+              {isMobile && <div style={{ width: '50px' }} />}
+            </>
+          ) : (
+            <>
+              <button
+                onClick={retakePhoto}
+                style={{
+                  background: '#f44336',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '60px',
+                  height: '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'white',
+                }}
+              >
+                <X size={28} />
+              </button>
+
+              <button
+                onClick={confirmPhoto}
+                style={{
+                  background: '#246E76',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '60px',
+                  height: '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'white',
+                }}
+              >
+                <Check size={28} />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
 }
 
 // Delete Confirmation Popup Component
@@ -254,329 +564,20 @@ function DeleteConfirmationPopup({
   );
 }
 
-function CameraModal({ isOpen, onClose, onCapture }: {
-  isOpen: boolean;
-  onClose: () => void;
-  onCapture: (imageUrl: string) => void;
-}) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
-  const [isMobile, setIsMobile] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      setIsMobile(mobile);
-    };
-    checkMobile();
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      startCamera();
-    }
-    return () => {
-      stopCamera();
-    };
-  }, [isOpen, facingMode]);
-
-  const startCamera = async () => {
-    try {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: facingMode,
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        }
-      };
-
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      setStream(mediaStream);
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      alert('Unable to access camera. Please check permissions.');
-    }
-  };
-
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-  };
-
-  const switchCamera = () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
-  };
-
-  const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        canvas.toBlob((blob: Blob | null) => {
-          if (blob) {
-            const imageUrl = URL.createObjectURL(blob);
-            setCapturedImage(imageUrl);
-          }
-        }, 'image/jpeg', 0.95);
-      }
-    }
-  };
-
-  const retakePhoto = () => {
-    setCapturedImage(null);
-  };
-
-  const confirmPhoto = () => {
-    if (capturedImage) {
-      onCapture(capturedImage);
-      handleClose();
-    }
-  };
-
-  const handleClose = () => {
-    stopCamera();
-    setCapturedImage(null);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(0, 0, 0, 0.95)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1002,
-      animation: 'fadeIn 0.3s ease',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '800px',
-        height: '90vh',
-        background: '#000',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        {/* Header */}
-        <div style={{
-          padding: '16px',
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10,
-        }}>
-          <h3 style={{ color: 'white', margin: 0, fontSize: '18px' }}>
-            {capturedImage ? 'Preview' : 'Take Photo'}
-          </h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '36px',
-              height: '36px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'white',
-            }}
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Camera View / Preview */}
-        <div style={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#000',
-          position: 'relative',
-        }}>
-          {!capturedImage ? (
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-              <canvas ref={canvasRef} style={{ display: 'none' }} />
-            </>
-          ) : (
-            <img
-              src={capturedImage}
-              alt="Captured"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-              }}
-            />
-          )}
-        </div>
-
-        {/* Controls */}
-        <div style={{
-          padding: '24px',
-          background: 'rgba(0,0,0,0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '20px',
-        }}>
-          {!capturedImage ? (
-            <>
-              {isMobile && (
-                <button
-                  onClick={switchCamera}
-                  style={{
-                    background: 'rgba(255,255,255,0.2)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '50px',
-                    height: '50px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    color: 'white',
-                  }}
-                >
-                  <RefreshCw size={24} />
-                </button>
-              )}
-
-              <button
-                onClick={capturePhoto}
-                style={{
-                  background: 'white',
-                  border: '4px solid #246E76',
-                  borderRadius: '50%',
-                  width: '70px',
-                  height: '70px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                }}
-                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
-                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-              />
-
-              {isMobile && <div style={{ width: '50px' }} />}
-            </>
-          ) : (
-            <>
-              <button
-                onClick={retakePhoto}
-                style={{
-                  background: '#f44336',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '60px',
-                  height: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: 'white',
-                }}
-              >
-                <X size={28} />
-              </button>
-
-              <button
-                onClick={confirmPhoto}
-                style={{
-                  background: '#246E76',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '60px',
-                  height: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: 'white',
-                }}
-              >
-                <Check size={28} />
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      `}</style>
-    </div>
-  );
-}
-
 export default function AdminProductManager({
   onProductAdded,
 }: AdminProductManagerProps) {
-  const [stage, setStage] = useState<"closed" | "edit" | "add" | "manage">(
-    "closed"
-  );
+  const [stage, setStage] = useState<"closed" | "edit" | "add" | "manage">("closed");
   const [cameraOpen, setCameraOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{
-    isOpen: boolean;
-    product: Product | null;
-  }>({
-    isOpen: false,
-    product: null,
-  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -586,6 +587,34 @@ export default function AdminProductManager({
     thumbnailUrl: "",
     category: "LIGHTROOM_PRESET",
   });
+
+  // Upload image to Supabase
+  const uploadImageToSupabase = async (file: File): Promise<string | null> => {
+    try {
+      setUploadingImage(true);
+      setError("");
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload image');
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   // Fetch products when entering manage mode
   useEffect(() => {
@@ -706,11 +735,16 @@ export default function AdminProductManager({
     }, 220);
   };
 
-  const handleCameraCapture = (imageUrl: string) => {
-    setFormData({ ...formData, thumbnailUrl: imageUrl });
+  // Handle camera capture
+  const handleCameraCapture = async (imageFile: File) => {
+    const uploadedUrl = await uploadImageToSupabase(imageFile);
+    if (uploadedUrl) {
+      setFormData({ ...formData, thumbnailUrl: uploadedUrl });
+    }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file upload from device
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
@@ -721,8 +755,11 @@ export default function AdminProductManager({
         setError("File size must be less than 5MB");
         return;
       }
-      const imageUrl = URL.createObjectURL(file);
-      setFormData({ ...formData, thumbnailUrl: imageUrl });
+      
+      const uploadedUrl = await uploadImageToSupabase(file);
+      if (uploadedUrl) {
+        setFormData({ ...formData, thumbnailUrl: uploadedUrl });
+      }
     }
   };
 
@@ -732,13 +769,8 @@ export default function AdminProductManager({
     setLoading(true);
 
     // Validation
-    if (
-      !formData.title ||
-      !formData.description ||
-      !formData.price ||
-      !formData.thumbnailUrl
-    ) {
-      setError("Please fill in all required fields");
+    if (!formData.title || !formData.description || !formData.price || !formData.thumbnailUrl) {
+      setError("Please fill in all required fields and upload an image");
       setLoading(false);
       return;
     }
@@ -762,16 +794,10 @@ export default function AdminProductManager({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error ||
-            `Failed to ${editingProduct ? "update" : "create"} product`
-        );
+        throw new Error(data.error || `Failed to ${editingProduct ? "update" : "create"} product`);
       }
 
-      // Success - notify parent and refresh
       onProductAdded(data);
-
-      // Go back to edit view
       setTimeout(() => {
         backToEdit();
       }, 500);
@@ -1269,74 +1295,96 @@ export default function AdminProductManager({
 
               {/* Add/Edit Product View */}
               {stage === "add" && (
-                <div
-                  style={{
-                    display: showContent ? "flex" : "none",
-                    flexDirection: "column",
-                    alignItems: "stretch",
-                    justifyContent: "flex-start",
-                    gap: "12px",
-                    padding: "14px",
-                    animation: showContent
-                      ? "contentFadeIn 0.28s ease forwards"
-                      : "contentFadeOut 0.22s ease forwards",
-                    overflowY: "auto",
-                    maxHeight: "calc(520px - 54px)",
-                  }}
-                >
-                  <div className="photo-row">
-                    <button
-                      type="button"
-                      onClick={() => setCameraOpen(true)}
-                      style={{
-                        background: "#0f6d66",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "10px",
-                        width: "140px",
-                        height: "80px",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Camera size={24} />
-                      <span style={{ fontSize: "14px" }}>Take Photo</span>
-                    </button>
+          <div className="photo-row">
+            <button
+              type="button"
+              onClick={() => setCameraOpen(true)}
+              disabled={uploadingImage}
+              style={{
+                background: uploadingImage ? '#999' : '#0f6d66',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                width: '140px',
+                height: '80px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                opacity: uploadingImage ? 0.6 : 1,
+              }}
+            >
+              {uploadingImage ? (
+                <span>Uploading...</span>
+              ) : (
+                <>
+                  <Camera size={24} />
+                  <span style={{ fontSize: '14px' }}>Take Photo</span>
+                </>
+              )}
+            </button>
 
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      style={{ display: "none" }}
-                    />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              disabled={uploadingImage}
+              style={{ display: 'none' }}
+            />
 
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      style={{
-                        background: "#0f6d66",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "10px",
-                        width: "140px",
-                        height: "80px",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <FolderOpen size={24} />
-                      <span style={{ fontSize: "14px" }}>Add Photo</span>
-                    </button>
-                  </div>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingImage}
+              style={{
+                background: uploadingImage ? '#999' : '#0f6d66',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                width: '140px',
+                height: '80px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                opacity: uploadingImage ? 0.6 : 1,
+              }}
+            >
+              {uploadingImage ? (
+                <span>Uploading...</span>
+              ) : (
+                <>
+                  <FolderOpen size={24} />
+                  <span style={{ fontSize: '14px' }}>Add Photo</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Image Preview */}
+        {formData.thumbnailUrl && stage === "add" && (
+          <div style={{
+            padding: '10px',
+            textAlign: 'center',
+          }}>
+            <img
+              src={formData.thumbnailUrl}
+              alt="Preview"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '200px',
+                borderRadius: '8px',
+                objectFit: 'cover',
+              }}
+            />
+          </div>
+        )}
 
                   <div
                     style={{
@@ -1533,7 +1581,6 @@ export default function AdminProductManager({
                 </div>
               )}
             </div>
-          )}
         </div>
 
         <style>{`
@@ -1546,7 +1593,6 @@ export default function AdminProductManager({
             to { opacity: 0; transform: translateY(8px); }
           }
         `}</style>
-      </div>
 
       {/* Delete Confirmation Popup */}
       <DeleteConfirmationPopup
