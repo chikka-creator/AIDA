@@ -604,7 +604,9 @@ function DeleteConfirmationPopup({
 export default function AdminProductManager({
   onProductAdded,
 }: AdminProductManagerProps) {
-  const [stage, setStage] = useState<"closed" | "edit" | "add" | "manage">("closed");
+  const [stage, setStage] = useState<"closed" | "edit" | "add" | "manage">(
+    "closed"
+  );
   const [cameraOpen, setCameraOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -640,10 +642,10 @@ export default function AdminProductManager({
       console.log("Starting upload for:", file.name, file.type, file.size);
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
-      const response = await fetch('/api/upload/image', {
-        method: 'POST',
+      const response = await fetch("/api/upload/image", {
+        method: "POST",
         body: formData,
       });
 
@@ -652,17 +654,19 @@ export default function AdminProductManager({
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Upload failed:", errorData);
-        throw new Error(errorData.details || errorData.error || 'Failed to upload image');
+        throw new Error(
+          errorData.details || errorData.error || "Failed to upload image"
+        );
       }
 
       const data = await response.json();
       console.log("Upload successful:", data);
-      
+
       setError(""); // Clear any previous errors
       return data.url;
     } catch (err: any) {
       console.error("Upload error:", err);
-      const errorMessage = err.message || 'Failed to upload image';
+      const errorMessage = err.message || "Failed to upload image";
       setError(errorMessage);
       alert(`Upload failed: ${errorMessage}`); // Show alert for immediate feedback
       return null;
@@ -807,7 +811,7 @@ export default function AdminProductManager({
         setError("File size must be less than 5MB");
         return;
       }
-      
+
       const uploadedUrl = await uploadImageToSupabase(file);
       if (uploadedUrl) {
         setFormData({ ...formData, thumbnailUrl: uploadedUrl });
@@ -820,7 +824,12 @@ export default function AdminProductManager({
     setError("");
     setLoading(true);
 
-    if (!formData.title || !formData.description || !formData.price || !formData.thumbnailUrl) {
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.price ||
+      !formData.thumbnailUrl
+    ) {
       setError("Please fill in all required fields and upload an image");
       setLoading(false);
       return;
@@ -845,7 +854,10 @@ export default function AdminProductManager({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to ${editingProduct ? "update" : "create"} product`);
+        throw new Error(
+          data.error ||
+            `Failed to ${editingProduct ? "update" : "create"} product`
+        );
       }
 
       onProductAdded(data);
@@ -921,21 +933,21 @@ export default function AdminProductManager({
       p.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getStageWidth = () => {
-    if (stage === "closed") return "120px";
-    if (stage === "edit") return "500px";
-    if (stage === "add") return "400px";
-    if (stage === "manage") return "700px";
-    return "120px";
-  };
-
   const getStageHeight = () => {
-    if (stage === "closed") return "40px";
-    if (stage === "edit") return "180px";
-    if (stage === "add") return "90vh"; // Changed to viewport height with max
-    if (stage === "manage") return "600px";
-    return "40px";
-  };
+  if (stage === "closed") return "40px";
+  if (stage === "edit") return "180px";
+  if (stage === "add") return "650px"; // Increased from 90vh to fixed 650px
+  if (stage === "manage") return "600px";
+  return "40px";
+};
+
+const getStageWidth = () => {
+  if (stage === "closed") return "120px";
+  if (stage === "edit") return "500px";
+  if (stage === "add") return "600px"; // Increased from 400px to 600px for wider layout
+  if (stage === "manage") return "700px";
+  return "120px";
+};
 
   return (
     <>
@@ -963,7 +975,8 @@ export default function AdminProductManager({
             display: "flex",
             alignItems: stage === "closed" ? "center" : "stretch",
             justifyContent: stage === "closed" ? "center" : "stretch",
-            overflow: stage === "add" || stage === "manage" ? "hidden" : "visible",
+            overflow:
+              stage === "add" || stage === "manage" ? "hidden" : "visible",
             transition: isAnimating
               ? "all 0.36s cubic-bezier(0.4, 0, 0.2, 1)"
               : "none",
@@ -1336,19 +1349,24 @@ export default function AdminProductManager({
               )}
 
               {stage === "add" && (
-                <div style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                  overflow: "hidden"
-                }}>
-                  <div className="photo-row" style={{
+                <div
+                  style={{
                     display: "flex",
-                    gap: "16px",
-                    justifyContent: "center",
-                    padding: "10px 6px",
-                    flexShrink: 0,
-                  }}>
+                    flexDirection: "column",
+                    height: "100%",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    className="photo-row"
+                    style={{
+                      display: "flex",
+                      gap: "16px",
+                      justifyContent: "center",
+                      padding: "10px 6px",
+                      flexShrink: 0,
+                    }}
+                  >
                     <button
                       type="button"
                       onClick={() => setCameraOpen(true)}
@@ -1432,7 +1450,7 @@ export default function AdminProductManager({
                         alt="Preview"
                         style={{
                           maxWidth: "100%",
-                          maxHeight: "150px",
+                          maxHeight: "120px",
                           borderRadius: "8px",
                           objectFit: "cover",
                         }}
@@ -1450,39 +1468,45 @@ export default function AdminProductManager({
                       flex: 1,
                     }}
                   >
-                    <input
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      placeholder="Product Title *"
-                      value={formData.title}
-                      onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
-                      }
-                      required
-                      disabled={loading}
-                    />
-                    <input
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      placeholder="Subtitle"
-                      value={formData.subtitle}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subtitle: e.target.value })
-                      }
-                      disabled={loading}
-                    />
+                    {/* Two column layout for title and subtitle */}
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <input
+                        style={{
+                          flex: 1,
+                          background: "#f2f2f2",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "10px",
+                          fontSize: "14px",
+                          outline: "none",
+                        }}
+                        placeholder="Product Title *"
+                        value={formData.title}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
+                        required
+                        disabled={loading}
+                      />
+                      <input
+                        style={{
+                          flex: 1,
+                          background: "#f2f2f2",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "10px",
+                          fontSize: "14px",
+                          outline: "none",
+                        }}
+                        placeholder="Subtitle"
+                        value={formData.subtitle}
+                        onChange={(e) =>
+                          setFormData({ ...formData, subtitle: e.target.value })
+                        }
+                        disabled={loading}
+                      />
+                    </div>
+
                     <textarea
                       style={{
                         background: "#f2f2f2",
@@ -1506,24 +1530,58 @@ export default function AdminProductManager({
                       required
                       disabled={loading}
                     />
-                    <input
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      type="number"
-                      placeholder="Price (IDR) *"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      required
-                      disabled={loading}
-                    />
+
+                    {/* Two column layout for price and category */}
+                    <div style={{ display: "flex", gap: "10px" }}>
+                      <input
+                        style={{
+                          flex: 1,
+                          background: "#f2f2f2",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "10px",
+                          fontSize: "14px",
+                          outline: "none",
+                        }}
+                        type="number"
+                        placeholder="Price (IDR) *"
+                        value={formData.price}
+                        onChange={(e) =>
+                          setFormData({ ...formData, price: e.target.value })
+                        }
+                        required
+                        disabled={loading}
+                      />
+
+                      <select
+                        style={{
+                          flex: 1,
+                          background: "#f2f2f2",
+                          border: "none",
+                          borderRadius: "8px",
+                          padding: "10px",
+                          fontSize: "14px",
+                          outline: "none",
+                        }}
+                        value={formData.category}
+                        onChange={(e) =>
+                          setFormData({ ...formData, category: e.target.value })
+                        }
+                        disabled={loading}
+                      >
+                        <option value="LIGHTROOM_PRESET">
+                          Lightroom Preset
+                        </option>
+                        <option value="PHOTOSHOP_ACTION">
+                          Photoshop Action
+                        </option>
+                        <option value="LUT">LUT</option>
+                        <option value="TEMPLATE">Template</option>
+                        <option value="BUNDLE">Bundle</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+
                     <input
                       style={{
                         background: "#f2f2f2",
@@ -1544,29 +1602,6 @@ export default function AdminProductManager({
                       required
                       disabled={loading}
                     />
-
-                    <select
-                      style={{
-                        background: "#f2f2f2",
-                        border: "none",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        fontSize: "14px",
-                        outline: "none",
-                      }}
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData({ ...formData, category: e.target.value })
-                      }
-                      disabled={loading}
-                    >
-                      <option value="LIGHTROOM_PRESET">Lightroom Preset</option>
-                      <option value="PHOTOSHOP_ACTION">Photoshop Action</option>
-                      <option value="LUT">LUT</option>
-                      <option value="TEMPLATE">Template</option>
-                      <option value="BUNDLE">Bundle</option>
-                      <option value="OTHER">Other</option>
-                    </select>
 
                     {error && (
                       <div

@@ -5,15 +5,30 @@ import { authOptions } from "../../auth/[...nextauth]/route";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Validate environment variables
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Missing Supabase environment variables');
+}
+
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export async function POST(request: Request) {
   try {
     console.log("Upload route called");
     
+    // Check if Supabase is configured
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Supabase is not configured. Please check environment variables." },
+        { status: 500 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
@@ -84,6 +99,19 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('Supabase upload error:', error);
+      
+      // Provide more specific error messages
+      if (error.message.includes('Bucket not found')) {
+        return NextResponse.json(
+          { 
+            error: "Storage bucket not found", 
+            details: "Please create a 'product-images' bucket in Supabase Storage",
+            supabaseError: error.message 
+          },
+          { status: 500 }
+        );
+      }
+      
       return NextResponse.json(
         { error: "Failed to upload image", details: error.message },
         { status: 500 }
@@ -109,50 +137,6 @@ export async function POST(request: Request) {
     console.error('Upload error:', error);
     return NextResponse.json(
       { error: "Failed to upload image", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    );
-  }
-}
-
-// Optional: DELETE endpoint to remove old images
-export async function DELETE(request: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const { fileName } = await request.json();
-
-    if (!fileName) {
-      return NextResponse.json(
-        { error: "No fileName provided" },
-        { status: 400 }
-      );
-    }
-
-    const { error } = await supabase.storage
-      .from('product-images')
-      .remove([fileName]);
-
-    if (error) {
-      console.error('Supabase delete error:', error);
-      return NextResponse.json(
-        { error: "Failed to delete image" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ success: true });
-
-  } catch (error) {
-    console.error('Delete error:', error);
-    return NextResponse.json(
-      { error: "Failed to delete image" },
       { status: 500 }
     );
   }
