@@ -124,7 +124,7 @@ function CameraModal({
               setCapturedImage(imageUrl);
             }
           },
-          "image/jpeg",
+          "image/webp",
           0.95
         );
       }
@@ -135,25 +135,32 @@ function CameraModal({
     setCapturedImage(null);
   };
 
-  const confirmPhoto = () => {
+  const confirmPhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (capturedImage && canvasRef.current) {
       canvasRef.current.toBlob(
         (blob: Blob | null) => {
           if (blob) {
-            const file = new File([blob], `photo-${Date.now()}.jpg`, {
-              type: "image/jpeg",
+            const file = new File([blob], `photo-${Date.now()}.webp`, {
+              type: "image/webp",
             });
             onCapture(file);
             handleClose();
           }
         },
-        "image/jpeg",
+        "image/webp",
         0.95
       );
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     stopCamera();
     setCapturedImage(null);
     onClose();
