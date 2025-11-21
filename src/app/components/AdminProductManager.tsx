@@ -39,12 +39,13 @@ function CameraModal({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">(
     "environment"
   );
   const [isMobile, setIsMobile] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -58,18 +59,21 @@ function CameraModal({
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !capturedImage) {
       startCamera();
     }
     return () => {
       stopCamera();
     };
-  }, [isOpen, facingMode]);
+  }, [isOpen, facingMode, capturedImage]);
 
   const startCamera = async () => {
     try {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      setIsLoading(true);
+      
+      // Stop any existing stream first
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
       const constraints: MediaStreamConstraints = {
@@ -83,29 +87,43 @@ function CameraModal({
       const mediaStream = await navigator.mediaDevices.getUserMedia(
         constraints
       );
-      setStream(mediaStream);
+      streamRef.current = mediaStream;
 
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        await videoRef.current.play();
       }
+      
+      setIsLoading(false);
     } catch (error) {
       console.error("Error accessing camera:", error);
       alert("Unable to access camera. Please check permissions.");
+      setIsLoading(false);
+      handleClose();
     }
   };
 
   const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-      setStream(null);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
   };
 
-  const switchCamera = () => {
+  const switchCamera = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCapturedImage(null);
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -116,6 +134,9 @@ function CameraModal({
       const context = canvas.getContext("2d");
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Stop camera after capture
+        stopCamera();
 
         canvas.toBlob(
           (blob: Blob | null) => {
@@ -131,8 +152,11 @@ function CameraModal({
     }
   };
 
-  const retakePhoto = () => {
+  const retakePhoto = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setCapturedImage(null);
+    // Camera will restart due to useEffect dependency
   };
 
   const confirmPhoto = (e: React.MouseEvent) => {
@@ -163,6 +187,7 @@ function CameraModal({
     }
     stopCamera();
     setCapturedImage(null);
+    setIsLoading(true);
     onClose();
   };
 
