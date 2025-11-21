@@ -137,7 +137,6 @@ function CameraModal({
 
   const confirmPhoto = () => {
     if (capturedImage && canvasRef.current) {
-      // Convert canvas to File object
       canvasRef.current.toBlob(
         (blob: Blob | null) => {
           if (blob) {
@@ -188,7 +187,6 @@ function CameraModal({
           flexDirection: "column",
         }}
       >
-        {/* Header */}
         <div
           style={{
             padding: "16px",
@@ -225,7 +223,6 @@ function CameraModal({
           </button>
         </div>
 
-        {/* Camera View / Preview */}
         <div
           style={{
             flex: 1,
@@ -264,7 +261,6 @@ function CameraModal({
           )}
         </div>
 
-        {/* Controls */}
         <div
           style={{
             padding: "24px",
@@ -413,7 +409,6 @@ function DeleteConfirmationPopup({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div
           style={{
             background: "linear-gradient(135deg, #f44336, #e53935)",
@@ -474,7 +469,6 @@ function DeleteConfirmationPopup({
           </h2>
         </div>
 
-        {/* Content */}
         <div style={{ padding: "24px" }}>
           <p
             style={{
@@ -511,7 +505,6 @@ function DeleteConfirmationPopup({
             deleted.
           </p>
 
-          {/* Action Buttons */}
           <div
             style={{
               display: "flex",
@@ -605,8 +598,7 @@ function DeleteConfirmationPopup({
         }
       `}</style>
     </div>
-  )
-  return null;
+  );
 }
 
 export default function AdminProductManager({
@@ -623,6 +615,13 @@ export default function AdminProductManager({
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    product: Product | null;
+  }>({
+    isOpen: false,
+    product: null,
+  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -633,11 +632,12 @@ export default function AdminProductManager({
     category: "LIGHTROOM_PRESET",
   });
 
-  // Upload image to Supabase
   const uploadImageToSupabase = async (file: File): Promise<string | null> => {
     try {
       setUploadingImage(true);
       setError("");
+
+      console.log("Starting upload for:", file.name, file.type, file.size);
 
       const formData = new FormData();
       formData.append('file', file);
@@ -647,21 +647,30 @@ export default function AdminProductManager({
         body: formData,
       });
 
+      console.log("Upload response status:", response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to upload image');
+        const errorData = await response.json();
+        console.error("Upload failed:", errorData);
+        throw new Error(errorData.details || errorData.error || 'Failed to upload image');
       }
 
       const data = await response.json();
+      console.log("Upload successful:", data);
+      
+      setError(""); // Clear any previous errors
       return data.url;
     } catch (err: any) {
-      setError(err.message || 'Failed to upload image');
+      console.error("Upload error:", err);
+      const errorMessage = err.message || 'Failed to upload image';
+      setError(errorMessage);
+      alert(`Upload failed: ${errorMessage}`); // Show alert for immediate feedback
       return null;
     } finally {
       setUploadingImage(false);
     }
   };
 
-  // Fetch products when entering manage mode
   useEffect(() => {
     if (stage === "manage") {
       fetchProducts();
@@ -780,7 +789,6 @@ export default function AdminProductManager({
     }, 220);
   };
 
-  // Handle camera capture
   const handleCameraCapture = async (imageFile: File) => {
     const uploadedUrl = await uploadImageToSupabase(imageFile);
     if (uploadedUrl) {
@@ -788,7 +796,6 @@ export default function AdminProductManager({
     }
   };
 
-  // Handle file upload from device
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -813,7 +820,6 @@ export default function AdminProductManager({
     setError("");
     setLoading(true);
 
-    // Validation
     if (!formData.title || !formData.description || !formData.price || !formData.thumbnailUrl) {
       setError("Please fill in all required fields and upload an image");
       setLoading(false);
@@ -926,7 +932,7 @@ export default function AdminProductManager({
   const getStageHeight = () => {
     if (stage === "closed") return "40px";
     if (stage === "edit") return "180px";
-    if (stage === "add") return "520px";
+    if (stage === "add") return "90vh"; // Changed to viewport height with max
     if (stage === "manage") return "600px";
     return "40px";
   };
@@ -953,10 +959,11 @@ export default function AdminProductManager({
             width: "100%",
             maxWidth: getStageWidth(),
             height: getStageHeight(),
+            maxHeight: stage === "add" ? "90vh" : "none",
             display: "flex",
             alignItems: stage === "closed" ? "center" : "stretch",
             justifyContent: stage === "closed" ? "center" : "stretch",
-            overflow: "hidden",
+            overflow: stage === "add" || stage === "manage" ? "hidden" : "visible",
             transition: isAnimating
               ? "all 0.36s cubic-bezier(0.4, 0, 0.2, 1)"
               : "none",
@@ -996,7 +1003,6 @@ export default function AdminProductManager({
                 flexDirection: "column",
               }}
             >
-              {/* Header */}
               <div
                 style={{
                   display: "flex",
@@ -1070,7 +1076,6 @@ export default function AdminProductManager({
                 </button>
               </div>
 
-              {/* Edit View */}
               {stage === "edit" && (
                 <div
                   style={{
@@ -1143,7 +1148,6 @@ export default function AdminProductManager({
                 </div>
               )}
 
-              {/* Manage Products View */}
               {stage === "manage" && (
                 <div
                   style={{
@@ -1158,7 +1162,6 @@ export default function AdminProductManager({
                     maxHeight: "500px",
                   }}
                 >
-                  {/* Search */}
                   <div
                     style={{
                       display: "flex",
@@ -1197,7 +1200,6 @@ export default function AdminProductManager({
                     </div>
                   )}
 
-                  {/* Product List */}
                   {loading && !deleteConfirm.isOpen ? (
                     <div
                       style={{
@@ -1333,293 +1335,308 @@ export default function AdminProductManager({
                 </div>
               )}
 
-              {/* Add/Edit Product View */}
               {stage === "add" && (
-                <div className="photo-row">
-                  <button
-                    type="button"
-                    onClick={() => setCameraOpen(true)}
-                    disabled={uploadingImage}
-                    style={{
-                      background: uploadingImage ? "#999" : "#0f6d66",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "10px",
-                      width: "140px",
-                      height: "80px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                      cursor: uploadingImage ? "not-allowed" : "pointer",
-                      opacity: uploadingImage ? 0.6 : 1,
-                    }}
-                  >
-                    {uploadingImage ? (
-                      <span>Uploading...</span>
-                    ) : (
-                      <>
-                        <Camera size={24} />
-                        <span style={{ fontSize: "14px" }}>Take Photo</span>
-                      </>
-                    )}
-                  </button>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    disabled={uploadingImage}
-                    style={{ display: "none" }}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingImage}
-                    style={{
-                      background: uploadingImage ? "#999" : "#0f6d66",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "10px",
-                      width: "140px",
-                      height: "80px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
-                      cursor: uploadingImage ? "not-allowed" : "pointer",
-                      opacity: uploadingImage ? 0.6 : 1,
-                    }}
-                  >
-                    {uploadingImage ? (
-                      <span>Uploading...</span>
-                    ) : (
-                      <>
-                        <FolderOpen size={24} />
-                        <span style={{ fontSize: "14px" }}>Add Photo</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-
-              {/* Image Preview */}
-              {formData.thumbnailUrl && stage === "add" && (
-                <div
-                  style={{
-                    padding: "10px",
-                    textAlign: "center",
-                  }}
-                >
-                  <img
-                    src={formData.thumbnailUrl}
-                    alt="Preview"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "200px",
-                      borderRadius: "8px",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
-              )}
-
-              <div
-                style={{
+                <div style={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "10px",
-                  padding: "4px 8px",
-                }}
-              >
-                <input
-                  style={{
-                    background: "#f2f2f2",
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    fontSize: "14px",
-                    outline: "none",
-                  }}
-                  placeholder="Product Title *"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  required
-                  disabled={loading}
-                />
-                <input
-                  style={{
-                    background: "#f2f2f2",
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    fontSize: "14px",
-                    outline: "none",
-                  }}
-                  placeholder="Subtitle"
-                  value={formData.subtitle}
-                  onChange={(e) =>
-                    setFormData({ ...formData, subtitle: e.target.value })
-                  }
-                  disabled={loading}
-                />
-                <textarea
-                  style={{
-                    background: "#f2f2f2",
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    fontSize: "14px",
-                    outline: "none",
-                    minHeight: "60px",
-                    fontFamily: "inherit",
-                    resize: "vertical",
-                  }}
-                  placeholder="Description *"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      description: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={loading}
-                />
-                <input
-                  style={{
-                    background: "#f2f2f2",
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    fontSize: "14px",
-                    outline: "none",
-                  }}
-                  type="number"
-                  placeholder="Price (IDR) *"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  required
-                  disabled={loading}
-                />
-                <input
-                  style={{
-                    background: "#f2f2f2",
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    fontSize: "14px",
-                    outline: "none",
-                  }}
-                  placeholder="Image URL *"
-                  value={formData.thumbnailUrl}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      thumbnailUrl: e.target.value,
-                    })
-                  }
-                  required
-                  disabled={loading}
-                />
+                  height: "100%",
+                  overflow: "hidden"
+                }}>
+                  <div className="photo-row" style={{
+                    display: "flex",
+                    gap: "16px",
+                    justifyContent: "center",
+                    padding: "10px 6px",
+                    flexShrink: 0,
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => setCameraOpen(true)}
+                      disabled={uploadingImage}
+                      style={{
+                        background: uploadingImage ? "#999" : "#0f6d66",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "10px",
+                        width: "140px",
+                        height: "80px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        cursor: uploadingImage ? "not-allowed" : "pointer",
+                        opacity: uploadingImage ? 0.6 : 1,
+                      }}
+                    >
+                      {uploadingImage ? (
+                        <span>Uploading...</span>
+                      ) : (
+                        <>
+                          <Camera size={24} />
+                          <span style={{ fontSize: "14px" }}>Take Photo</span>
+                        </>
+                      )}
+                    </button>
 
-                <select
-                  style={{
-                    background: "#f2f2f2",
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    fontSize: "14px",
-                    outline: "none",
-                  }}
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  disabled={loading}
-                >
-                  <option value="LIGHTROOM_PRESET">Lightroom Preset</option>
-                  <option value="PHOTOSHOP_ACTION">Photoshop Action</option>
-                  <option value="LUT">LUT</option>
-                  <option value="TEMPLATE">Template</option>
-                  <option value="BUNDLE">Bundle</option>
-                  <option value="OTHER">Other</option>
-                </select>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      disabled={uploadingImage}
+                      style={{ display: "none" }}
+                    />
 
-                {error && (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      style={{
+                        background: uploadingImage ? "#999" : "#0f6d66",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "10px",
+                        width: "140px",
+                        height: "80px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        cursor: uploadingImage ? "not-allowed" : "pointer",
+                        opacity: uploadingImage ? 0.6 : 1,
+                      }}
+                    >
+                      {uploadingImage ? (
+                        <span>Uploading...</span>
+                      ) : (
+                        <>
+                          <FolderOpen size={24} />
+                          <span style={{ fontSize: "14px" }}>Add Photo</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {formData.thumbnailUrl && (
+                    <div
+                      style={{
+                        padding: "10px",
+                        textAlign: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <img
+                        src={formData.thumbnailUrl}
+                        alt="Preview"
+                        style={{
+                          maxWidth: "100%",
+                          maxHeight: "150px",
+                          borderRadius: "8px",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <div
                     style={{
-                      color: "#f44336",
-                      fontSize: "13px",
-                      padding: "8px",
-                      background: "#ffebee",
-                      borderRadius: "6px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                      padding: "4px 18px 18px 18px",
+                      overflowY: "auto",
+                      flex: 1,
                     }}
                   >
-                    {error}
+                    <input
+                      style={{
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                      placeholder="Product Title *"
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                      required
+                      disabled={loading}
+                    />
+                    <input
+                      style={{
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                      placeholder="Subtitle"
+                      value={formData.subtitle}
+                      onChange={(e) =>
+                        setFormData({ ...formData, subtitle: e.target.value })
+                      }
+                      disabled={loading}
+                    />
+                    <textarea
+                      style={{
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
+                        minHeight: "60px",
+                        fontFamily: "inherit",
+                        resize: "vertical",
+                      }}
+                      placeholder="Description *"
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
+                      required
+                      disabled={loading}
+                    />
+                    <input
+                      style={{
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                      type="number"
+                      placeholder="Price (IDR) *"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      required
+                      disabled={loading}
+                    />
+                    <input
+                      style={{
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                      placeholder="Image URL *"
+                      value={formData.thumbnailUrl}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          thumbnailUrl: e.target.value,
+                        })
+                      }
+                      required
+                      disabled={loading}
+                    />
+
+                    <select
+                      style={{
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
+                      }}
+                      value={formData.category}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
+                      disabled={loading}
+                    >
+                      <option value="LIGHTROOM_PRESET">Lightroom Preset</option>
+                      <option value="PHOTOSHOP_ACTION">Photoshop Action</option>
+                      <option value="LUT">LUT</option>
+                      <option value="TEMPLATE">Template</option>
+                      <option value="BUNDLE">Bundle</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+
+                    {error && (
+                      <div
+                        style={{
+                          color: "#f44336",
+                          fontSize: "13px",
+                          padding: "8px",
+                          background: "#ffebee",
+                          borderRadius: "6px",
+                        }}
+                      >
+                        {error}
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginTop: "6px",
+                        paddingBottom: "10px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        style={{
+                          background: "transparent",
+                          color: "#777777",
+                          border: "1px solid #ddd",
+                          padding: "8px 14px",
+                          borderRadius: "8px",
+                          cursor: loading ? "not-allowed" : "pointer",
+                          fontSize: "14px",
+                          opacity: loading ? 0.5 : 1,
+                        }}
+                        onClick={backToEdit}
+                        disabled={loading}
+                      >
+                        Back
+                      </button>
+
+                      <button
+                        type="submit"
+                        style={{
+                          background: "#0f6d66",
+                          color: "white",
+                          border: "none",
+                          padding: "8px 18px",
+                          borderRadius: "8px",
+                          cursor: loading ? "not-allowed" : "pointer",
+                          opacity: loading ? 0.6 : 1,
+                          fontSize: "14px",
+                        }}
+                        onClick={handleSubmit}
+                        disabled={loading}
+                      >
+                        {loading
+                          ? editingProduct
+                            ? "Updating..."
+                            : "Adding..."
+                          : editingProduct
+                          ? "Update Product"
+                          : "Add Product"}
+                      </button>
+                    </div>
                   </div>
-                )}
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "10px",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginTop: "6px",
-                  }}
-                >
-                  <button
-                    type="button"
-                    style={{
-                      background: "transparent",
-                      color: "#777777",
-                      border: "1px solid #ddd",
-                      padding: "8px 14px",
-                      borderRadius: "8px",
-                      cursor: loading ? "not-allowed" : "pointer",
-                      fontSize: "14px",
-                      opacity: loading ? 0.5 : 1,
-                    }}
-                    onClick={backToEdit}
-                    disabled={loading}
-                  >
-                    Back
-                  </button>
-
-                  <button
-                    type="submit"
-                    style={{
-                      background: "#0f6d66",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 18px",
-                      borderRadius: "8px",
-                      cursor: loading ? "not-allowed" : "pointer",
-                      opacity: loading ? 0.6 : 1,
-                      fontSize: "14px",
-                    }}
-                    onClick={handleSubmit}
-                    disabled={loading}
-                  >
-                    {loading
-                      ? editingProduct
-                        ? "Updating..."
-                        : "Adding..."
-                      : editingProduct
-                      ? "Update Product"
-                      : "Add Product"}
-                  </button>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
@@ -1636,7 +1653,6 @@ export default function AdminProductManager({
           }
         `}</style>
 
-      {/* Delete Confirmation Popup */}
       <DeleteConfirmationPopup
         isOpen={deleteConfirm.isOpen}
         onClose={() =>
