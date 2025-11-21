@@ -2,10 +2,12 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import LoginPopup from './LoginPopup';
 
 export default function AuthButton() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [showLogin, setShowLogin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -93,21 +95,102 @@ export default function AuthButton() {
                 background: 'white',
                 borderRadius: '12px',
                 boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-                padding: '12px',
-                minWidth: '220px',
+                padding: '8px',
+                minWidth: '240px',
                 animation: 'fadeIn 0.2s ease',
                 zIndex: 200,
               }}
             >
               {/* User Info */}
-              <div style={{ padding: '12px', borderBottom: '1px solid #eee' }}>
-                <p style={{ margin: '0', color: '#333', fontWeight: 'bold', fontSize: '15px' }}>
+              <div style={{ 
+                padding: '12px', 
+                borderBottom: '1px solid #eee',
+                marginBottom: '4px'
+              }}>
+                <p style={{ 
+                  margin: '0', 
+                  color: '#333', 
+                  fontWeight: 'bold', 
+                  fontSize: '15px' 
+                }}>
                   {session.user.name || 'User'}
                 </p>
-                <p style={{ margin: '5px 0 0', color: '#666', fontSize: '13px' }}>
+                <p style={{ 
+                  margin: '5px 0 0', 
+                  color: '#666', 
+                  fontSize: '13px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
                   {session.user.email}
                 </p>
               </div>
+
+              {/* Navigation Links */}
+              <button
+                onClick={() => {
+                  router.push('/owned-products');
+                  setMenuOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  background: 'transparent',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  textAlign: 'left',
+                  transition: 'background 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginBottom: '4px',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span style={{ fontSize: '18px' }}>📚</span>
+                My Library
+              </button>
+
+              <button
+                onClick={() => {
+                  router.push('/purchases');
+                  setMenuOpen(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  background: 'transparent',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  textAlign: 'left',
+                  transition: 'background 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  marginBottom: '4px',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f5')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <span style={{ fontSize: '18px' }}>🛒</span>
+                Purchase History
+              </button>
+
+              <div style={{ 
+                height: '1px', 
+                background: '#eee', 
+                margin: '8px 0' 
+              }} />
 
               {/* Sign Out Button */}
               <button
@@ -117,25 +200,42 @@ export default function AuthButton() {
                 }}
                 style={{
                   width: '100%',
-                  padding: '10px',
-                  marginTop: '8px',
-                  background: '#f44336',
-                  color: 'white',
+                  padding: '10px 12px',
+                  background: 'transparent',
+                  color: '#f44336',
                   border: 'none',
                   borderRadius: '8px',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: '600',
+                  textAlign: 'left',
                   transition: 'background 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#d32f2f')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#f44336')}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#ffebee')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
+                <span style={{ fontSize: '18px' }}>🚪</span>
                 Sign Out
               </button>
             </div>
           </>
         )}
+
+        <style>{`
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(-10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}</style>
       </div>
     );
   }
