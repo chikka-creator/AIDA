@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Camera, FolderOpen, X, Edit3, Trash2, PlusCircle, Edit, Search } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Camera, FolderOpen, X, Edit3, Trash2, PlusCircle, Edit, Search, RefreshCw, Check } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -17,12 +17,12 @@ interface AdminProductManagerProps {
 }
 
 // Delete Confirmation Popup Component
-function DeleteConfirmationPopup({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
+function DeleteConfirmationPopup({
+  isOpen,
+  onClose,
+  onConfirm,
   productTitle,
-  loading 
+  loading,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -35,134 +35,149 @@ function DeleteConfirmationPopup({
   return (
     <div
       style={{
-        position: 'fixed',
+        position: "fixed",
         inset: 0,
-        background: 'rgba(0, 0, 0, 0.6)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        background: "rgba(0, 0, 0, 0.6)",
+        backdropFilter: "blur(4px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         zIndex: 1001,
-        animation: 'fadeIn 0.3s ease',
+        animation: "fadeIn 0.3s ease",
       }}
       onClick={onClose}
     >
       <div
         style={{
-          background: 'white',
-          borderRadius: '18px',
-          width: '90%',
-          maxWidth: '480px',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
-          animation: 'slideUp 0.3s ease',
-          overflow: 'hidden',
+          background: "white",
+          borderRadius: "18px",
+          width: "90%",
+          maxWidth: "480px",
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+          animation: "slideUp 0.3s ease",
+          overflow: "hidden",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, #f44336, #e53935)',
-          padding: '24px',
-          position: 'relative',
-        }}>
+        <div
+          style={{
+            background: "linear-gradient(135deg, #f44336, #e53935)",
+            padding: "24px",
+            position: "relative",
+          }}
+        >
           <button
             onClick={onClose}
             disabled={loading}
             style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: 'rgba(255, 255, 255, 0.2)',
-              border: 'none',
-              borderRadius: '50%',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              color: 'white',
+              position: "absolute",
+              top: "16px",
+              right: "16px",
+              background: "rgba(255, 255, 255, 0.2)",
+              border: "none",
+              borderRadius: "50%",
+              width: "32px",
+              height: "32px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: loading ? "not-allowed" : "pointer",
+              color: "white",
               opacity: loading ? 0.5 : 1,
             }}
           >
             <X size={18} />
           </button>
 
-          <div style={{
-            width: '64px',
-            height: '64px',
-            background: 'rgba(255, 255, 255, 0.15)',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px',
-            border: '3px solid rgba(255, 255, 255, 0.3)',
-            fontSize: '32px',
-          }}>
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              background: "rgba(255, 255, 255, 0.15)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px",
+              border: "3px solid rgba(255, 255, 255, 0.3)",
+              fontSize: "32px",
+            }}
+          >
             ⚠️
           </div>
 
-          <h2 style={{
-            color: 'white',
-            fontSize: '24px',
-            fontWeight: '600',
-            textAlign: 'center',
-            margin: '0',
-          }}>
+          <h2
+            style={{
+              color: "white",
+              fontSize: "24px",
+              fontWeight: "600",
+              textAlign: "center",
+              margin: "0",
+            }}
+          >
             Delete Product?
           </h2>
         </div>
 
         {/* Content */}
-        <div style={{ padding: '24px' }}>
-          <p style={{
-            color: '#666',
-            fontSize: '16px',
-            textAlign: 'center',
-            lineHeight: '1.6',
-            margin: '0 0 8px',
-          }}>
+        <div style={{ padding: "24px" }}>
+          <p
+            style={{
+              color: "#666",
+              fontSize: "16px",
+              textAlign: "center",
+              lineHeight: "1.6",
+              margin: "0 0 8px",
+            }}
+          >
             Are you sure you want to delete
           </p>
-          <p style={{
-            color: '#246E76',
-            fontSize: '18px',
-            fontWeight: '600',
-            textAlign: 'center',
-            margin: '0 0 16px',
-          }}>
+          <p
+            style={{
+              color: "#246E76",
+              fontSize: "18px",
+              fontWeight: "600",
+              textAlign: "center",
+              margin: "0 0 16px",
+            }}
+          >
             "{productTitle}"
           </p>
-          <p style={{
-            color: '#999',
-            fontSize: '14px',
-            textAlign: 'center',
-            lineHeight: '1.5',
-            margin: '0',
-          }}>
-            If this product has been purchased, it will be archived instead of deleted.
+          <p
+            style={{
+              color: "#999",
+              fontSize: "14px",
+              textAlign: "center",
+              lineHeight: "1.5",
+              margin: "0",
+            }}
+          >
+            If this product has been purchased, it will be archived instead of
+            deleted.
           </p>
 
           {/* Action Buttons */}
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            marginTop: '24px',
-          }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              marginTop: "24px",
+            }}
+          >
             <button
               onClick={onClose}
               disabled={loading}
               style={{
                 flex: 1,
-                padding: '12px',
-                background: 'transparent',
-                color: '#666',
-                border: '2px solid #ddd',
-                borderRadius: '10px',
-                fontSize: '15px',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                padding: "12px",
+                background: "transparent",
+                color: "#666",
+                border: "2px solid #ddd",
+                borderRadius: "10px",
+                fontSize: "15px",
+                fontWeight: "600",
+                cursor: loading ? "not-allowed" : "pointer",
                 opacity: loading ? 0.5 : 1,
               }}
             >
@@ -174,31 +189,33 @@ function DeleteConfirmationPopup({
               disabled={loading}
               style={{
                 flex: 1,
-                padding: '12px',
-                background: loading ? '#999' : '#f44336',
-                color: 'white',
-                border: 'none',
-                borderRadius: '10px',
-                fontSize: '15px',
-                fontWeight: '600',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
+                padding: "12px",
+                background: loading ? "#999" : "#f44336",
+                color: "white",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "15px",
+                fontWeight: "600",
+                cursor: loading ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
               }}
             >
               {loading ? (
                 <>
-                  <span style={{
-                    width: '16px',
-                    height: '16px',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    borderTop: '2px solid white',
-                    borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite',
-                    display: 'inline-block',
-                  }}></span>
+                  <span
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid rgba(255,255,255,0.3)",
+                      borderTop: "2px solid white",
+                      borderRadius: "50%",
+                      animation: "spin 0.8s linear infinite",
+                      display: "inline-block",
+                    }}
+                  ></span>
                   Deleting...
                 </>
               ) : (
@@ -237,32 +254,342 @@ function DeleteConfirmationPopup({
   );
 }
 
-export default function AdminProductManager({ onProductAdded }: AdminProductManagerProps) {
-  const [stage, setStage] = useState<'closed' | 'edit' | 'add' | 'manage'>('closed');
+function CameraModal({ isOpen, onClose, onCapture }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onCapture: (imageUrl: string) => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const [isMobile, setIsMobile] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+    };
+    checkMobile();
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      startCamera();
+    }
+    return () => {
+      stopCamera();
+    };
+  }, [isOpen, facingMode]);
+
+  const startCamera = async () => {
+    try {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: facingMode,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      };
+
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(mediaStream);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      alert('Unable to access camera. Please check permissions.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const switchCamera = () => {
+    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob: Blob | null) => {
+          if (blob) {
+            const imageUrl = URL.createObjectURL(blob);
+            setCapturedImage(imageUrl);
+          }
+        }, 'image/jpeg', 0.95);
+      }
+    }
+  };
+
+  const retakePhoto = () => {
+    setCapturedImage(null);
+  };
+
+  const confirmPhoto = () => {
+    if (capturedImage) {
+      onCapture(capturedImage);
+      handleClose();
+    }
+  };
+
+  const handleClose = () => {
+    stopCamera();
+    setCapturedImage(null);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'rgba(0, 0, 0, 0.95)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1002,
+      animation: 'fadeIn 0.3s ease',
+    }}>
+      <div style={{
+        width: '100%',
+        maxWidth: '800px',
+        height: '90vh',
+        background: '#000',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '16px',
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+        }}>
+          <h3 style={{ color: 'white', margin: 0, fontSize: '18px' }}>
+            {capturedImage ? 'Preview' : 'Take Photo'}
+          </h3>
+          <button
+            onClick={handleClose}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              border: 'none',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'white',
+            }}
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Camera View / Preview */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#000',
+          position: 'relative',
+        }}>
+          {!capturedImage ? (
+            <>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
+            </>
+          ) : (
+            <img
+              src={capturedImage}
+              alt="Captured"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+            />
+          )}
+        </div>
+
+        {/* Controls */}
+        <div style={{
+          padding: '24px',
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '20px',
+        }}>
+          {!capturedImage ? (
+            <>
+              {isMobile && (
+                <button
+                  onClick={switchCamera}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '50px',
+                    height: '50px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'white',
+                  }}
+                >
+                  <RefreshCw size={24} />
+                </button>
+              )}
+
+              <button
+                onClick={capturePhoto}
+                style={{
+                  background: 'white',
+                  border: '4px solid #246E76',
+                  borderRadius: '50%',
+                  width: '70px',
+                  height: '70px',
+                  cursor: 'pointer',
+                  transition: 'transform 0.2s',
+                }}
+                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')}
+                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              />
+
+              {isMobile && <div style={{ width: '50px' }} />}
+            </>
+          ) : (
+            <>
+              <button
+                onClick={retakePhoto}
+                style={{
+                  background: '#f44336',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '60px',
+                  height: '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'white',
+                }}
+              >
+                <X size={28} />
+              </button>
+
+              <button
+                onClick={confirmPhoto}
+                style={{
+                  background: '#246E76',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '60px',
+                  height: '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'white',
+                }}
+              >
+                <Check size={28} />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default function AdminProductManager({
+  onProductAdded,
+}: AdminProductManagerProps) {
+  const [stage, setStage] = useState<"closed" | "edit" | "add" | "manage">(
+    "closed"
+  );
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{isOpen: boolean; product: Product | null}>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    product: Product | null;
+  }>({
     isOpen: false,
-    product: null
+    product: null,
   });
-  
+
   const [formData, setFormData] = useState({
-    title: '',
-    subtitle: '',
-    description: '',
-    price: '',
-    thumbnailUrl: '',
-    category: 'LIGHTROOM_PRESET',
+    title: "",
+    subtitle: "",
+    description: "",
+    price: "",
+    thumbnailUrl: "",
+    category: "LIGHTROOM_PRESET",
   });
 
   // Fetch products when entering manage mode
   useEffect(() => {
-    if (stage === 'manage') {
+    if (stage === "manage") {
       fetchProducts();
     }
   }, [stage]);
@@ -270,27 +597,27 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      setError('');
-      const response = await fetch('/api/products');
-      
+      setError("");
+      const response = await fetch("/api/products");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch products');
+        throw new Error("Failed to fetch products");
       }
-      
+
       const data = await response.json();
       setProducts(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch products');
-      console.error('Fetch error:', err);
+      setError(err.message || "Failed to fetch products");
+      console.error("Fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const openToEdit = () => {
-    if (isAnimating || stage !== 'closed') return;
+    if (isAnimating || stage !== "closed") return;
     setIsAnimating(true);
-    setStage('edit');
+    setStage("edit");
     setTimeout(() => {
       setShowContent(true);
       setIsAnimating(false);
@@ -298,21 +625,21 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   };
 
   const goToAddProduct = () => {
-    if (isAnimating || stage !== 'edit') return;
+    if (isAnimating || stage !== "edit") return;
     setIsAnimating(true);
     setShowContent(false);
     setTimeout(() => {
-      setStage('add');
+      setStage("add");
       setEditingProduct(null);
       setFormData({
-        title: '',
-        subtitle: '',
-        description: '',
-        price: '',
-        thumbnailUrl: '',
-        category: 'LIGHTROOM_PRESET',
+        title: "",
+        subtitle: "",
+        description: "",
+        price: "",
+        thumbnailUrl: "",
+        category: "LIGHTROOM_PRESET",
       });
-      setError('');
+      setError("");
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -321,12 +648,12 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   };
 
   const goToManageProducts = () => {
-    if (isAnimating || stage !== 'edit') return;
+    if (isAnimating || stage !== "edit") return;
     setIsAnimating(true);
     setShowContent(false);
     setTimeout(() => {
-      setStage('manage');
-      setError('');
+      setStage("manage");
+      setError("");
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -339,17 +666,17 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     setIsAnimating(true);
     setShowContent(false);
     setTimeout(() => {
-      setStage('edit');
+      setStage("edit");
       setEditingProduct(null);
       setFormData({
-        title: '',
-        subtitle: '',
-        description: '',
-        price: '',
-        thumbnailUrl: '',
-        category: 'LIGHTROOM_PRESET',
+        title: "",
+        subtitle: "",
+        description: "",
+        price: "",
+        thumbnailUrl: "",
+        category: "LIGHTROOM_PRESET",
       });
-      setError('');
+      setError("");
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -358,46 +685,73 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
   };
 
   const closeAll = () => {
-    if (isAnimating || stage === 'closed') return;
+    if (isAnimating || stage === "closed") return;
     setIsAnimating(true);
     setShowContent(false);
     setTimeout(() => {
-      setStage('closed');
+      setStage("closed");
       setEditingProduct(null);
       setFormData({
-        title: '',
-        subtitle: '',
-        description: '',
-        price: '',
-        thumbnailUrl: '',
-        category: 'LIGHTROOM_PRESET',
+        title: "",
+        subtitle: "",
+        description: "",
+        price: "",
+        thumbnailUrl: "",
+        category: "LIGHTROOM_PRESET",
       });
-      setError('');
+      setError("");
       setTimeout(() => {
         setIsAnimating(false);
       }, 350);
     }, 220);
   };
 
+  const handleCameraCapture = (imageUrl: string) => {
+    setFormData({ ...formData, thumbnailUrl: imageUrl });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Please select an image file");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB");
+        return;
+      }
+      const imageUrl = URL.createObjectURL(file);
+      setFormData({ ...formData, thumbnailUrl: imageUrl });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     // Validation
-    if (!formData.title || !formData.description || !formData.price || !formData.thumbnailUrl) {
-      setError('Please fill in all required fields');
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.price ||
+      !formData.thumbnailUrl
+    ) {
+      setError("Please fill in all required fields");
       setLoading(false);
       return;
     }
 
     try {
-      const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
-      const method = editingProduct ? 'PUT' : 'POST';
+      const url = editingProduct
+        ? `/api/products/${editingProduct.id}`
+        : "/api/products";
+      const method = editingProduct ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           price: parseInt(formData.price),
@@ -408,19 +762,21 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to ${editingProduct ? 'update' : 'create'} product`);
+        throw new Error(
+          data.error ||
+            `Failed to ${editingProduct ? "update" : "create"} product`
+        );
       }
 
       // Success - notify parent and refresh
       onProductAdded(data);
-      
+
       // Go back to edit view
       setTimeout(() => {
         backToEdit();
       }, 500);
-      
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      setError(err.message || "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -430,17 +786,17 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
     setEditingProduct(product);
     setFormData({
       title: product.title,
-      subtitle: product.subtitle || '',
+      subtitle: product.subtitle || "",
       description: product.description,
       price: product.price.toString(),
       thumbnailUrl: product.thumbnailUrl,
       category: product.category,
     });
-    
+
     setIsAnimating(true);
     setShowContent(false);
     setTimeout(() => {
-      setStage('add');
+      setStage("add");
       setTimeout(() => {
         setShowContent(true);
         setIsAnimating(false);
@@ -454,146 +810,190 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
 
   const confirmDelete = async () => {
     if (!deleteConfirm.product) return;
-    
+
     try {
       setLoading(true);
-      setError('');
-      
-      const response = await fetch(`/api/products/${deleteConfirm.product.id}`, {
-        method: 'DELETE',
-      });
+      setError("");
+
+      const response = await fetch(
+        `/api/products/${deleteConfirm.product.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to delete product');
+        throw new Error(data.error || "Failed to delete product");
       }
 
       // Update local state
-      setProducts(products.filter(p => p.id !== deleteConfirm.product!.id));
-      
+      setProducts(products.filter((p) => p.id !== deleteConfirm.product!.id));
+
       // Notify parent component
       onProductAdded(null);
-      
+
       // Close confirmation popup
       setDeleteConfirm({ isOpen: false, product: null });
-      
     } catch (err: any) {
-      setError(err.message || 'Failed to delete product');
-      console.error('Delete error:', err);
+      setError(err.message || "Failed to delete product");
+      console.error("Delete error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProducts = products.filter(p =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (p) =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStageWidth = () => {
-    if (stage === 'closed') return '120px';
-    if (stage === 'edit') return '500px';
-    if (stage === 'add') return '400px';
-    if (stage === 'manage') return '700px';
-    return '120px';
+    if (stage === "closed") return "120px";
+    if (stage === "edit") return "500px";
+    if (stage === "add") return "400px";
+    if (stage === "manage") return "700px";
+    return "120px";
   };
 
   const getStageHeight = () => {
-    if (stage === 'closed') return '40px';
-    if (stage === 'edit') return '180px';
-    if (stage === 'add') return '520px';
-    if (stage === 'manage') return '600px';
-    return '40px';
+    if (stage === "closed") return "40px";
+    if (stage === "edit") return "180px";
+    if (stage === "add") return "520px";
+    if (stage === "manage") return "600px";
+    return "40px";
   };
 
   return (
     <>
-      <div style={{ 
-        display: 'inline-block', 
-        position: 'relative',
-        width: '100%',
-        maxWidth: '800px',
-        margin: '0 auto'
-      }}>
+      <div
+        style={{
+          display: "inline-block",
+          position: "relative",
+          width: "100%",
+          maxWidth: "800px",
+          margin: "0 auto",
+        }}
+      >
         <div
           style={{
-            backgroundColor: stage === 'closed' ? '#135D66' : 'transparent',
-            border: stage === 'closed' ? '1px solid #e5e4e0' : 'none',
-            borderRadius: stage === 'closed' ? '14px' : '18px',
-            padding: stage === 'closed' ? '10px 18px' : '0',
-            color: stage === 'closed' ? '#222' : 'inherit',
-            cursor: stage === 'closed' ? 'pointer' : 'default',
-            width: '100%',
+            backgroundColor: stage === "closed" ? "#135D66" : "transparent",
+            border: stage === "closed" ? "1px solid #e5e4e0" : "none",
+            borderRadius: stage === "closed" ? "14px" : "18px",
+            padding: stage === "closed" ? "10px 18px" : "0",
+            color: stage === "closed" ? "#222" : "inherit",
+            cursor: stage === "closed" ? "pointer" : "default",
+            width: "100%",
             maxWidth: getStageWidth(),
             height: getStageHeight(),
-            display: 'flex',
-            alignItems: stage === 'closed' ? 'center' : 'stretch',
-            justifyContent: stage === 'closed' ? 'center' : 'stretch',
-            overflow: 'hidden',
-            transition: isAnimating ? 'all 0.36s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-            boxShadow: stage !== 'closed' ? '0 10px 30px rgba(0, 0, 0, 0.08)' : '0 2px 6px rgba(0, 0, 0, 0.05)',
-            background: stage === 'add' || stage === 'manage' ? '#ffffff' : (stage === 'edit' ? '#0f6d66' : '#135D66'),
-            margin: '0 auto',
+            display: "flex",
+            alignItems: stage === "closed" ? "center" : "stretch",
+            justifyContent: stage === "closed" ? "center" : "stretch",
+            overflow: "hidden",
+            transition: isAnimating
+              ? "all 0.36s cubic-bezier(0.4, 0, 0.2, 1)"
+              : "none",
+            boxShadow:
+              stage !== "closed"
+                ? "0 10px 30px rgba(0, 0, 0, 0.08)"
+                : "0 2px 6px rgba(0, 0, 0, 0.05)",
+            background:
+              stage === "add" || stage === "manage"
+                ? "#ffffff"
+                : stage === "edit"
+                ? "#0f6d66"
+                : "#135D66",
+            margin: "0 auto",
           }}
           onClick={() => {
-            if (stage === 'closed') openToEdit();
+            if (stage === "closed") openToEdit();
           }}
         >
-          {stage === 'closed' && !isAnimating && (
-            <span style={{ fontSize: '15px', color: 'white', userSelect: 'none' }}>
+          {stage === "closed" && !isAnimating && (
+            <span
+              style={{ fontSize: "15px", color: "white", userSelect: "none" }}
+            >
               Create New
             </span>
           )}
 
-          {(stage === 'edit' || stage === 'add' || stage === 'manage' || isAnimating) && (
-            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {(stage === "edit" ||
+            stage === "add" ||
+            stage === "manage" ||
+            isAnimating) && (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               {/* Header */}
               <div
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  gap: '8px',
-                  borderTopLeftRadius: '18px',
-                  borderTopRightRadius: '18px',
-                  background: (stage === 'add' || stage === 'manage') ? '#0f6d66' : 'transparent',
-                  color: 'white',
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "10px 14px",
+                  gap: "8px",
+                  borderTopLeftRadius: "18px",
+                  borderTopRightRadius: "18px",
+                  background:
+                    stage === "add" || stage === "manage"
+                      ? "#0f6d66"
+                      : "transparent",
+                  color: "white",
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
                   <div
                     style={{
-                      width: '34px',
-                      height: '34px',
-                      borderRadius: '6px',
-                      background: 'rgba(255,255,255,0.08)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      border: '2px solid rgba(255,255,255,0.12)',
+                      width: "34px",
+                      height: "34px",
+                      borderRadius: "6px",
+                      background: "rgba(255,255,255,0.08)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      border: "2px solid rgba(255,255,255,0.12)",
                     }}
                   >
                     <Edit3 size={20} />
                   </div>
-                  <div style={{ fontSize: '18px', fontWeight: '500', color: 'inherit' }}>
-                    {stage === 'edit' ? 'Edit' : stage === 'manage' ? 'Manage Products' : editingProduct ? 'Edit Product' : 'Add Product'}
+                  <div
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: "500",
+                      color: "inherit",
+                    }}
+                  >
+                    {stage === "edit"
+                      ? "Edit"
+                      : stage === "manage"
+                      ? "Manage Products"
+                      : editingProduct
+                      ? "Edit Product"
+                      : "Add Product"}
                   </div>
                 </div>
 
                 <button
                   style={{
-                    background: 'rgba(255,255,255,0.12)',
-                    border: 'none',
-                    width: '30px',
-                    height: '30px',
-                    borderRadius: '50%',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
+                    background: "rgba(255,255,255,0.12)",
+                    border: "none",
+                    width: "30px",
+                    height: "30px",
+                    borderRadius: "50%",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -605,35 +1005,46 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
               </div>
 
               {/* Edit View */}
-              {stage === 'edit' && (
+              {stage === "edit" && (
                 <div
                   style={{
-                    padding: '5px',
+                    padding: "5px",
                     flex: 1,
-                    display: showContent ? 'flex' : 'none',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '12px',
-                    background: 'white',
-                    animation: showContent ? 'contentFadeIn 0.28s ease forwards' : 'contentFadeOut 0.22s ease forwards',
+                    display: showContent ? "flex" : "none",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "12px",
+                    background: "white",
+                    animation: showContent
+                      ? "contentFadeIn 0.28s ease forwards"
+                      : "contentFadeOut 0.22s ease forwards",
                   }}
                 >
-                  <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "12px",
+                    }}
+                  >
                     <button
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '10px 18px',
-                        borderRadius: '28px',
-                        background: 'rgba(15,109,102,0.9)',
-                        color: 'white',
-                        border: 'none',
-                        width: '90%',
-                        maxWidth: '240px',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        fontSize: '16px',
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "10px 18px",
+                        borderRadius: "28px",
+                        background: "rgba(15,109,102,0.9)",
+                        color: "white",
+                        border: "none",
+                        width: "90%",
+                        maxWidth: "240px",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        fontSize: "16px",
                       }}
                       onClick={goToAddProduct}
                     >
@@ -643,19 +1054,19 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
 
                     <button
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '10px 18px',
-                        borderRadius: '28px',
-                        background: 'rgba(0,0,0,0.05)',
-                        color: '#333',
-                        border: 'none',
-                        width: '90%',
-                        maxWidth: '240px',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        fontSize: '16px',
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "10px 18px",
+                        borderRadius: "28px",
+                        background: "rgba(0,0,0,0.05)",
+                        color: "#333",
+                        border: "none",
+                        width: "90%",
+                        maxWidth: "240px",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        fontSize: "16px",
                       }}
                       onClick={goToManageProducts}
                     >
@@ -667,20 +1078,29 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
               )}
 
               {/* Manage Products View */}
-              {stage === 'manage' && (
+              {stage === "manage" && (
                 <div
                   style={{
-                    display: showContent ? 'flex' : 'none',
-                    flexDirection: 'column',
-                    padding: '14px',
-                    gap: '12px',
-                    animation: showContent ? 'contentFadeIn 0.28s ease forwards' : 'contentFadeOut 0.22s ease forwards',
-                    overflowY: 'auto',
-                    maxHeight: '500px',
+                    display: showContent ? "flex" : "none",
+                    flexDirection: "column",
+                    padding: "14px",
+                    gap: "12px",
+                    animation: showContent
+                      ? "contentFadeIn 0.28s ease forwards"
+                      : "contentFadeOut 0.22s ease forwards",
+                    overflowY: "auto",
+                    maxHeight: "500px",
                   }}
                 >
                   {/* Search */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "8px",
+                    }}
+                  >
                     <input
                       type="text"
                       placeholder="Search products..."
@@ -688,60 +1108,97 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       onChange={(e) => setSearchQuery(e.target.value)}
                       style={{
                         flex: 1,
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #ddd',
-                        fontSize: '14px',
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        fontSize: "14px",
                       }}
                     />
-                    <Search size={20} style={{ color: '#666' }} />
+                    <Search size={20} style={{ color: "#666" }} />
                   </div>
 
                   {error && (
-                    <div style={{ color: '#f44336', fontSize: '13px', padding: '8px', background: '#ffebee', borderRadius: '6px' }}>
+                    <div
+                      style={{
+                        color: "#f44336",
+                        fontSize: "13px",
+                        padding: "8px",
+                        background: "#ffebee",
+                        borderRadius: "6px",
+                      }}
+                    >
                       {error}
                     </div>
                   )}
 
                   {/* Product List */}
                   {loading && !deleteConfirm.isOpen ? (
-                    <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "20px",
+                        color: "#666",
+                      }}
+                    >
                       Loading...
                     </div>
                   ) : filteredProducts.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                      {searchQuery ? 'No products found matching your search' : 'No products available'}
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "20px",
+                        color: "#666",
+                      }}
+                    >
+                      {searchQuery
+                        ? "No products found matching your search"
+                        : "No products available"}
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                      }}
+                    >
                       {filteredProducts.map((product) => (
                         <div
                           key={product.id}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            padding: '10px',
-                            background: '#f9f9f9',
-                            borderRadius: '8px',
-                            border: '1px solid #eee',
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "10px",
+                            background: "#f9f9f9",
+                            borderRadius: "8px",
+                            border: "1px solid #eee",
                           }}
                         >
                           <img
                             src={product.thumbnailUrl}
                             alt={product.title}
                             style={{
-                              width: '50px',
-                              height: '50px',
-                              objectFit: 'cover',
-                              borderRadius: '6px',
+                              width: "50px",
+                              height: "50px",
+                              objectFit: "cover",
+                              borderRadius: "6px",
                             }}
                           />
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: '600', fontSize: '14px', color: '#333', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <div
+                              style={{
+                                fontWeight: "600",
+                                fontSize: "14px",
+                                color: "#333",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               {product.title}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#666' }}>
+                            <div style={{ fontSize: "12px", color: "#666" }}>
                               IDR {product.price.toLocaleString()}
                             </div>
                           </div>
@@ -749,16 +1206,16 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                             onClick={() => handleEdit(product)}
                             disabled={loading}
                             style={{
-                              background: '#0f6d66',
-                              color: 'white',
-                              border: 'none',
-                              padding: '6px 12px',
-                              borderRadius: '6px',
-                              cursor: loading ? 'not-allowed' : 'pointer',
-                              fontSize: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
+                              background: "#0f6d66",
+                              color: "white",
+                              border: "none",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              cursor: loading ? "not-allowed" : "pointer",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
                               opacity: loading ? 0.5 : 1,
                             }}
                           >
@@ -769,16 +1226,16 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                             onClick={() => handleDeleteClick(product)}
                             disabled={loading}
                             style={{
-                              background: '#f44336',
-                              color: 'white',
-                              border: 'none',
-                              padding: '6px 12px',
-                              borderRadius: '6px',
-                              cursor: loading ? 'not-allowed' : 'pointer',
-                              fontSize: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
+                              background: "#f44336",
+                              color: "white",
+                              border: "none",
+                              padding: "6px 12px",
+                              borderRadius: "6px",
+                              cursor: loading ? "not-allowed" : "pointer",
+                              fontSize: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
                               opacity: loading ? 0.5 : 1,
                             }}
                           >
@@ -794,14 +1251,14 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                     onClick={backToEdit}
                     disabled={loading}
                     style={{
-                      marginTop: '12px',
-                      padding: '8px 16px',
-                      background: 'transparent',
-                      color: '#0f6d66',
-                      border: '1px solid #0f6d66',
-                      borderRadius: '8px',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      fontSize: '14px',
+                      marginTop: "12px",
+                      padding: "8px 16px",
+                      background: "transparent",
+                      color: "#0f6d66",
+                      border: "1px solid #0f6d66",
+                      borderRadius: "8px",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      fontSize: "14px",
                       opacity: loading ? 0.5 : 1,
                     }}
                   >
@@ -811,160 +1268,192 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
               )}
 
               {/* Add/Edit Product View */}
-              {stage === 'add' && (
+              {stage === "add" && (
                 <div
                   style={{
-                    display: showContent ? 'flex' : 'none',
-                    flexDirection: 'column',
-                    alignItems: 'stretch',
-                    justifyContent: 'flex-start',
-                    gap: '12px',
-                    padding: '14px',
-                    animation: showContent ? 'contentFadeIn 0.28s ease forwards' : 'contentFadeOut 0.22s ease forwards',
-                    overflowY: 'auto',
-                    maxHeight: 'calc(520px - 54px)',
+                    display: showContent ? "flex" : "none",
+                    flexDirection: "column",
+                    alignItems: "stretch",
+                    justifyContent: "flex-start",
+                    gap: "12px",
+                    padding: "14px",
+                    animation: showContent
+                      ? "contentFadeIn 0.28s ease forwards"
+                      : "contentFadeOut 0.22s ease forwards",
+                    overflowY: "auto",
+                    maxHeight: "calc(520px - 54px)",
                   }}
                 >
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <div className="photo-row">
                     <button
+                      type="button"
+                      onClick={() => setCameraOpen(true)}
                       style={{
-                        background: '#0f6d66',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '10px',
-                        width: '140px',
-                        height: '80px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
+                        background: "#0f6d66",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "10px",
+                        width: "140px",
+                        height: "80px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        cursor: "pointer",
                       }}
                     >
                       <Camera size={24} />
-                      <span style={{ fontSize: '14px' }}>Take Photo</span>
+                      <span style={{ fontSize: "14px" }}>Take Photo</span>
                     </button>
 
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      style={{ display: "none" }}
+                    />
+
                     <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
                       style={{
-                        background: '#0f6d66',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '10px',
-                        width: '140px',
-                        height: '80px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        cursor: 'pointer',
+                        background: "#0f6d66",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "10px",
+                        width: "140px",
+                        height: "80px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px",
+                        cursor: "pointer",
                       }}
                     >
                       <FolderOpen size={24} />
-                      <span style={{ fontSize: '14px' }}>Add Photo</span>
+                      <span style={{ fontSize: "14px" }}>Add Photo</span>
                     </button>
                   </div>
 
                   <div
                     style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '10px',
-                      padding: '4px 8px',
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                      padding: "4px 8px",
                     }}
                   >
                     <input
                       style={{
-                        background: '#f2f2f2',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px',
-                        fontSize: '14px',
-                        outline: 'none',
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
                       }}
                       placeholder="Product Title *"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
                       required
                       disabled={loading}
                     />
                     <input
                       style={{
-                        background: '#f2f2f2',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px',
-                        fontSize: '14px',
-                        outline: 'none',
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
                       }}
                       placeholder="Subtitle"
                       value={formData.subtitle}
-                      onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, subtitle: e.target.value })
+                      }
                       disabled={loading}
                     />
                     <textarea
                       style={{
-                        background: '#f2f2f2',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px',
-                        fontSize: '14px',
-                        outline: 'none',
-                        minHeight: '60px',
-                        fontFamily: 'inherit',
-                        resize: 'vertical',
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
+                        minHeight: "60px",
+                        fontFamily: "inherit",
+                        resize: "vertical",
                       }}
                       placeholder="Description *"
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                       required
                       disabled={loading}
                     />
                     <input
                       style={{
-                        background: '#f2f2f2',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px',
-                        fontSize: '14px',
-                        outline: 'none',
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
                       }}
                       type="number"
                       placeholder="Price (IDR) *"
                       value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
                       required
                       disabled={loading}
                     />
                     <input
                       style={{
-                        background: '#f2f2f2',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px',
-                        fontSize: '14px',
-                        outline: 'none',
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
                       }}
                       placeholder="Image URL *"
                       value={formData.thumbnailUrl}
-                      onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          thumbnailUrl: e.target.value,
+                        })
+                      }
                       required
                       disabled={loading}
                     />
 
                     <select
                       style={{
-                        background: '#f2f2f2',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '10px',
-                        fontSize: '14px',
-                        outline: 'none',
+                        background: "#f2f2f2",
+                        border: "none",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        fontSize: "14px",
+                        outline: "none",
                       }}
                       value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
                       disabled={loading}
                     >
                       <option value="LIGHTROOM_PRESET">Lightroom Preset</option>
@@ -976,22 +1465,38 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                     </select>
 
                     {error && (
-                      <div style={{ color: '#f44336', fontSize: '13px', padding: '8px', background: '#ffebee', borderRadius: '6px' }}>
+                      <div
+                        style={{
+                          color: "#f44336",
+                          fontSize: "13px",
+                          padding: "8px",
+                          background: "#ffebee",
+                          borderRadius: "6px",
+                        }}
+                      >
                         {error}
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center', marginTop: '6px' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginTop: "6px",
+                      }}
+                    >
                       <button
                         type="button"
                         style={{
-                          background: 'transparent',
-                          color: '#777777',
-                          border: '1px solid #ddd',
-                          padding: '8px 14px',
-                          borderRadius: '8px',
-                          cursor: loading ? 'not-allowed' : 'pointer',
-                          fontSize: '14px',
+                          background: "transparent",
+                          color: "#777777",
+                          border: "1px solid #ddd",
+                          padding: "8px 14px",
+                          borderRadius: "8px",
+                          cursor: loading ? "not-allowed" : "pointer",
+                          fontSize: "14px",
                           opacity: loading ? 0.5 : 1,
                         }}
                         onClick={backToEdit}
@@ -1003,19 +1508,25 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
                       <button
                         type="submit"
                         style={{
-                          background: '#0f6d66',
-                          color: 'white',
-                          border: 'none',
-                          padding: '8px 18px',
-                          borderRadius: '8px',
-                          cursor: loading ? 'not-allowed' : 'pointer',
+                          background: "#0f6d66",
+                          color: "white",
+                          border: "none",
+                          padding: "8px 18px",
+                          borderRadius: "8px",
+                          cursor: loading ? "not-allowed" : "pointer",
                           opacity: loading ? 0.6 : 1,
-                          fontSize: '14px',
+                          fontSize: "14px",
                         }}
                         onClick={handleSubmit}
                         disabled={loading}
                       >
-                        {loading ? (editingProduct ? 'Updating...' : 'Adding...') : (editingProduct ? 'Update Product' : 'Add Product')}
+                        {loading
+                          ? editingProduct
+                            ? "Updating..."
+                            : "Adding..."
+                          : editingProduct
+                          ? "Update Product"
+                          : "Add Product"}
                       </button>
                     </div>
                   </div>
@@ -1040,10 +1551,18 @@ export default function AdminProductManager({ onProductAdded }: AdminProductMana
       {/* Delete Confirmation Popup */}
       <DeleteConfirmationPopup
         isOpen={deleteConfirm.isOpen}
-        onClose={() => !loading && setDeleteConfirm({ isOpen: false, product: null })}
+        onClose={() =>
+          !loading && setDeleteConfirm({ isOpen: false, product: null })
+        }
         onConfirm={confirmDelete}
-        productTitle={deleteConfirm.product?.title || ''}
+        productTitle={deleteConfirm.product?.title || ""}
         loading={loading}
+      />
+
+      <CameraModal
+        isOpen={cameraOpen}
+        onClose={() => setCameraOpen(false)}
+        onCapture={handleCameraCapture}
       />
     </>
   );

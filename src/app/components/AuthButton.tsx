@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LoginPopup from './LoginPopup';
 
@@ -10,6 +10,31 @@ export default function AuthButton() {
   const router = useRouter();
   const [showLogin, setShowLogin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userRole, setUserRole] = useState<'ADMIN' | 'CUSTOMER'>('CUSTOMER');
+  const [loadingRole, setLoadingRole] = useState(true);
+
+  // Fetch user role from database
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (session?.user?.email) {
+        try {
+          const response = await fetch('/api/auth/check-role');
+          const data = await response.json();
+          if (data.role) {
+            setUserRole(data.role);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        } finally {
+          setLoadingRole(false);
+        }
+      }
+    };
+
+    if (status !== 'loading') {
+      fetchUserRole();
+    }
+  }, [session, status]);
 
   // Show loading state
   if (status === 'loading') {
@@ -107,16 +132,43 @@ export default function AuthButton() {
                 borderBottom: '1px solid #eee',
                 marginBottom: '4px'
               }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '5px'
+                }}>
+                  <p style={{ 
+                    margin: '0', 
+                    color: '#333', 
+                    fontWeight: 'bold', 
+                    fontSize: '15px',
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    paddingRight: '8px'
+                  }}>
+                    {session.user.name || 'User'}
+                  </p>
+                  {!loadingRole && (
+                    <span style={{
+                      padding: '3px 10px',
+                      borderRadius: '12px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      background: userRole === 'ADMIN' ? '#246E76' : '#e0e0e0',
+                      color: userRole === 'ADMIN' ? 'white' : '#666',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      flexShrink: 0
+                    }}>
+                      {userRole}
+                    </span>
+                  )}
+                </div>
                 <p style={{ 
                   margin: '0', 
-                  color: '#333', 
-                  fontWeight: 'bold', 
-                  fontSize: '15px' 
-                }}>
-                  {session.user.name || 'User'}
-                </p>
-                <p style={{ 
-                  margin: '5px 0 0', 
                   color: '#666', 
                   fontSize: '13px',
                   overflow: 'hidden',
