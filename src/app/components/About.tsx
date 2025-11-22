@@ -25,6 +25,7 @@ export default function About() {
           </p>
         </div>
 
+        {/* === PHOTO GRID === */}
         <div className="photo-grid">
           <div className="photo photo1">
             <Image src="/foto1.webp" alt="gambar Photo 1" fill />

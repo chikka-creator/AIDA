@@ -9,7 +9,6 @@ import PhotoSlideshow from "./PhotoSlideshow";
 import CanvaEmbed from "../components/CanvaEmbed"; // Import komponen Canva
 import { useLanguage } from "../contexts/LanguageContext";
 
-
 export default function Home() {
   const { t } = useLanguage();
   return (

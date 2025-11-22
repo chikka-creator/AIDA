@@ -2,7 +2,6 @@ import { Playfair_Display } from "next/font/google";
 import SessionProvider from "./components/SessionProvider";
 import Toast from "./components/Toast"; // Add this
 import { LanguageProvider } from './contexts/LanguageContext';
-
 const playfair = Playfair_Display({ 
   subsets: ["latin"], 
   weight: ["400", "700"],

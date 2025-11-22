@@ -8,6 +8,7 @@ import CartModal from './CartModal';
 import Navbar from "./Navbar";
 import AuthButton from "../components/AuthButton";
 import AdminProductManager from '../components/AdminProductManager';
+import { useLanguage } from "../contexts/LanguageContext";
 import './shop.css';
 import '../globals.css';
 
@@ -47,6 +48,7 @@ export default function Page() {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const { t } = useLanguage();
 
   // Scroll animation observer
   useEffect(() => {
@@ -173,7 +175,7 @@ export default function Page() {
             )}
           </div>
         </nav>
-        <h1 className="hero-title">SHOP</h1>
+        <h1 className="hero-title">{t.shop.title}</h1>
       </header>
 
       {/* Admin Controls */}

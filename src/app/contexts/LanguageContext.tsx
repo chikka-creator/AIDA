@@ -11,7 +11,7 @@ export interface Translations {
   footer: { username: string; rights: string };
   auth: { login: string; logout: string; myLibrary: string; purchaseHistory: string; signOut: string; loading: string };
   portofolio: {services: string; photoGallery: string; videoGallery: string; socialMediaManagement: string};
-  shop: {};
+  shop: {title: string};
 }
 
 const translations: Record<Language, Translations> = {
@@ -28,6 +28,7 @@ const translations: Record<Language, Translations> = {
     footer: { username: '@aidacreative.id', rights: '© 2025 es teh anget. All rights reserved.' },
     auth: { login: 'Login', logout: 'Logout', myLibrary: 'My Owned Products', purchaseHistory: 'Purchase History', signOut: 'Sign Out', loading: 'Loading...' },
     portofolio: {services: 'Our Services', photoGallery: 'Photography', videoGallery: 'Videography', socialMediaManagement: 'Social Media Management'},
+    shop: {title: 'SHOP'},
   },
   IND: {
     nav: { home: 'Beranda', portofolio: 'Portofolio', shop: 'Toko' },
@@ -42,6 +43,7 @@ const translations: Record<Language, Translations> = {
     footer: { username: '@aidacreative.id', rights: '© 2025 es teh anget. Hak cipta dilindungi.' },
     auth: { login: 'Masuk', logout: 'Keluar', myLibrary: 'Produk milik saya', purchaseHistory: 'Riwayat Pembelian', signOut: 'Keluar', loading: 'Memuat...' },
     portofolio: {services: 'Layanan Kami', photoGallery: 'Fotografi', videoGallery: 'Videografi', socialMediaManagement: 'Manajemen Media Sosial'},
+    shop: {title: 'TOKO'},
   },
   JPN: {
     nav: { home: 'ホーム', portofolio: 'ポートフォリオ', shop: 'ショップ' },
@@ -56,6 +58,7 @@ const translations: Record<Language, Translations> = {
     footer: { username: '@aidacreative.id', rights: '© 2025 es teh anget. 全著作権所有。' },
     auth: { login: 'ログイン', logout: 'ログアウト', myLibrary: '私の所有する製品', purchaseHistory: '購入履歴', signOut: 'サインアウト', loading: '読み込み中...' },
     portofolio: {services: '私たちのサービス', photoGallery: '写真撮影', videoGallery: 'ビデオ撮影', socialMediaManagement: 'ソーシャルメディア管理'},
+    shop: {title: 'ショップ'},
   },
 };
 

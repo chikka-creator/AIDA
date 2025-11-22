@@ -55,17 +55,24 @@ export default function Navbar(): JSX.Element {
     setLangOpen(false);
   };
 
+  // Animation delay
   useEffect(() => {
     const timeout = setTimeout(() => setAnimate(true), 100);
     return () => clearTimeout(timeout);
   }, []);
 
+  // Set active based on pathname
   useEffect(() => {
-    if (pathname === "/") setActive("home");
-    else if (pathname === "/portofolio") setActive("portofolio");
-    else if (pathname === "/shop") setActive("shop");
+    if (pathname === "/") {
+      setActive("home");
+    } else if (pathname === "/portofolio") {
+      setActive("portofolio");
+    } else if (pathname === "/shop") {
+      setActive("shop");
+    }
   }, [pathname]);
 
+  // Update indicator position
   useEffect(() => {
     if (!navRef.current) return;
     const activeLink = navRef.current.querySelector(`.nav-item.active a`);

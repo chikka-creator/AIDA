@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useLanguage } from "../contexts/LanguageContext";
 import "../globals.css";
-import { FaWhatsapp } from 'react-icons/fa';
-import { FaInstagram } from 'react-icons/fa';
-import { FaYoutube } from 'react-icons/fa';
+import { FaWhatsapp, FaInstagram, FaYoutube } from 'react-icons/fa';
 
 export default function Footer() {
   const { t } = useLanguage();

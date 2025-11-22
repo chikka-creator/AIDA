@@ -56,15 +56,12 @@ export default function PhotoSlideshow() {
   
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
-    const { t } = useLanguage();
-  
+  const { t } = useLanguage();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Mulai fade out
       setFadeOut(true);
       
-      // Setelah 600ms, ganti foto dan fade in
       setTimeout(() => {
         setCurrentPhotoIndex((prevIndex) => 
           prevIndex === photos.length - 1 ? 0 : prevIndex + 1
@@ -72,7 +69,7 @@ export default function PhotoSlideshow() {
         setFadeOut(false);
       }, 600);
       
-    }, 4000); // Ganti foto setiap 4 detik
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [photos.length]);

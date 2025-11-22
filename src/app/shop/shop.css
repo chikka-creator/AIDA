@@ -24,6 +24,7 @@
   padding: 18px 40px;
   background: transparent;
   z-index: 100;
+
 }
 
 .logo {
@@ -43,12 +44,12 @@
 /* ====== NAVBAR CONTAINER ====== */
 .nav-container {
   display: flex;
+  height: 50px;
   align-items: center;
   background: rgba(255, 255, 255, 0.454);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 25px;
   padding: 1px 1px;
-  height: 50px;
   backdrop-filter: blur(12px);
 }
 
@@ -66,6 +67,7 @@
   position: absolute;
   margin-top: -2.7px;
   left: 0px;
+left: 0px;
   transform: translateY(-50%);
   height: 32px; 
   background: white;
@@ -243,6 +245,7 @@
   padding: 10px;
   z-index: 200;
   position: fixed;
+  /* Ubah dari left ke right untuk konsistensi */
   right: 100px;
   top: 20px;
   transition: transform 0.4s ease;
@@ -266,6 +269,7 @@
   text-align: center;
 }
 
+/* Responsive adjustments */
 @media (max-width: 1200px) {
   .cart-icon {
     right: 100px;
@@ -291,6 +295,7 @@
 }
 
 /* ====== PRODUCTS WRAP ====== */
+/* products wrap which overlaps hero */
 .products-wrap {
   max-width: 1200px;
   margin: -80px auto 60px;
@@ -307,8 +312,8 @@
   justify-content: center;
   align-items: center;
   padding: 20px 0 30px;
-  position: sticky;
-  top: 70px;
+  position: relative;
+  top: 90px;
   z-index: 50;
   background: transparent;
 }
@@ -341,10 +346,11 @@
   background: rgba(255, 255, 255, 0.2);
   border: 2px solid #ffffff;
   color: #fff;
-  margin-left: -70px;
+  margin-left: -94px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
+  z-index: 10;
 }
 
 .search-btn:hover {
@@ -357,32 +363,12 @@
 }
 
 /* Fade overlay - creates the fade out effect at top */
-.grid-container::before {
-  content: '';
-  position: sticky;
-  top: 130px; /* Position below search bar */
-  left: 0;
-  right: 0;
-  height: 100px; /* Fade height - sedang */
-  background: linear-gradient(
-    to bottom,
-    rgba(30, 30, 30, 1) 0%,
-    rgba(30, 30, 30, 0.8) 30%,
-    rgba(30, 30, 30, 0.4) 60%,
-    rgba(30, 30, 30, 0) 100%
-  );
-  pointer-events: none;
-  z-index: 40;
-  display: block;
-  margin-bottom: -100px; /* Pull grid up so it doesn't create gap */
-}
-
 /* Grid */
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 40px;
-  padding-top: 20px;
+  padding-top: 100px;
 }
 
 @media (max-width: 1000px) {
