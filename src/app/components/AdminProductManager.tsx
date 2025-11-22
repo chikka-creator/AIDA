@@ -28,6 +28,7 @@ interface AdminProductManagerProps {
 }
 
 // Camera Modal Component
+
 function CameraModal({
   isOpen,
   onClose,
@@ -40,19 +41,16 @@ function CameraModal({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [facingMode, setFacingMode] = useState<"user" | "environment">(
-    "environment"
-  );
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const [isMobile, setIsMobile] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkMobile = () => {
-      const mobile =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        );
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
       setIsMobile(mobile);
     };
     checkMobile();
@@ -71,7 +69,6 @@ function CameraModal({
     try {
       setIsLoading(true);
       
-      // Stop any existing stream first
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
@@ -84,9 +81,7 @@ function CameraModal({
         },
       };
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia(
-        constraints
-      );
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = mediaStream;
 
       if (videoRef.current) {
@@ -99,7 +94,7 @@ function CameraModal({
       console.error("Error accessing camera:", error);
       alert("Unable to access camera. Please check permissions.");
       setIsLoading(false);
-      handleClose();
+      onClose();
     }
   };
 
@@ -113,17 +108,12 @@ function CameraModal({
     }
   };
 
-  const switchCamera = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const switchCamera = () => {
     setCapturedImage(null);
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   };
 
-  const capturePhoto = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -134,8 +124,6 @@ function CameraModal({
       const context = canvas.getContext("2d");
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Stop camera after capture
         stopCamera();
 
         canvas.toBlob(
@@ -152,17 +140,11 @@ function CameraModal({
     }
   };
 
-  const retakePhoto = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const retakePhoto = () => {
     setCapturedImage(null);
-    // Camera will restart due to useEffect dependency
   };
 
-  const confirmPhoto = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const confirmPhoto = () => {
     if (capturedImage && canvasRef.current) {
       canvasRef.current.toBlob(
         (blob: Blob | null) => {
@@ -171,24 +153,16 @@ function CameraModal({
               type: "image/webp",
             });
             onCapture(file);
-            handleClose();
+            stopCamera();
+            setCapturedImage(null);
+            setIsLoading(true);
+            onClose();
           }
         },
         "image/webp",
         0.95
       );
     }
-  };
-
-  const handleClose = (e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    stopCamera();
-    setCapturedImage(null);
-    setIsLoading(true);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -205,115 +179,171 @@ function CameraModal({
         zIndex: 1002,
         animation: "fadeIn 0.3s ease",
       }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          stopCamera();
+          setCapturedImage(null);
+          setIsLoading(true);
+          onClose();
+        }
+      }}
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "800px",
-          height: "90vh",
-          background: "#000",
-          borderRadius: "16px",
-          overflow: "hidden",
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      {/* Container wrapper to hold both modal and button */}
+      <div style={{ 
+        position: "relative", 
+        display: "flex", 
+        alignItems: "flex-start",
+        gap: "16px",
+        maxWidth: "calc(800px + 96px)",
+        pointerEvents: "none", // KEY FIX: Let clicks pass through wrapper
+      }}>
+        
         <div
           style={{
-            padding: "16px",
-            background: "rgba(0,0,0,0.5)",
+            width: "100%",
+            maxWidth: "800px",
+            height: "90vh",
+            background: "#000",
+            borderRadius: "16px",
+            overflow: "hidden",
+            position: "relative",
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 10,
+            flexDirection: "column",
+            pointerEvents: "auto", // Re-enable for modal
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          <h3 style={{ color: "white", margin: 0, fontSize: "18px" }}>
-            {capturedImage ? "Preview" : "Take Photo"}
-          </h3>
-          <button
-            onClick={handleClose}
+          {/* Header */}
+          <div
             style={{
-              background: "rgba(255,255,255,0.2)",
-              border: "none",
-              borderRadius: "50%",
-              width: "36px",
-              height: "36px",
+              padding: "16px",
+              background: "rgba(0,0,0,0.7)",
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 100,
+              pointerEvents: "none",
+            }}
+          >
+            <h3 style={{ color: "white", margin: 0, fontSize: "18px", pointerEvents: "none" }}>
+              {capturedImage ? "Preview" : "Take Photo"}
+            </h3>
+          </div>
+
+          {/* Camera/Preview Area */}
+          <div
+            style={{
+              flex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              cursor: "pointer",
-              color: "white",
+              background: "#000",
+              position: "relative",
+              marginTop: "56px",
+              pointerEvents: "none",
             }}
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#000",
-            position: "relative",
-          }}
-        >
-          {!capturedImage ? (
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
+            {!capturedImage ? (
+              <>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    pointerEvents: "none",
+                  }}
+                />
+                <canvas ref={canvasRef} style={{ display: "none" }} />
+              </>
+            ) : (
+              <img
+                src={capturedImage}
+                alt="Captured"
                 style={{
                   width: "100%",
                   height: "100%",
-                  objectFit: "cover",
+                  objectFit: "contain",
+                  pointerEvents: "none",
                 }}
               />
-              <canvas ref={canvasRef} style={{ display: "none" }} />
-            </>
-          ) : (
-            <img
-              src={capturedImage}
-              alt="Captured"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-              }}
-            />
-          )}
-        </div>
+            )}
+          </div>
 
-        <div
-          style={{
-            padding: "24px",
-            background: "rgba(0,0,0,0.7)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "20px",
-          }}
-        >
-          {!capturedImage ? (
-            <>
-              {isMobile && (
+          {/* Controls */}
+          <div
+            style={{
+              padding: "24px",
+              background: "rgba(0,0,0,0.7)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "20px",
+            }}
+          >
+            {!capturedImage ? (
+              <>
+                {isMobile && (
+                  <button
+                    onClick={switchCamera}
+                    type="button"
+                    style={{
+                      background: "rgba(255,255,255,0.2)",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "50px",
+                      height: "50px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      color: "white",
+                    }}
+                  >
+                    <RefreshCw size={24} />
+                  </button>
+                )}
+
                 <button
-                  onClick={switchCamera}
+                  onClick={capturePhoto}
+                  type="button"
                   style={{
-                    background: "rgba(255,255,255,0.2)",
+                    background: "white",
+                    border: "4px solid #246E76",
+                    borderRadius: "50%",
+                    width: "70px",
+                    height: "70px",
+                    cursor: "pointer",
+                    transition: "transform 0.2s",
+                  }}
+                  onMouseDown={(e) =>
+                    (e.currentTarget.style.transform = "scale(0.95)")
+                  }
+                  onMouseUp={(e) =>
+                    (e.currentTarget.style.transform = "scale(1)")
+                  }
+                />
+
+                {isMobile && <div style={{ width: "50px" }} />}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={retakePhoto}
+                  type="button"
+                  style={{
+                    background: "#f44336",
                     border: "none",
                     borderRadius: "50%",
-                    width: "50px",
-                    height: "50px",
+                    width: "60px",
+                    height: "60px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -321,70 +351,68 @@ function CameraModal({
                     color: "white",
                   }}
                 >
-                  <RefreshCw size={24} />
+                  <X size={28} />
                 </button>
-              )}
 
-              <button
-                onClick={capturePhoto}
-                style={{
-                  background: "white",
-                  border: "4px solid #246E76",
-                  borderRadius: "50%",
-                  width: "70px",
-                  height: "70px",
-                  cursor: "pointer",
-                  transition: "transform 0.2s",
-                }}
-                onMouseDown={(e) =>
-                  (e.currentTarget.style.transform = "scale(0.95)")
-                }
-                onMouseUp={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
-              />
+                <button
+                  onClick={confirmPhoto}
+                  type="button"
+                  style={{
+                    background: "#246E76",
+                    border: "none",
+                    borderRadius: "50%",
+                    width: "60px",
+                    height: "60px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "white",
+                  }}
+                >
+                  <Check size={28} />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
 
-              {isMobile && <div style={{ width: "50px" }} />}
-            </>
-          ) : (
-            <>
-              <button
-                onClick={retakePhoto}
-                style={{
-                  background: "#f44336",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "60px",
-                  height: "60px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  color: "white",
-                }}
-              >
-                <X size={28} />
-              </button>
-
-              <button
-                onClick={confirmPhoto}
-                style={{
-                  background: "#246E76",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "60px",
-                  height: "60px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  color: "white",
-                }}
-              >
-                <Check size={28} />
-              </button>
-            </>
-          )}
+        {/* Close button - OUTSIDE and to the RIGHT of the modal */}
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Close button clicked!");
+            stopCamera();
+            setCapturedImage(null);
+            setIsLoading(true);
+            onClose();
+          }}
+          style={{
+            background: "#f44336",
+            border: "3px solid white",
+            borderRadius: "50%",
+            width: "80px",
+            height: "80px",
+            minWidth: "80px",
+            minHeight: "80px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            color: "white",
+            flexShrink: 0,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+            transition: "transform 0.2s ease",
+            userSelect: "none",
+            pointerEvents: "auto", // Ensure button receives clicks
+          }}
+          role="button"
+          aria-label="Close camera"
+          onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.1)"}
+          onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+        >
+          <X size={40} strokeWidth={3} style={{ pointerEvents: "none" }} />
         </div>
       </div>
 
@@ -966,20 +994,20 @@ export default function AdminProductManager({
   );
 
   const getStageHeight = () => {
-  if (stage === "closed") return "40px";
-  if (stage === "edit") return "180px";
-  if (stage === "add") return "650px"; // Increased from 90vh to fixed 650px
-  if (stage === "manage") return "600px";
-  return "40px";
-};
+    if (stage === "closed") return "40px";
+    if (stage === "edit") return "180px";
+    if (stage === "add") return "650px"; // Increased from 90vh to fixed 650px
+    if (stage === "manage") return "600px";
+    return "40px";
+  };
 
-const getStageWidth = () => {
-  if (stage === "closed") return "120px";
-  if (stage === "edit") return "500px";
-  if (stage === "add") return "600px"; // Increased from 400px to 600px for wider layout
-  if (stage === "manage") return "700px";
-  return "120px";
-};
+  const getStageWidth = () => {
+    if (stage === "closed") return "120px";
+    if (stage === "edit") return "500px";
+    if (stage === "add") return "600px"; // Increased from 400px to 600px for wider layout
+    if (stage === "manage") return "700px";
+    return "120px";
+  };
 
   return (
     <>
