@@ -1,24 +1,22 @@
 "use client";
 
 import { useState, useRef, useEffect, JSX } from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { useLanguage, Language } from "../contexts/LanguageContext";
 
 export default function Navbar(): JSX.Element {
   const router = useRouter();
   const pathname = usePathname();
+  const { language, setLanguage, t } = useLanguage();
   const [active, setActive] = useState<string>("home");
   const [indicator, setIndicator] = useState<{ x: number; width: number }>({ x: 0, width: 0 });
   const navRef = useRef<HTMLUListElement | null>(null);
   const [langOpen, setLangOpen] = useState<boolean>(false);
-  const [closing, setClosing] = useState<boolean>(false);
-  const [language, setLanguage] = useState<string>("ENG");
-  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const [animate, setAnimate] = useState<boolean>(false);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const languages = ["ENG", "IND", "JPN"];
+  const allLanguages: Language[] = ["ENG", "IND", "JPN"];
 
   const navItems = [
     { label: "home", path: "/" },
@@ -28,14 +26,10 @@ export default function Navbar(): JSX.Element {
 
   const getFlag = (lang: string) => {
     switch (lang) {
-      case "ENG":
-        return "https://flagcdn.com/us.svg";
-      case "IND":
-        return "https://flagcdn.com/id.svg";
-      case "JPN":
-        return "https://flagcdn.com/jp.svg";
-      default:
-        return "";
+      case "ENG": return "https://flagcdn.com/us.svg";
+      case "IND": return "https://flagcdn.com/id.svg";
+      case "JPN": return "https://flagcdn.com/jp.svg";
+      default: return "";
     }
   };
 
@@ -44,32 +38,21 @@ export default function Navbar(): JSX.Element {
     router.push(path);
   };
 
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (langOpen && buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
-        handleCloseDropdown();
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [langOpen]);
+  }, []);
 
-  useEffect(() => {
-    if (langOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPos({
-        top: rect.bottom + window.scrollY + 6,
-        left: rect.left,
-      });
-    }
-  }, [langOpen]);
-
-  const handleCloseDropdown = () => {
-    setClosing(true);
-    setTimeout(() => {
-      setLangOpen(false);
-      setClosing(false);
-    }, 200);
+  // Handle language selection
+  const handleSelectLanguage = (lang: Language) => {
+    setLanguage(lang);
+    setLangOpen(false);
   };
 
   useEffect(() => {
@@ -78,13 +61,9 @@ export default function Navbar(): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (pathname === "/") {
-      setActive("home");
-    } else if (pathname === "/portofolio") {
-      setActive("portofolio");
-    } else if (pathname === "/shop") {
-      setActive("shop");
-    }
+    if (pathname === "/") setActive("home");
+    else if (pathname === "/portofolio") setActive("portofolio");
+    else if (pathname === "/shop") setActive("shop");
   }, [pathname]);
 
   useEffect(() => {
@@ -94,16 +73,15 @@ export default function Navbar(): JSX.Element {
       const linkEl = activeLink as HTMLElement;
       const rect = linkEl.getBoundingClientRect();
       const parentRect = navRef.current.getBoundingClientRect();
-
-      const newX = rect.left - parentRect.left - 8;
-      const newWidth = rect.width + 16;
-
       setIndicator({
-        x: newX,
-        width: newWidth,
+        x: rect.left - parentRect.left - 8,
+        width: rect.width + 16,
       });
     }
-  }, [active]);
+  }, [active, language]);
+
+  // Get available languages (exclude current)
+  const availableLanguages = allLanguages.filter((l) => l !== language);
 
   return (
     <header className={`header ${animate ? "show" : ""}`}>
@@ -119,17 +97,72 @@ export default function Navbar(): JSX.Element {
               onClick={() => handleNavigation(item.path, item.label)}
             >
               <Link href={item.path}>
-                {item.label.charAt(0).toUpperCase() + item.label.slice(1)}
+                {t.nav[item.label as keyof typeof t.nav]}
               </Link>
             </li>
           ))}
 
-          <li className="nav-item lang" ref={buttonRef as any}>
-            <button className="lang-btn" onClick={() => setLangOpen(!langOpen)}>
-              <img src={getFlag(language)} alt="flag" className="flag" />
-              <span className="lang-text">{language}</span>
-              <span className="arrow">▾</span>
-            </button>
+          {/* Language Dropdown */}
+          <li className="nav-item lang">
+            <div ref={dropdownRef} style={{ position: 'relative' }}>
+              <button
+                type="button"
+                className="lang-btn"
+                onClick={() => setLangOpen((prev) => !prev)}
+              >
+                <img src={getFlag(language)} alt="flag" className="flag" />
+                <span className="lang-text">{language}</span>
+                <span className="arrow" style={{
+                  transform: langOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s'
+                }}>▾</span>
+              </button>
+
+              {/* Dropdown Menu */}
+              {langOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    marginTop: '8px',
+                    background: '#fff',
+                    borderRadius: '8px',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                    padding: '6px 0',
+                    minWidth: '100px',
+                    zIndex: 9999,
+                  }}
+                >
+                  {availableLanguages.map((lang) => (
+                    <div
+                      key={lang}
+                      onClick={() => handleSelectLanguage(lang)}
+                      style={{
+                        padding: '10px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontFamily: 'Poppins, sans-serif',
+                        color: '#333',
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = '#f0f0f0')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <img
+                        src={getFlag(lang)}
+                        alt={`${lang} flag`}
+                        style={{ width: '20px', height: '14px', borderRadius: '2px' }}
+                      />
+                      <span>{lang}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </li>
 
           <span
@@ -141,28 +174,6 @@ export default function Navbar(): JSX.Element {
           ></span>
         </ul>
       </nav>
-
-      {langOpen &&
-        createPortal(
-          <ul
-            className={`dropdown-menu ${closing ? "fade-out" : "fade-in"}`}
-            style={{ top: dropdownPos.top, left: dropdownPos.left }}
-          >
-            {languages.map((lang) => (
-              <li
-                key={lang}
-                onClick={() => {
-                  setLanguage(lang);
-                  handleCloseDropdown();
-                }}
-              >
-                <img src={getFlag(lang)} alt={`${lang} flag`} className="flag" />
-                <span>{lang}</span>
-              </li>
-            ))}
-          </ul>,
-          document.body
-        )}
     </header>
   );
 }

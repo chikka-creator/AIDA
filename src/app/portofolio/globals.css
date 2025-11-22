@@ -242,7 +242,7 @@ left: 0px;
 }
 /* HERO SECTION */
 .Services{
-  position: absolute;
+  position: relative;
   text-align: center;
   top: 30px;
   color: white;

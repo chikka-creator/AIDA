@@ -3,11 +3,13 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '../contexts/LanguageContext';
 import LoginPopup from './LoginPopup';
 
 export default function AuthButton() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { t } = useLanguage();
   const [showLogin, setShowLogin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [userRole, setUserRole] = useState<'ADMIN' | 'CUSTOMER'>('CUSTOMER');
@@ -57,7 +59,7 @@ export default function AuthButton() {
             fontWeight: 500,
           }}
         >
-          Loading...
+          {t.auth.loading}
         </div>
       </div>
     );
@@ -206,7 +208,7 @@ export default function AuthButton() {
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <span style={{ fontSize: '18px' }}>📚</span>
-                My Library
+                {t.auth.myLibrary}
               </button>
 
               <button
@@ -235,7 +237,7 @@ export default function AuthButton() {
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <span style={{ fontSize: '18px' }}>🛒</span>
-                Purchase History
+                {t.auth.purchaseHistory}
               </button>
 
               <div style={{ 
@@ -270,7 +272,7 @@ export default function AuthButton() {
                 onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               >
                 <span style={{ fontSize: '18px' }}>🚪</span>
-                Sign Out
+                {t.auth.signOut}
               </button>
             </div>
           </>
@@ -323,7 +325,7 @@ export default function AuthButton() {
           e.currentTarget.style.background = '#2fafbeff';
         }}
       >
-        Login
+        {t.auth.login}
       </button>
       {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
     </>

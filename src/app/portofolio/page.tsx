@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import "./globals.css";
 import Navbar from "./Navbar";
@@ -6,8 +7,11 @@ import KopiJotos from "./KopiJotos";
 import AuthButton from "../components/AuthButton";
 import PhotoSlideshow from "./PhotoSlideshow";
 import CanvaEmbed from "../components/CanvaEmbed"; // Import komponen Canva
+import { useLanguage } from "../contexts/LanguageContext";
+
 
 export default function Home() {
+  const { t } = useLanguage();
   return (
     <main>
       {/* HEADER */}
@@ -15,24 +19,24 @@ export default function Home() {
 
       {/* HERO SECTION */}
       <section className="hero">
-        <p className="Services">Our Services</p>
+        <p className="Services">{t.portofolio.services}</p>
         <div className="hero-row">
           <PhotoSlideshow />
           <div className="hero-box-vidio">
-           <iframe
-              src="https://www.youtube.com/embed/stfcQNHEKJc?autoplay=1&mute=1&loop=1&playlist=stfcQNHEKJc&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
-              title="Videography"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              className="youtube-iframe"
+            <Image
+              src="/vidio.webp"
+              alt="Videography"
+              fill
+              className="img"
+              unoptimized
             />
-            <div className="overlay">Videography</div>
+            <div className="overlay">{t.portofolio.videoGallery}</div>
           </div>
         </div>
         <div className="hero-row">
           <div className="hero-box wide">
             <Image src="/sosmed.webp" alt="Social Media Management" fill className="img" />
-            <div className="overlay">Social Media Management</div>
+            <div className="overlay">{t.portofolio.socialMediaManagement}</div>
           </div>
         </div>
       </section>

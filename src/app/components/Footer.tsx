@@ -1,10 +1,15 @@
+"use client";
+
 import Image from "next/image";
+import { useLanguage } from "../contexts/LanguageContext";
 import "../globals.css";
 import { FaWhatsapp } from 'react-icons/fa';
 import { FaInstagram } from 'react-icons/fa';
 import { FaYoutube } from 'react-icons/fa';
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="footer-section">
       <div className="footer-overlay" aria-hidden />
@@ -17,7 +22,6 @@ export default function Footer() {
             className="icon-link"
             aria-label="Instagram"
           >
-            {/* Instagram SVG */}
             <FaInstagram size={22} color="#ffffff" />
           </a>
 
@@ -28,8 +32,7 @@ export default function Footer() {
             className="icon-link"
             aria-label="YouTube"
           >
-            {/* YouTube SVG */}
-           <FaYoutube size={22} color="#ffffff" />
+            <FaYoutube size={22} color="#ffffff" />
           </a>
 
           <a
@@ -39,16 +42,13 @@ export default function Footer() {
             className="icon-link"
             aria-label="WhatsApp"
           >
-            {/* WhatsApp SVG */}
-           <FaWhatsapp size={22} color="#ffffff" />
+            <FaWhatsapp size={22} color="#ffffff" />
           </a>
         </div>
 
-        <h3 className="footer-name">@aidacreative.id</h3>
+        <h3 className="footer-name">{t.footer.username}</h3>
 
-        <p className="footer-text">
-          © 2025 es teh anget. All rights reserved.
-        </p>
+        <p className="footer-text">{t.footer.rights}</p>
       </div>
     </footer>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from "next/image";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function PhotoSlideshow() {
   const photos = [
@@ -55,6 +56,8 @@ export default function PhotoSlideshow() {
   
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
+    const { t } = useLanguage();
+  
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -107,7 +110,7 @@ export default function PhotoSlideshow() {
             style={{ objectFit: 'cover' }}
           />
         </div>
-        <div className="overlay">Photography</div>
+        <div className="overlay">{t.portofolio.photoGallery}</div>
       </div>
     </>
   );

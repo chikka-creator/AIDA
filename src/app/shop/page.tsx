@@ -1,6 +1,6 @@
 // src/app/shop/page.tsx
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import ProductCard from './ProductCard';
 import ProductModal from './ProductModal';
@@ -45,6 +45,31 @@ export default function Page() {
   const [error, setError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Scroll animation observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal');
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    );
+
+    cardRefs.current.forEach((card) => {
+      if (card) observer.observe(card);
+    });
+
+    return () => observer.disconnect();
+  }, [products]);
 
   // Check if user is admin
   useEffect(() => {
@@ -88,7 +113,7 @@ export default function Page() {
         subtitle: p.subtitle || '',
         description: p.description,
         price: p.price,
-        image: p.thumbnailUrl, // Map thumbnailUrl to image
+        image: p.thumbnailUrl,
         category: p.category,
         status: p.status,
       }));
@@ -123,9 +148,15 @@ export default function Page() {
   });
 
   const handleProductAdded = () => {
-    fetchProducts(); // Refresh products list
+    fetchProducts();
     setShowAdminPanel(false);
   };
+
+  // Filter products based on search
+  const filteredProducts = products.filter(p => 
+    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <main className="page-root">
@@ -177,7 +208,6 @@ export default function Page() {
       {isAdmin && showAdminPanel && (
         <div style={{
           position: 'fixed',
-          top: '150px',
           top: '160px',
           left: '30px',
           zIndex: 99,
@@ -185,51 +215,63 @@ export default function Page() {
           padding: '20px',
           borderRadius: '12px',
           boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          width: 'auto',
           width: 'fit-content',
         }}>
           <AdminProductManager onProductAdded={handleProductAdded} />
         </div>
       )}
 
-      {/* products area overlaps hero */}
+      {/* Products area */}
       <section className="products-wrap">
+        {/* Sticky Search bar */}
         <div className="search-row">
-          <input className="search-input" placeholder="Search..." />
+          <input 
+            className="search-input" 
+            placeholder="Search products..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           <button className="search-btn">Search</button>
         </div>
 
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
-            Loading products...
-          </div>
-        ) : error ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#f44336' }}>
-            Error: {error}
-          </div>
-        ) : products.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
-            No products available yet.
-          </div>
-        ) : (
-          <div className="grid">
-            {products.map((p, i) => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                index={i}
-                onClick={() => openModal(p)}
-                onAdd={(ev?: React.MouseEvent) => {
-                  ev?.stopPropagation();
-                  addToCart(p.id);
-                }}
-              />
-            ))}
-          </div>
-        )}
+        {/* Grid container */}
+        <div className="grid-container">
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
+              Loading products...
+            </div>
+          ) : error ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#f44336' }}>
+              Error: {error}
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
+              {searchQuery ? 'No products found.' : 'No products available yet.'}
+            </div>
+          ) : (
+            <div className="grid">
+              {filteredProducts.map((p, i) => (
+                <div
+                  key={p.id}
+                  ref={(el) => { cardRefs.current[i] = el; }}
+                >
+                  <ProductCard
+                    product={p}
+                    index={i}
+                    onClick={() => openModal(p)}
+                    onAdd={(ev?: React.MouseEvent) => {
+                      ev?.stopPropagation();
+                      addToCart(p.id);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
-      {/* product modal */}
+      {/* Product modal */}
       {selected && (
         <ProductModal
           product={selected}
@@ -240,7 +282,7 @@ export default function Page() {
         />
       )}
 
-      {/* cart modal */}
+      {/* Cart modal */}
       {cartOpen && (
         <CartModal
           onClose={() => setCartOpen(false)}
