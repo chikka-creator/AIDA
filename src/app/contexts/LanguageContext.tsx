@@ -16,7 +16,7 @@ export interface Translations {
 
 const translations: Record<Language, Translations> = {
   ENG: {
-    nav: { home: 'Home', portofolio: 'Portofolio', shop: 'Shop' },
+    nav: { home: 'Home', portofolio: 'Portfolio', shop: 'Shop' },
     about: {
       title: 'About us',
       subtitle: 'Aida Creative Agency',
