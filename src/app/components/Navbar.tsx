@@ -72,6 +72,24 @@ export default function Navbar(): JSX.Element {
     }
   }, [pathname]);
 
+  // Track previous pathname
+  const prevPathnameRef = useRef<string>("");
+
+  // Auto refresh satu kali setiap perpindah page
+  useEffect(() => {
+    if (prevPathnameRef.current === "") {
+      // Initial load, set pathname tanpa refresh
+      prevPathnameRef.current = pathname;
+    } else if (prevPathnameRef.current !== pathname) {
+      // Pathname berubah dari sebelumnya
+      prevPathnameRef.current = pathname;
+      window.location.reload();
+    } else if (prevPathnameRef.current === pathname) {
+      // Kembali ke halaman yang sama
+      window.location.reload();
+    }
+  }, [pathname]);
+
   // Update indicator position
   useEffect(() => {
     if (!navRef.current) return;
@@ -80,9 +98,11 @@ export default function Navbar(): JSX.Element {
       const linkEl = activeLink as HTMLElement;
       const rect = linkEl.getBoundingClientRect();
       const parentRect = navRef.current.getBoundingClientRect();
+      const newX = rect.left - parentRect.left - 8;
+      const newWidth = rect.width + 16;
       setIndicator({
-        x: rect.left - parentRect.left - 8,
-        width: rect.width + 16,
+        x: newX,
+        width: newWidth,
       });
     }
   }, [active, language]);
