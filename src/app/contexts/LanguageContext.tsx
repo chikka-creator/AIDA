@@ -11,7 +11,7 @@ export interface Translations {
   footer: { username: string; rights: string };
   auth: { login: string; logout: string; myLibrary: string; purchaseHistory: string; signOut: string; loading: string };
   portofolio: {services: string; photoGallery: string; videoGallery: string; socialMediaManagement: string};
-  shop: {title: string};
+  shop: {title: string;};
 }
 
 const translations: Record<Language, Translations> = {

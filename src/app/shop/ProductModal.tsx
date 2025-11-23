@@ -37,7 +37,7 @@ export default function ProductModal({
             <div className="modal-info">
               <h4 className="modal-sub">{product.subtitle}</h4>
               <h2 className="modal-title">{product.title}</h2>
-              <p className="modal-desc">{product.description} lorem ipsum bla bla bla</p>
+              <p className="modal-desc">{product.description}</p>
 
               <div className="modal-bottom">
                 <div className="modal-price">IDR{product.price}</div>
