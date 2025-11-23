@@ -11,6 +11,8 @@ const playfair = Playfair_Display({
 export const metadata = {
   title: "AIDA Creative",
   description: "A minimal and elegant creative portfolio",
+  icons: {
+    icon: '/aida-star.webp',}
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
