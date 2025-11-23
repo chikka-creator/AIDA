@@ -246,7 +246,7 @@ left: 0px;
   z-index: 200;
   position: fixed;
   /* Ubah dari left ke right untuk konsistensi */
-  right: 100px;
+  right: 150px;
   top: 20px;
   transition: transform 0.4s ease;
 }
@@ -313,7 +313,7 @@ left: 0px;
   align-items: center;
   padding: 20px 0 30px;
   position: relative;
-  top: 90px;
+  top: 65px;
   z-index: 50;
   background: transparent;
 }

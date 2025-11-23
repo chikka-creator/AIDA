@@ -9,6 +9,13 @@ body {
   width: 100%;
   overflow-x: hidden;
 }
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}
 .about-container,.footer-section, .home-container{
   overflow-x: hidden;
   overflow-y: hidden;
