@@ -43,7 +43,7 @@ export default function Home() {
       {/* CANVA PRESENTATION SECTION */}
       <section className="canva-section">
         <CanvaEmbed 
-          embedUrl="https://www.canva.com/design/DAG4TRN_uYs/vW_LEw3aZz0nPHjP6VrRvQ/view?embed"
+          embedUrl="https://www.canva.com/design/DAGzolF2lTM/NFqa9_BhIBlkUXiesX4nDg/view?embed"
           height="600px"
           className="canva-showcase"
         />
