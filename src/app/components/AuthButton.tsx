@@ -14,6 +14,17 @@ export default function AuthButton() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userRole, setUserRole] = useState<'ADMIN' | 'CUSTOMER'>('CUSTOMER');
   const [loadingRole, setLoadingRole] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch user role from database
   useEffect(() => {
@@ -38,8 +49,176 @@ export default function AuthButton() {
     }
   }, [session, status]);
 
-  // Show loading state
-  if (status === 'loading') {
+  // Inject into mobile menu placeholder
+  useEffect(() => {
+    const placeholder = document.getElementById('mobile-auth-placeholder');
+    if (placeholder && isMobile) {
+      const content = getMobileContent();
+      placeholder.innerHTML = content;
+      attachEventListeners();
+    }
+  }, [session, status, loadingRole, userRole, isMobile, t]);
+
+  const getMobileContent = () => {
+    if (status === 'loading') {
+      return `
+        <div style="padding: 10px 12px; text-align: center;">
+          <div style="
+            background: #246E76;
+            color: #fff;
+            borderRadius: 10px;
+            padding: 10px 18px;
+            fontFamily: 'Poppins, sans-serif';
+            fontWeight: 500;
+          ">
+            ${t.auth.loading}
+          </div>
+        </div>
+      `;
+    }
+
+    if (session?.user) {
+      return `
+        <div style="
+          padding: 10px 12px;
+          borderTop: 1px solid rgba(0, 0, 0, 0.1);
+          marginTop: 10px;
+        ">
+          <div style="
+            padding: 10px 0;
+            marginBottom: 8px;
+          ">
+            <p style="
+              margin: 0 0 4px 0;
+              color: #333;
+              fontWeight: bold;
+              fontSize: 14px;
+            ">
+              ${session.user.name || 'User'}
+            </p>
+            <p style="
+              margin: 0;
+              color: #666;
+              fontSize: 12px;
+            ">
+              ${session.user.email}
+            </p>
+            ${!loadingRole ? `
+              <span style="
+                display: inline-block;
+                padding: 3px 8px;
+                borderRadius: 6px;
+                fontSize: 10px;
+                fontWeight: 600;
+                background: ${userRole === 'ADMIN' ? '#246E76' : '#e0e0e0'};
+                color: ${userRole === 'ADMIN' ? 'white' : '#666'};
+                textTransform: uppercase;
+                letterSpacing: 0.5px;
+                marginTop: 4px;
+              ">
+                ${userRole}
+              </span>
+            ` : ''}
+          </div>
+
+          <button
+            id="mobile-library-btn"
+            style="
+              width: 100%;
+              padding: 8px 0;
+              background: transparent;
+              color: #333;
+              border: none;
+              cursor: pointer;
+              fontSize: 13px;
+              fontWeight: 500;
+              textAlign: left;
+            "
+          >
+            📚 ${t.auth.myLibrary}
+          </button>
+
+          <button
+            id="mobile-purchases-btn"
+            style="
+              width: 100%;
+              padding: 8px 0;
+              background: transparent;
+              color: #333;
+              border: none;
+              cursor: pointer;
+              fontSize: 13px;
+              fontWeight: 500;
+              textAlign: left;
+            "
+          >
+            🛒 ${t.auth.purchaseHistory}
+          </button>
+
+          <button
+            id="mobile-signout-btn"
+            style="
+              width: 100%;
+              padding: 8px 0;
+              background: transparent;
+              color: #f44336;
+              border: none;
+              cursor: pointer;
+              fontSize: 13px;
+              fontWeight: 600;
+              textAlign: left;
+            "
+          >
+            🚪 ${t.auth.signOut}
+          </button>
+        </div>
+      `;
+    }
+
+    return `
+      <button
+        id="mobile-login-btn"
+        style="
+          width: 100%;
+          padding: 10px 12px;
+          background: #2fafbeff;
+          color: #fff;
+          border: none;
+          borderRadius: 8px;
+          fontFamily: 'Poppins, sans-serif';
+          fontSize: 14px;
+          fontWeight: 500;
+          cursor: pointer;
+          marginTop: 10px;
+        "
+      >
+        ${t.auth.login}
+      </button>
+    `;
+  };
+
+  const attachEventListeners = () => {
+    const loginBtn = document.getElementById('mobile-login-btn');
+    const libraryBtn = document.getElementById('mobile-library-btn');
+    const purchasesBtn = document.getElementById('mobile-purchases-btn');
+    const signoutBtn = document.getElementById('mobile-signout-btn');
+
+    if (loginBtn) {
+      loginBtn.onclick = () => setShowLogin(true);
+    }
+    if (libraryBtn) {
+      libraryBtn.onclick = () => router.push('/owned-products');
+    }
+    if (purchasesBtn) {
+      purchasesBtn.onclick = () => router.push('/purchases');
+    }
+    if (signoutBtn) {
+      signoutBtn.onclick = () => signOut({ callbackUrl: '/' });
+    }
+  };
+
+  // Show loading state on desktop
+  if (status === 'loading' && !isMobile) {
     return (
       <div
         style={{
@@ -65,8 +244,8 @@ export default function AuthButton() {
     );
   }
 
-  // If user is logged in, show user menu
-  if (session?.user) {
+  // Desktop version - if user is logged in
+  if (session?.user && !isMobile) {
     return (
       <div
         style={{
@@ -102,7 +281,6 @@ export default function AuthButton() {
 
         {menuOpen && (
           <>
-            {/* Backdrop to close menu */}
             <div
               onClick={() => setMenuOpen(false)}
               style={{
@@ -113,7 +291,6 @@ export default function AuthButton() {
               }}
             />
 
-            {/* Dropdown menu */}
             <div
               style={{
                 position: 'absolute',
@@ -128,7 +305,6 @@ export default function AuthButton() {
                 zIndex: 200,
               }}
             >
-              {/* User Info */}
               <div style={{ 
                 padding: '12px', 
                 borderBottom: '1px solid #eee',
@@ -181,7 +357,6 @@ export default function AuthButton() {
                 </p>
               </div>
 
-              {/* Navigation Links */}
               <button
                 onClick={() => {
                   router.push('/owned-products');
@@ -246,7 +421,6 @@ export default function AuthButton() {
                 margin: '8px 0' 
               }} />
 
-              {/* Sign Out Button */}
               <button
                 onClick={() => {
                   signOut({ callbackUrl: '/' });
@@ -294,40 +468,44 @@ export default function AuthButton() {
     );
   }
 
-  // If not logged in, show login button
-  return (
-    <>
-      <button
-        onClick={() => setShowLogin(true)}
-        className="btn-login"
-        style={{
-          position: 'fixed',
-          top: '14px',
-          right: '-65px',
-          background: '#2fafbeff',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '10px',
-          padding: '10px 18px',
-          fontFamily: 'Poppins, sans-serif',
-          fontWeight: 500,
-          cursor: 'pointer',
-          zIndex: 200,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-          transition: 'transform 0.2s ease, background 0.2s ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.05)';
-          e.currentTarget.style.background = '#2fafbeff';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.background = '#2fafbeff';
-        }}
-      >
-        {t.auth.login}
-      </button>
-      {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
-    </>
-  );
+  // Desktop login button
+  if (!session && !isMobile) {
+    return (
+      <>
+        <button
+          onClick={() => setShowLogin(true)}
+          className="btn-login"
+          style={{
+            position: 'fixed',
+            top: '14px',
+            right: '-65px',
+            background: '#2fafbeff',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '10px',
+            padding: '10px 18px',
+            fontFamily: 'Poppins, sans-serif',
+            fontWeight: 500,
+            cursor: 'pointer',
+            zIndex: 200,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            transition: 'transform 0.2s ease, background 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.background = '#2fafbeff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.background = '#2fafbeff';
+          }}
+        >
+          {t.auth.login}
+        </button>
+        {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
+      </>
+    );
+  }
+
+  return showLogin ? <LoginPopup onClose={() => setShowLogin(false)} /> : null;
 }

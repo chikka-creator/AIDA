@@ -35,7 +35,7 @@ export default function CanvaEmbed({
           padding: 0,
           margin: 0
         }}
-        src={`https://www.canva.com/design/DAGzolF2lTM/NFqa9_BhIBlkUXiesX4nDg/view?embede`}
+        src={`https://www.canva.com/design/DAGzolF2lTM/NFqa9_BhIBlkUXiesX4nDg/view?embed`}
         allowFullScreen
         allow="fullscreen"
       />
