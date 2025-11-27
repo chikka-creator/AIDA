@@ -120,21 +120,22 @@ export default function Navbar(): JSX.Element {
 
   return (
     <>
+      {/* HAMBURGER BUTTON - INDEPENDENT & OUTSIDE HEADER */}
+      <button
+        className="hamburger-btn"
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label="Toggle menu"
+      >
+        <span className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}></span>
+        <span className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}></span>
+        <span className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}></span>
+      </button>
+
+      {/* HEADER */}
       <header className={`header ${animate ? "show" : ""}`}>
         <div className="logo">
           <img src="./hd.webp" alt="Aida Creative Logo" className="logo-img" />
         </div>
-
-        {/* Hamburger Button - Mobile Only */}
-        <button
-          className="hamburger-btn"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          <span className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}></span>
-          <span className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}></span>
-          <span className={`hamburger-line ${mobileMenuOpen ? "active" : ""}`}></span>
-        </button>
 
         {/* Desktop Navigation */}
         <nav className="nav-container">

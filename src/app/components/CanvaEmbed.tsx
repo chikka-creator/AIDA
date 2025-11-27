@@ -1,14 +1,16 @@
 import React from 'react';
 
 interface CanvaEmbedProps {
-  designId: string;
+  designId?: string;
+  embedUrl?: string;
   width?: string;
   height?: string;
   className?: string;
 }
 
 export default function CanvaEmbed({ 
-  designId, 
+  designId = "DAGzolF2lTM",
+  embedUrl = "https://www.canva.com/design/DAGzolF2lTM/NFqa9_BhIBlkUXiesX4nDg/view?embed",
   width = "100%", 
   height = "600px",
   className = ""
@@ -35,7 +37,7 @@ export default function CanvaEmbed({
           padding: 0,
           margin: 0
         }}
-        src={`https://www.canva.com/design/DAGzolF2lTM/NFqa9_BhIBlkUXiesX4nDg/view?embed`}
+        src={embedUrl}
         allowFullScreen
         allow="fullscreen"
       />

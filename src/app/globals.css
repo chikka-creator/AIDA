@@ -33,7 +33,6 @@ img {
   padding: 18px 40px;
   background: transparent;
   z-index: 100;
-
 }
 
 .logo {
@@ -50,38 +49,105 @@ img {
   filter: brightness(0) invert(1); 
 }
 
-/* ====== HAMBURGER BUTTON ====== */
+/* ====== HAMBURGER BUTTON - INDEPENDENT ====== */
 .hamburger-btn {
-  display: none;
-  flex-direction: column;
-  background: none;
-  border: none;
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  border: 1.5px solid rgba(255, 255, 255, 1);
   cursor: pointer;
-  gap: 6px;
-  margin-left: auto;
-  z-index: 102;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  pointer-events: auto;
+  display: none;
+}
+
+.hamburger-btn:hover {
+  background: #b1fffc94;
+  /* transform: scale(1.08); */
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.hamburger-btn:active {
+  /* transform: scale(0.92); */
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Container untuk lines */
+.hamburger-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
+  pointer-events: none;
 }
 
 .hamburger-line {
-  width: 28px;
-  height: 3px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 2.5px;
   background: #1a4c8b;
-  border-radius: 2px;
-  transition: all 0.3s ease;
+  border-radius: 4px;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 1px 3px rgba(26, 76, 139, 0.2);
 }
 
-.hamburger-btn .hamburger-line:nth-child(1).active {
-  transform: rotate(45deg) translate(10px, 10px);
-  background: #fff;
+.hamburger-line:nth-child(1) {
+  top: 14px;
 }
 
-.hamburger-btn .hamburger-line:nth-child(2).active {
-  opacity: 0;
+.hamburger-line:nth-child(2) {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
 }
 
-.hamburger-btn .hamburger-line:nth-child(3).active {
-  transform: rotate(-45deg) translate(8px, -8px);
-  background: #fff;
+.hamburger-line:nth-child(3) {
+  bottom: 14px;
+}
+
+
+/* Active state - Perfect X dengan warna gelap */
+.hamburger-line.active:nth-child(1) {
+  top: 21px;
+  left: 23px;
+  width: 30px;
+  height: 2.5px;
+  background: #1a1a1a;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hamburger-line.active:nth-child(2) {
+  opacity: 1;
+  top: 21px;
+  left: 23px;
+  width: 30px;
+  height: 2.5px;
+  background: #1a1a1a;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hamburger-line.active:nth-child(3) {
+  top: 21px;
+  bottom: auto;
+  width: 30px;
+  height: 2.5px;
+  left: 23px;
+  background: #1a1a1a;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* ====== NAVBAR CONTAINER ====== */

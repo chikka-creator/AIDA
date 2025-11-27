@@ -4,7 +4,6 @@ import About from "./components/About";
 import Footer from "./components/Footer";
 import AuthButton from "./components/AuthButton";
 import "./globals.css";
-
 export default function Home() {
   return (
     <>
