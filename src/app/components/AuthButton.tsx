@@ -203,7 +203,8 @@ export default function AuthButton() {
     <button
       id="mobile-login-btn"
       style="
-        width: 100%;
+        width: 80%;
+        margin-left: 10%;
         padding: 7px 10px;
         background: #2fafbeff;
         color: #ffffff;
