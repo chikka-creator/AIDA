@@ -311,16 +311,17 @@ body {
   opacity: 0;
   transform: translateY(-5px);
 }
-
 /* ====== MOBILE MENU OVERLAY ====== */
 .mobile-menu-overlay {
-  display: none;
+  display: none; /* default: hidden */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Safari / iOS */
   z-index: 98;
   animation: fadeInOverlay 0.3s ease;
 }
@@ -352,6 +353,13 @@ body {
 
 .mobile-menu.open {
   right: 0;
+  opacity: 1;
+  pointer-events: auto;
+  animation: mobileFadeIn 0.3s ease-out forwards;
+}
+/* SAAT DITUTUP (fade-out otomatis) */
+.mobile-menu:not(.open) {
+  animation: mobileFadeOut 0.25s ease-in forwards;
 }
 
 .mobile-nav-list {
@@ -360,7 +368,7 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .mobile-nav-item {
@@ -379,8 +387,10 @@ body {
 }
 
 .mobile-nav-item:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateX(-4px);
+  background: rgba(255, 255, 255, 0.85);
+  color: #135D66;
+  transform: translateX(4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .mobile-nav-item.active {
@@ -411,26 +421,110 @@ body {
   cursor: pointer;
   font-family: "Poppins", sans-serif;
   font-size: 13px;
-  font-weight: 500;
-  color: #fff;
-  transition: all 0.3s ease;
-}
-
-.mobile-lang-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-}
-
-.mobile-lang-btn.active {
-  background: rgba(255, 255, 255, 0.9);
-  color: #135D66;
-  font-weight: 600;
+  color: #ffffff;
+  transition: all 0.25s ease;
 }
 
 .mobile-lang-btn img {
   width: 18px;
   height: 13px;
   border-radius: 2px;
+}
+
+/* =========================================
+   FORCE FIX: MOBILE LANGUAGE BUTTON SMALL
+   ========================================= */
+@media (max-width: 768px) {
+
+  /* container bahasa di tengah */
+  .mobile-lang-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 0 !important;
+    margin-top: 8px !important;
+  }
+
+  /* tombol bahasa DIPERKECIL */
+  .mobile-lang-btn {
+    flex: 0 0 auto !important;          /* MATIIN stretch */
+    padding: 15px 19px !important;
+    min-height: 28px !important;
+    border-radius: 8px !important;
+
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-lang-btn img {
+    width: 14px !important;
+    height: 10px !important;
+  }
+
+  .mobile-lang-btn span {
+    margin-top: 1px !important;
+    font-size: 13px !important;
+    letter-spacing: 0.4px !important;
+  }
+}
+
+/* HP SANGAT KECIL */
+@media (max-width: 420px) {
+
+  .mobile-lang-container {
+    gap: 6px !important;
+  }
+
+  .mobile-lang-btn {
+    padding: 9px 15px !important;
+    min-height: 24px !important;
+  }
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  background: linear-gradient(to right, #0e0e0e, #2e9cca);
+  padding: 20px;
+  font-size: 0.9rem;
+}
+
+/* =========================================================
+   TAMBAHAN: ANIMASI NAVBAR MOBILE SAAT TERBUKA (TANPA UBAH STYLE)
+   ========================================================= */
+
+   @keyframes mobileFadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes mobileFadeOut {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+  }
+  
+
+/* Terapkan animasi saat menu mobile dibuka */
+.mobile-menu.open {
+  animation: slideInMobileMenu 0.3s ease-out;
+}
+
+/* Item menu mobile muncul dengan animasi */
+.mobile-menu.open .mobile-nav-item {
+  animation: mobileNavItemFadeIn 0.25s ease-out;
 }
 
 /* ====== FADE-IN SLIDE NAVBAR ====== */
@@ -765,4 +859,93 @@ body {
   background: linear-gradient(to right, #0e0e0e, #2e9cca);
   padding: 20px;
   font-size: 0.9rem;
+}
+
+/* =========================================================
+   ANIMASI TAMBAHAN NAVBAR MOBILE: FADE IN, FADE OUT & BLUR
+   ========================================================= */
+
+/* Panel menu nav kecil: fade-in saat terbuka, fade-out siap pakai */
+@keyframes navbarMobileFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes navbarMobileFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+/* Item menu: fade-in dari kanan */
+@keyframes navbarMobileItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Overlay: fade-in (blur sudah ada di backdrop-filter yang lama) */
+@keyframes navbarOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* OPTIONAL: kalau nanti mau fade-out overlay, tinggal pakai class .closing */
+@keyframes navbarOverlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Terapkan animasi hanya di layar kecil */
+@media (max-width: 767px) {
+  /* panel menu */
+  .mobile-menu {
+    opacity: 0;
+  }
+
+  .mobile-menu.open {
+    opacity: 1;
+    animation: navbarMobileFadeIn 0.50s ease-out forwards;
+  }
+
+  /* item di dalam menu */
+  .mobile-menu.open .mobile-nav-item {
+    animation: navbarMobileItemFadeIn 0.50s ease-out forwards;
+  }
+
+  /* overlay sudah punya backdrop-filter: blur(),
+     di sini kita hanya tambahkan animasi fade-in */
+  .mobile-menu-overlay {
+    animation: navbarOverlayFadeIn 0.50s ease forwards;
+  }
+
+  /* kalau suatu saat elemen dikasih class .closing di React,
+     animasi fade-out ini akan jalan */
+  .mobile-menu-overlay.closing {
+    animation: navbarOverlayFadeOut 0.50s ease forwards;
+  }
 }

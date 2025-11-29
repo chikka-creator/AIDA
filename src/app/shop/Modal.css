@@ -65,3 +65,25 @@
   color: #fff;
   font-size: 22px;
 }
+
+/* === Responsif tambahan, tanpa mengubah style desktop === */
+@media (max-width: 600px) {
+  .modal-card {
+    padding: 14px;
+  }
+  .modal-media img {
+    height: 230px;
+  }
+}
+
+@media (max-width: 400px) {
+  .modal-card {
+    padding: 12px;
+  }
+  .modal-media img {
+    height: 200px;
+  }
+  .modal-main-title {
+    font-size: 20px;
+  }
+}

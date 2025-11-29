@@ -178,10 +178,10 @@ img {
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  top: 0px;
+  top: -0.4px;
 left: 0px;
   transform: translateY(-50%);
-  height: 32px; 
+  height: 33px; 
   background: white;
   border-radius: 20px;
   transition: transform 0.35s ease, width 0.35s ease;
@@ -336,9 +336,12 @@ left: 0px;
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* untuk Safari / iOS */
   z-index: 98;
   animation: fadeInOverlay 0.3s ease;
 }
+
 
 @keyframes fadeInOverlay {
   from {
@@ -447,6 +450,57 @@ left: 0px;
   height: 13px;
   border-radius: 2px;
 }
+/* =========================================
+   FORCE FIX: MOBILE LANGUAGE BUTTON SMALL
+   ========================================= */
+@media (max-width: 768px) {
+
+  /* container bahasa di tengah */
+  .mobile-lang-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 0 !important;
+    margin-top: 8px !important;
+  }
+
+  /* tombol bahasa DIPERKECIL */
+  .mobile-lang-btn {
+    flex: 0 0 auto !important;          /* MATIIN stretch */
+    padding: 15px 19px !important;
+    min-height: 28px !important;
+    border-radius: 8px !important;
+
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-lang-btn img {
+    width: 14px !important;
+    height: 10px !important;
+  }
+
+  .mobile-lang-btn span {
+    margin-top: 1px !important;
+    font-size: 13px !important;
+    letter-spacing: 0.4px !important;
+  }
+}
+
+/* HP SANGAT KECIL */
+@media (max-width: 420px) {
+
+  .mobile-lang-container {
+    gap: 6px !important;
+  }
+
+  .mobile-lang-btn {
+    padding: 9px 15px !important;
+    min-height: 24px !important;
+  }
+}
+
 
 /* ====== FADE-IN SLIDE NAVBAR ====== */
 .header {

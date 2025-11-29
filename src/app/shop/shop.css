@@ -12,19 +12,29 @@
   justify-content: space-between;
   margin: 0;
 }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ====== NAVBAR STRUCTURE ====== */
 .header {
   width: 100%;
   position: fixed;
   top: 0;
-  left: -20px;
+  left: -10px;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 18px 40px;
   background: transparent;
   z-index: 100;
-
 }
 
 .logo {
@@ -41,33 +51,133 @@
   filter: brightness(0) invert(1); 
 }
 
+/* ====== HAMBURGER BUTTON - INDEPENDENT ====== */
+.hamburger-btn {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  border: 1.5px solid rgba(255, 255, 255, 1);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  pointer-events: auto;
+  display: none;
+}
+
+.hamburger-btn:hover {
+  background: #b1fffc94;
+  transform: scale(1.08);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.2);
+}
+
+.hamburger-btn:active {
+  transform: scale(0.92);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Container untuk lines */
+.hamburger-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+.hamburger-line {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 2.5px;
+  background: #1a4c8b;
+  border-radius: 4px;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 1px 3px rgba(26, 76, 139, 0.2);
+}
+
+.hamburger-line:nth-child(1) {
+  top: 14px;
+}
+
+.hamburger-line:nth-child(2) {
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+}
+
+.hamburger-line:nth-child(3) {
+  bottom: 14px;
+}
+
+
+/* Active state - Perfect X dengan warna gelap */
+.hamburger-line.active:nth-child(1) {
+  top: 8px;
+  left: 10px;
+  width: 30px;
+  height: 2.5px;
+  background: #1a1a1a;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hamburger-line.active:nth-child(2) {
+  opacity: 1;
+   top: 20px;
+  left: 20px;
+  width: 30px;
+  height: 2.5px;
+  background: #1a1a1a;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hamburger-line.active:nth-child(3) {
+  top: 33px;
+  bottom: auto;
+  width: 30px;
+  height: 2.5px;
+  left: 10px;
+  background: #1a1a1a;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 /* ====== NAVBAR CONTAINER ====== */
 .nav-container {
   display: flex;
-  height: 50px;
   align-items: center;
   background: rgba(255, 255, 255, 0.454);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 25px;
   padding: 1px 1px;
+  height: 50px;
   backdrop-filter: blur(12px);
 }
 
 .nav-list {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-left: 40px;
+  gap: 20px;
+  margin-left: 20px;
   list-style: none;
-  position: relative;
 }
 
 /* indikator putih aktif */
 .nav-indicator {
   position: absolute;
-  margin-top: -2.7px;
+  top: 0px;
   left: 0px;
-left: 0px;
   transform: translateY(-50%);
   height: 32px; 
   background: white;
@@ -115,8 +225,7 @@ left: 0px;
 
 .nav-item.active a {
   background: #ffffff;
-  color: #0e4b7a;
-  top: -3px;
+  color: #74b5fb;
   box-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
 }
 
@@ -129,7 +238,7 @@ left: 0px;
   border: none;
   cursor: pointer;
   font-family: "Poppins", sans-serif;
-  color: #184a80;
+  color: white;
   font-size: 14px;
   padding: 5px 10px;
   transition: all 0.25s ease;
@@ -181,7 +290,6 @@ left: 0px;
 .dropdown-menu li {
   padding: 6px 12px;
   display: flex;
-  color: black;
   align-items: center;
   gap: 6px;
   cursor: pointer;
@@ -201,15 +309,304 @@ left: 0px;
   opacity: 0;
   transform: translateY(-5px);
 }
+/* ... SELURUH CSS LAMA KAMU TETAP SAMA DI SINI ...
+   (tidak ada yang diubah, hanya ditambah di bagian paling bawah file) */
 
-@keyframes fadeIn {
+/* ====== MOBILE MENU OVERLAY ====== */
+.mobile-menu-overlay {
+  display: none; /* default: hidden */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* Safari / iOS */
+  z-index: 98;
+  animation: fadeInOverlay 0.3s ease;
+}
+
+@keyframes fadeInOverlay {
   from {
     opacity: 0;
-    transform: translateY(-5px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+  }
+}
+
+/* ====== MOBILE MENU ====== */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(135deg, #135D66 0%, #2EB9B9 100%);
+  backdrop-filter: blur(12px);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  z-index: 101;
+  transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow-y: auto;
+  padding-top: 80px;
+}
+
+.mobile-menu.open {
+  right: 0;
+  opacity: 1;
+  pointer-events: auto;
+  animation: mobileFadeIn 0.3s ease-out forwards;
+}
+/* SAAT DITUTUP (fade-out otomatis) */
+.mobile-menu:not(.open) {
+  animation: mobileFadeOut 0.25s ease-in forwards;
+}
+
+.mobile-nav-list {
+  list-style: none;
+  padding: 20px 16px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mobile-nav-item {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-nav-item:hover {
+  background: rgba(255, 255, 255, 0.85);
+  color: #135D66;
+  transform: translateX(4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.mobile-nav-item.active {
+  background: rgba(255, 255, 255, 0.9);
+  color: #135D66;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+}
+
+.mobile-lang-container {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0;
+  margin-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mobile-lang-btn {
+  flex: 1;
+  padding: 10px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  color: #ffffff;
+  transition: all 0.25s ease;
+}
+
+.mobile-lang-btn img {
+  width: 18px;
+  height: 13px;
+  border-radius: 2px;
+}
+
+/* =========================================
+   FORCE FIX: MOBILE LANGUAGE BUTTON SMALL
+   ========================================= */
+@media (max-width: 768px) {
+
+  /* container bahasa di tengah */
+  .mobile-lang-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 0 !important;
+    margin-top: 8px !important;
+  }
+
+  /* tombol bahasa DIPERKECIL */
+  .mobile-lang-btn {
+    flex: 0 0 auto !important;          /* MATIIN stretch */
+    padding: 15px 19px !important;
+    min-height: 28px !important;
+    border-radius: 8px !important;
+
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+
+  .mobile-lang-btn img {
+    width: 14px !important;
+    height: 10px !important;
+  }
+
+  .mobile-lang-btn span {
+    margin-top: 1px !important;
+    font-size: 13px !important;
+    letter-spacing: 0.4px !important;
+  }
+}
+
+/* HP SANGAT KECIL */
+@media (max-width: 420px) {
+
+  .mobile-lang-container {
+    gap: 6px !important;
+  }
+
+  .mobile-lang-btn {
+    padding: 9px 15px !important;
+    min-height: 24px !important;
+  }
+}
+
+
+/* =========================================================
+   TAMBAHAN: ANIMASI NAVBAR MOBILE SAAT TERBUKA (TANPA UBAH STYLE)
+   ========================================================= */
+
+   @keyframes mobileFadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes mobileFadeOut {
+    from {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+  }
+  
+
+/* Terapkan animasi saat menu mobile dibuka */
+.mobile-menu.open {
+  animation: slideInMobileMenu 0.3s ease-out;
+}
+
+/* Item menu mobile muncul dengan animasi */
+.mobile-menu.open .mobile-nav-item {
+  animation: mobileNavItemFadeIn 0.25s ease-out;
+}
+
+/* =========================================================
+   ANIMASI TAMBAHAN NAVBAR MOBILE: FADE IN, FADE OUT & BLUR
+   ========================================================= */
+
+/* Panel menu nav kecil: fade-in saat terbuka, fade-out siap pakai */
+@keyframes navbarMobileFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes navbarMobileFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+/* Item menu: fade-in dari kanan */
+@keyframes navbarMobileItemFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Overlay: fade-in (blur sudah ada di backdrop-filter yang lama) */
+@keyframes navbarOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* OPTIONAL: kalau nanti mau fade-out overlay, tinggal pakai class .closing */
+@keyframes navbarOverlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Terapkan animasi hanya di layar kecil */
+@media (max-width: 767px) {
+  /* panel menu */
+  .mobile-menu {
+    opacity: 0;
+  }
+
+  .mobile-menu.open {
+    opacity: 1;
+    animation: navbarMobileFadeIn 0.50s ease-out forwards;
+  }
+
+  /* item di dalam menu */
+  .mobile-menu.open .mobile-nav-item {
+    animation: navbarMobileItemFadeIn 0.50s ease-out forwards;
+  }
+
+  /* overlay sudah punya backdrop-filter: blur(),
+     di sini kita hanya tambahkan animasi fade-in */
+  .mobile-menu-overlay {
+    animation: navbarOverlayFadeIn 0.50s ease forwards;
+  }
+
+  /* kalau suatu saat elemen dikasih class .closing di React,
+     animasi fade-out ini akan jalan */
+  .mobile-menu-overlay.closing {
+    animation: navbarOverlayFadeOut 0.50s ease forwards;
   }
 }
 
@@ -287,9 +684,9 @@ left: 0px;
 
 @media (max-width: 520px) {
   .cart-icon {
-    right: 15px;
-    top: 15px;
-    font-size: 1.2rem;
+    right: 90px;
+    top: 20px;
+    font-size: 1.5rem;
     padding: 8px;
   }
 }

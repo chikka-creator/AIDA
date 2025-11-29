@@ -100,3 +100,26 @@
   color: var(--teal);
   font-size: 20px;
 }
+
+/* === Responsif tambahan === */
+@media (max-width: 768px) {
+  .cart-card {
+    padding: 16px;
+  }
+  .cart-content {
+    flex-direction: column;
+  }
+  .cart-right {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-card {
+    padding: 14px;
+  }
+  .cart-title {
+    font-size: 18px;
+  }
+}
