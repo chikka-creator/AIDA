@@ -1,27 +1,46 @@
-// src/app/shop/CartModal.tsx
+// src/app/shop/ImprovedCartModal.tsx
 'use client';
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import type { Product } from './page';
-import './shop.css';
+import { X, Wallet, Building2, QrCode, CreditCard } from 'lucide-react';
+import './Cart.css';
 
-export default function Cart({
-  onClose,
-  items,
-  onRemove,
-}: {
+type PaymentMethod = 'E_WALLET' | 'BANK_TRANSFER' | 'QRIS' | 'CREDIT_CARD';
+type PaymentProvider = 'DANA' | 'OVO' | 'GOPAY' | 'SHOPEEPAY' | 'BCA' | 'MANDIRI' | 'BNI' | 'BRI';
+
+interface ImprovedCartModalProps {
   onClose: () => void;
   items: { p: Product; qty: number }[];
   onRemove: (id: string) => void;
-}) {
+  onClearCart: () => void;
+}
+
+export default function ImprovedCartModal({
+  onClose,
+  items,
+  onRemove,
+  onClearCart,
+}: ImprovedCartModalProps) {
   const { data: session } = useSession();
+  const router = useRouter();
   const [closing, setClosing] = useState(false);
+  const [step, setStep] = useState<'cart' | 'payment' | 'processing' | 'success' | 'failed'>('cart');
+  
+  // Form data
   const [username, setUsername] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'E_WALLET' | 'BANK_TRANSFER' | 'QR_CODE'>('E_WALLET');
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'failed'>('idle');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState(session?.user?.email || '');
+  
+  // Payment selection
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('E_WALLET');
+  const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('DANA');
+  
+  // Payment data
   const [purchaseId, setPurchaseId] = useState('');
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [error, setError] = useState('');
 
   const total = items.reduce((s, it) => s + it.qty * it.p.price, 0);
 
@@ -30,29 +49,34 @@ export default function Cart({
     setTimeout(() => onClose(), 300);
   };
 
-  const handlePayment = async () => {
-    // Validate
+  const handlePaymentMethodChange = (method: PaymentMethod) => {
+    setPaymentMethod(method);
+    // Set default provider for each method
+    if (method === 'E_WALLET') setPaymentProvider('DANA');
+    else if (method === 'BANK_TRANSFER') setPaymentProvider('BCA');
+  };
+
+  const handleProceedToPayment = () => {
     if (!session?.user) {
       setError('Please login to continue');
       return;
     }
 
     if (!username.trim() || !whatsapp.trim()) {
-      setError('Please fill in all fields');
-      return;
-    }
-
-    if (items.length === 0) {
-      setError('Cart is empty');
+      setError('Please fill in all required fields');
       return;
     }
 
     setError('');
-    setPaymentStatus('processing');
+    setStep('payment');
+  };
+
+  const handleCreatePayment = async () => {
+    setStep('processing');
+    setError('');
 
     try {
-      // Create purchase
-      const response = await fetch('/api/purchases', {
+      const response = await fetch('/api/payment/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +86,8 @@ export default function Cart({
             productId: item.p.id,
             quantity: item.qty,
           })),
-          paymentMethod,
+          paymentMethod: paymentProvider,
+          paymentType: paymentMethod,
           username,
           whatsapp,
         }),
@@ -71,235 +96,332 @@ export default function Cart({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create purchase');
+        throw new Error(data.error || 'Failed to create payment');
       }
 
       setPurchaseId(data.purchase.id);
+      setPaymentData(data.paymentData);
 
-      // Simulate payment processing
-      setTimeout(async () => {
-        try {
-          // Complete the payment
-          const completeResponse = await fetch(`/api/purchases/${data.purchase.id}/complete`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              transactionId: `TXN-${Date.now()}`,
-              paymentProof: 'proof-url-here',
-            }),
-          });
-
-          const completeData = await completeResponse.json();
-
-          if (!completeResponse.ok) {
-            throw new Error(completeData.error || 'Payment failed');
-          }
-
-          setPaymentStatus('success');
-        } catch (err: any) {
-          console.error('Payment completion error:', err);
-          setPaymentStatus('failed');
-          setError(err.message || 'Payment failed');
-        }
-      }, 2000);
+      // Auto-simulate payment after 3 seconds (in real scenario, user completes payment)
+      setTimeout(() => {
+        simulatePaymentResult(data.purchase.id);
+      }, 3000);
 
     } catch (err: any) {
-      console.error('Payment error:', err);
-      setPaymentStatus('failed');
-      setError(err.message || 'An error occurred');
+      console.error('Payment creation error:', err);
+      setError(err.message || 'Failed to create payment');
+      setStep('payment');
     }
   };
 
-  const handleDone = () => {
-    // Clear cart and close
-    items.forEach(item => onRemove(item.p.id));
-    handleClose();
+  const simulatePaymentResult = async (purchaseId: string) => {
+    try {
+      // 80% success rate for simulation
+      const isSuccess = Math.random() > 0.2;
+      
+      const response = await fetch('/api/payment/simulate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          purchaseId,
+          status: isSuccess ? 'success' : 'failed',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (isSuccess && data.success) {
+        setStep('success');
+        // Clear cart after successful payment
+        setTimeout(() => {
+          onClearCart();
+        }, 500);
+      } else {
+        setStep('failed');
+      }
+
+    } catch (err: any) {
+      console.error('Payment simulation error:', err);
+      setError(err.message || 'Payment processing failed');
+      setStep('failed');
+    }
   };
 
-  const handleTryAgain = () => {
-    setPaymentStatus('idle');
+  const handleRetry = () => {
+    setStep('payment');
     setError('');
   };
 
+  const handleGoToLibrary = () => {
+    router.push('/owned-products');
+    handleClose();
+  };
+
   return (
-    <div className={`overlay ${closing ? 'out' : 'in'}`} onClick={handleClose}>
+    <div className={`cart-overlay-new ${closing ? 'closing' : ''}`} onClick={handleClose}>
       <div
-        className="cart-modal"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className={`cart-modal-new ${step}`}
+        onClick={(e) => e.stopPropagation()}
       >
-        <button className="cart-back" onClick={handleClose} aria-label="back">
-          ←
-        </button>
+        {/* Header */}
+        <div className="cart-header">
+          <button className="cart-close-btn" onClick={handleClose}>
+            <X size={24} />
+          </button>
+          <h2 className="cart-title-new">
+            {step === 'cart' && 'Shopping Cart'}
+            {step === 'payment' && 'Payment Method'}
+            {step === 'processing' && 'Processing Payment'}
+            {step === 'success' && 'Payment Successful!'}
+            {step === 'failed' && 'Payment Failed'}
+          </h2>
+        </div>
 
-        <h2 className="cart-heading">
-          {paymentStatus === 'idle' ? 'Order' : 
-           paymentStatus === 'processing' ? 'Processing Payment...' :
-           paymentStatus === 'success' ? 'Payment Success!' :
-           'Payment Failed'}
-        </h2>
-
-        <div className="cart-body">
-          <div className="cart-left">
-            {items.map(({ p, qty }) => (
-              <div className="cart-row" key={p.id}>
-                <div className="cart-thumb">
-                  <img src={p.image} alt={p.title} />
-                </div>
-                <div className="cart-desc">
-                  <div className="cart-title">{p.title}</div>
-                  <div className="cart-price">IDR{p.price}</div>
-                </div>
-                <div className="cart-qty">x{qty}</div>
-                {paymentStatus === 'idle' && (
-                  <button className="cart-remove" onClick={() => onRemove(p.id)}>
-                    Remove
+        {/* Cart Step */}
+        {step === 'cart' && (
+          <div className="cart-content-new">
+            <div className="cart-items-section">
+              <h3>Items ({items.length})</h3>
+              {items.map(({ p, qty }) => (
+                <div className="cart-item-new" key={p.id}>
+                  <img src={p.image} alt={p.title} className="cart-item-img" />
+                  <div className="cart-item-info">
+                    <h4>{p.title}</h4>
+                    <p className="cart-item-price">IDR {p.price.toLocaleString()}</p>
+                    <p className="cart-item-qty">Quantity: {qty}</p>
+                  </div>
+                  <button 
+                    className="cart-item-remove"
+                    onClick={() => onRemove(p.id)}
+                  >
+                    <X size={20} />
                   </button>
-                )}
+                </div>
+              ))}
+              
+              <div className="cart-total">
+                <span>Total:</span>
+                <span className="cart-total-amount">IDR {total.toLocaleString()}</span>
               </div>
-            ))}
-
-            <hr className="sep" />
-            <div className="cart-total-row">
-              <div className="total-label">Total</div>
-              <div className="total-value">IDR{total.toLocaleString()}</div>
             </div>
-          </div>
 
-          <div className="cart-right">
-            {paymentStatus === 'idle' && (
-              <div className="pay-panel">
-                <h3>Payment Information</h3>
-                
-                <label style={{ fontSize: '14px', marginBottom: '5px', display: 'block' }}>
-                  Payment Method
-                </label>
-                <select 
-                  className="input" 
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as any)}
-                  style={{ marginBottom: '12px' }}
-                >
-                  <option value="E_WALLET">E-Wallet (Dana, OVO, GoPay)</option>
-                  <option value="BANK_TRANSFER">Bank Transfer</option>
-                  <option value="QR_CODE">QR Code</option>
-                </select>
-
-                <label style={{ fontSize: '14px', marginBottom: '5px', display: 'block' }}>
-                  Username
-                </label>
-                <input 
-                  className="input" 
-                  placeholder="Your username" 
+            <div className="cart-form-section">
+              <h3>Contact Information</h3>
+              
+              <div className="form-group">
+                <label>Username *</label>
+                <input
+                  type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  className="form-input"
                 />
-                
-                <label style={{ fontSize: '14px', marginBottom: '5px', display: 'block' }}>
-                  WhatsApp Number
-                </label>
-                <input 
-                  className="input" 
-                  placeholder="08xxxxxxxxxx" 
+              </div>
+
+              <div className="form-group">
+                <label>WhatsApp Number *</label>
+                <input
+                  type="tel"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="08xxxxxxxxxx"
+                  className="form-input"
                 />
+              </div>
 
-                {error && (
-                  <div style={{
-                    background: '#ffebee',
-                    color: '#c62828',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    marginTop: '10px'
-                  }}>
-                    {error}
-                  </div>
-                )}
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="form-input"
+                  disabled={!!session?.user?.email}
+                />
+              </div>
 
-                <button 
-                  className="continue-btn"
-                  onClick={handlePayment}
-                  disabled={!session?.user}
-                >
-                  {session?.user ? 'Continue to Payment' : 'Login to Continue'}
-                </button>
+              {error && (
+                <div className="error-message">{error}</div>
+              )}
+
+              <button 
+                className="proceed-btn"
+                onClick={handleProceedToPayment}
+                disabled={!session?.user}
+              >
+                {session?.user ? 'Proceed to Payment' : 'Login to Continue'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Method Selection Step */}
+        {step === 'payment' && (
+          <div className="payment-content">
+            <div className="payment-methods-grid">
+              {/* E-Wallet */}
+              <div 
+                className={`payment-method-card ${paymentMethod === 'E_WALLET' ? 'active' : ''}`}
+                onClick={() => handlePaymentMethodChange('E_WALLET')}
+              >
+                <Wallet size={32} />
+                <h4>E-Wallet</h4>
+                <p>DANA, OVO, GoPay, ShopeePay</p>
+              </div>
+
+              {/* Bank Transfer */}
+              <div 
+                className={`payment-method-card ${paymentMethod === 'BANK_TRANSFER' ? 'active' : ''}`}
+                onClick={() => handlePaymentMethodChange('BANK_TRANSFER')}
+              >
+                <Building2 size={32} />
+                <h4>Bank Transfer</h4>
+                <p>BCA, Mandiri, BNI, BRI</p>
+              </div>
+
+              {/* QRIS */}
+              <div 
+                className={`payment-method-card ${paymentMethod === 'QRIS' ? 'active' : ''}`}
+                onClick={() => handlePaymentMethodChange('QRIS')}
+              >
+                <QrCode size={32} />
+                <h4>QRIS</h4>
+                <p>Scan QR Code</p>
+              </div>
+
+              {/* Credit Card */}
+              <div 
+                className={`payment-method-card ${paymentMethod === 'CREDIT_CARD' ? 'active' : ''}`}
+                onClick={() => handlePaymentMethodChange('CREDIT_CARD')}
+              >
+                <CreditCard size={32} />
+                <h4>Credit Card</h4>
+                <p>Visa, Mastercard</p>
+              </div>
+            </div>
+
+            {/* Provider Selection */}
+            {paymentMethod === 'E_WALLET' && (
+              <div className="provider-selection">
+                <h4>Select E-Wallet Provider</h4>
+                <div className="provider-buttons">
+                  {(['DANA', 'OVO', 'GOPAY', 'SHOPEEPAY'] as PaymentProvider[]).map(provider => (
+                    <button
+                      key={provider}
+                      className={`provider-btn ${paymentProvider === provider ? 'active' : ''}`}
+                      onClick={() => setPaymentProvider(provider)}
+                    >
+                      {provider}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {paymentStatus === 'processing' && (
-              <div className="pay-panel" style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '60px', marginBottom: '20px' }}>⏳</div>
-                <h3>Processing...</h3>
-                <p style={{ fontSize: '14px', opacity: 0.9 }}>
-                  Please wait while we process your payment.
-                </p>
+            {paymentMethod === 'BANK_TRANSFER' && (
+              <div className="provider-selection">
+                <h4>Select Bank</h4>
+                <div className="provider-buttons">
+                  {(['BCA', 'MANDIRI', 'BNI', 'BRI'] as PaymentProvider[]).map(provider => (
+                    <button
+                      key={provider}
+                      className={`provider-btn ${paymentProvider === provider ? 'active' : ''}`}
+                      onClick={() => setPaymentProvider(provider)}
+                    >
+                      {provider}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {paymentStatus === 'success' && (
-              <div className="pay-panel" style={{ textAlign: 'center' }}>
-                <div style={{ 
-                  fontSize: '80px', 
-                  marginBottom: '20px',
-                  background: 'white',
-                  width: '100px',
-                  height: '100px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 20px',
-                  color: 'var(--teal)'
-                }}>✓</div>
-                <h3>Payment Success!</h3>
-                <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '20px' }}>
-                  Thank you for your purchase. You can now access your products.
-                </p>
-                <button 
-                  className="continue-btn"
-                  onClick={handleDone}
-                  style={{ width: '100%' }}
-                >
-                  Done
-                </button>
+            <div className="payment-summary">
+              <div className="summary-row">
+                <span>Subtotal:</span>
+                <span>IDR {total.toLocaleString()}</span>
               </div>
-            )}
+              <div className="summary-row total">
+                <span>Total:</span>
+                <span>IDR {total.toLocaleString()}</span>
+              </div>
+            </div>
 
-            {paymentStatus === 'failed' && (
-              <div className="pay-panel" style={{ textAlign: 'center' }}>
-                <div style={{ 
-                  fontSize: '80px', 
-                  marginBottom: '20px',
-                  background: 'white',
-                  width: '100px',
-                  height: '100px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 20px',
-                  color: '#c62828'
-                }}>✕</div>
-                <h3>Payment Failed!</h3>
-                <p style={{ fontSize: '14px', opacity: 0.9, marginBottom: '20px' }}>
-                  {error || 'We could not process your payment. Please try again.'}
-                </p>
-                <button 
-                  className="continue-btn"
-                  onClick={handleTryAgain}
-                  style={{ width: '100%' }}
-                >
-                  Try Again
-                </button>
+            {error && <div className="error-message">{error}</div>}
+
+            <div className="payment-actions">
+              <button className="back-btn" onClick={() => setStep('cart')}>
+                Back
+              </button>
+              <button className="pay-btn" onClick={handleCreatePayment}>
+                Pay Now
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Processing Step */}
+        {step === 'processing' && (
+          <div className="processing-content">
+            <div className="processing-spinner"></div>
+            <h3>Processing Your Payment</h3>
+            <p>Please wait while we process your payment...</p>
+            {paymentData && paymentData.type === 'QRIS' && (
+              <div className="qris-container">
+                <div className="qris-placeholder">
+                  <QrCode size={200} />
+                  <p>Scan with your mobile banking app</p>
+                </div>
               </div>
             )}
           </div>
-        </div>
+        )}
+
+        {/* Success Step */}
+        {step === 'success' && (
+          <div className="success-content">
+            <div className="success-icon">✓</div>
+            <h3>Payment Successful!</h3>
+            <p>Thank you for your purchase. Your products are now available in your library.</p>
+            
+            <div className="success-details">
+              <div className="detail-row">
+                <span>Amount Paid:</span>
+                <span>IDR {total.toLocaleString()}</span>
+              </div>
+              <div className="detail-row">
+                <span>Items:</span>
+                <span>{items.length} product(s)</span>
+              </div>
+            </div>
+
+            <button className="library-btn" onClick={handleGoToLibrary}>
+              Go to My Library
+            </button>
+          </div>
+        )}
+
+        {/* Failed Step */}
+        {step === 'failed' && (
+          <div className="failed-content">
+            <div className="failed-icon">✕</div>
+            <h3>Payment Failed</h3>
+            <p>We couldn't process your payment. Please try again.</p>
+            {error && <p className="error-detail">{error}</p>}
+            
+            <div className="failed-actions">
+              <button className="retry-btn" onClick={handleRetry}>
+                Try Again
+              </button>
+              <button className="cancel-btn" onClick={handleClose}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

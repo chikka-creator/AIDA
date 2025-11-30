@@ -1,16 +1,16 @@
 // src/app/shop/page.tsx
-'use client';
-import React, { useState, useEffect, useRef } from 'react';
-import { useSession } from 'next-auth/react';
-import ProductCard from './ProductCard';
-import ProductModal from './ProductModal';
-import CartModal from './CartModal';
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
+import ProductCard from "./ProductCard";
+import ProductModal from "./ProductModal";
+import CartModal from "./CartModal";
 import Navbar from "./Navbar";
 import AuthButton from "../components/AuthButton";
-import AdminProductManager from '../components/AdminProductManager';
+import AdminProductManager from "../components/AdminProductManager";
 import { useLanguage } from "../contexts/LanguageContext";
-import './shop.css';
-import '../globals.css';
+import "./shop.css";
+import "../globals.css";
 
 // Database Product type (from Prisma)
 type DBProduct = {
@@ -43,12 +43,12 @@ export default function Page() {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-    const { t } = useLanguage();
+  const { t } = useLanguage();
 
   // Scroll animation observer
   useEffect(() => {
@@ -56,13 +56,13 @@ export default function Page() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('reveal');
+            entry.target.classList.add("reveal");
           }
         });
       },
       {
         threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        rootMargin: "0px 0px -50px 0px",
       }
     );
 
@@ -78,16 +78,16 @@ export default function Page() {
     const checkAdmin = async () => {
       if (session?.user?.email) {
         try {
-          const response = await fetch('/api/auth/check-role');
+          const response = await fetch("/api/auth/check-role");
           const data = await response.json();
-          setIsAdmin(data.role === 'ADMIN');
+          setIsAdmin(data.role === "ADMIN");
         } catch (err) {
-          console.error('Error checking admin status:', err);
+          console.error("Error checking admin status:", err);
         }
       }
     };
 
-    if (status !== 'loading') {
+    if (status !== "loading") {
       checkAdmin();
     }
   }, [session, status]);
@@ -100,30 +100,30 @@ export default function Page() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/products');
-      
+      const response = await fetch("/api/products");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch products');
+        throw new Error("Failed to fetch products");
       }
 
       const data: DBProduct[] = await response.json();
-      
+
       // Transform database products to component products
-      const transformedProducts: Product[] = data.map(p => ({
+      const transformedProducts: Product[] = data.map((p) => ({
         id: p.id,
         title: p.title,
-        subtitle: p.subtitle || '',
+        subtitle: p.subtitle || "",
         description: p.description,
         price: p.price,
         image: p.thumbnailUrl,
         category: p.category,
         status: p.status,
       }));
-      
+
       setProducts(transformedProducts);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error fetching products:', err);
+      console.error("Error fetching products:", err);
     } finally {
       setLoading(false);
     }
@@ -155,9 +155,10 @@ export default function Page() {
   };
 
   // Filter products based on search
-  const filteredProducts = products.filter(p => 
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (p) =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -171,7 +172,9 @@ export default function Page() {
           <div className="cart-icon" onClick={() => setCartOpen(true)}>
             🛒
             {Object.values(cart).length > 0 && (
-              <span className="badge">{Object.values(cart).reduce((s, n) => s + n, 0)}</span>
+              <span className="badge">
+                {Object.values(cart).reduce((s, n) => s + n, 0)}
+              </span>
             )}
           </div>
         </nav>
@@ -180,45 +183,49 @@ export default function Page() {
 
       {/* Admin Controls */}
       {isAdmin && (
-        <div style={{
-          position: 'fixed',
-          top: '100px',
-          left: '30px',
-          zIndex: 100,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            top: "100px",
+            left: "30px",
+            zIndex: 100,
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+          }}
+        >
           <button
             onClick={() => setShowAdminPanel(!showAdminPanel)}
             style={{
-              background: '#246E76',
-              color: 'white',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              fontWeight: '600',
+              background: "#246E76",
+              color: "white",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontWeight: "600",
             }}
           >
-            {showAdminPanel ? 'Close Admin Panel' : 'Admin Panel'}
+            {showAdminPanel ? "Close Admin Panel" : "Admin Panel"}
           </button>
         </div>
       )}
 
       {/* Admin Panel */}
       {isAdmin && showAdminPanel && (
-        <div style={{
-          position: 'fixed',
-          top: '160px',
-          left: '30px',
-          zIndex: 99,
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
-          width: 'fit-content',
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            top: "160px",
+            left: "30px",
+            zIndex: 99,
+            background: "white",
+            padding: "20px",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+            width: "fit-content",
+          }}
+        >
           <AdminProductManager onProductAdded={handleProductAdded} />
         </div>
       )}
@@ -227,9 +234,9 @@ export default function Page() {
       <section className="products-wrap">
         {/* Sticky Search bar */}
         <div className="search-row">
-          <input 
-            className="search-input" 
-            placeholder="Search products..." 
+          <input
+            className="search-input"
+            placeholder="Search products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -239,23 +246,33 @@ export default function Page() {
         {/* Grid container */}
         <div className="grid-container">
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
+            <div
+              style={{ textAlign: "center", padding: "40px", color: "white" }}
+            >
               Loading products...
             </div>
           ) : error ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#f44336' }}>
+            <div
+              style={{ textAlign: "center", padding: "40px", color: "#f44336" }}
+            >
               Error: {error}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'white' }}>
-              {searchQuery ? 'No products found.' : 'No products available yet.'}
+            <div
+              style={{ textAlign: "center", padding: "40px", color: "white" }}
+            >
+              {searchQuery
+                ? "No products found."
+                : "No products available yet."}
             </div>
           ) : (
             <div className="grid">
               {filteredProducts.map((p, i) => (
                 <div
                   key={p.id}
-                  ref={(el) => { cardRefs.current[i] = el; }}
+                  ref={(el) => {
+                    cardRefs.current[i] = el;
+                  }}
                 >
                   <ProductCard
                     product={p}
@@ -290,6 +307,7 @@ export default function Page() {
           onClose={() => setCartOpen(false)}
           items={cartItems}
           onRemove={(id: string) => removeFromCart(id)}
+          onClearCart={() => setCart({})}
         />
       )}
     </main>
