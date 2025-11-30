@@ -1,4 +1,4 @@
-// src/app/shop/ImprovedCartModal.tsx
+// src/app/shop/CartModal.tsx
 'use client';
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -28,16 +28,13 @@ export default function ImprovedCartModal({
   const [closing, setClosing] = useState(false);
   const [step, setStep] = useState<'cart' | 'payment' | 'processing' | 'success' | 'failed'>('cart');
   
-  // Form data
   const [username, setUsername] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [email, setEmail] = useState(session?.user?.email || '');
   
-  // Payment selection
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('E_WALLET');
   const [paymentProvider, setPaymentProvider] = useState<PaymentProvider>('DANA');
   
-  // Payment data
   const [purchaseId, setPurchaseId] = useState('');
   const [paymentData, setPaymentData] = useState<any>(null);
   const [error, setError] = useState('');
@@ -51,7 +48,6 @@ export default function ImprovedCartModal({
 
   const handlePaymentMethodChange = (method: PaymentMethod) => {
     setPaymentMethod(method);
-    // Set default provider for each method
     if (method === 'E_WALLET') setPaymentProvider('DANA');
     else if (method === 'BANK_TRANSFER') setPaymentProvider('BCA');
   };
@@ -76,7 +72,11 @@ export default function ImprovedCartModal({
     setError('');
 
     try {
-      const response = await fetch('/api/payment/create', {
+      console.log('Creating payment...');
+      console.log('Items:', items);
+      
+      // FIXED: Changed from /api/payment/create to /api/payments/create
+      const response = await fetch('/api/payments/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,7 +93,19 @@ export default function ImprovedCartModal({
         }),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned an invalid response. Please check the console for details.');
+      }
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to create payment');
@@ -102,7 +114,7 @@ export default function ImprovedCartModal({
       setPurchaseId(data.purchase.id);
       setPaymentData(data.paymentData);
 
-      // Auto-simulate payment after 3 seconds (in real scenario, user completes payment)
+      // Auto-simulate payment after 3 seconds
       setTimeout(() => {
         simulatePaymentResult(data.purchase.id);
       }, 3000);
@@ -116,10 +128,10 @@ export default function ImprovedCartModal({
 
   const simulatePaymentResult = async (purchaseId: string) => {
     try {
-      // 80% success rate for simulation
       const isSuccess = Math.random() > 0.2;
       
-      const response = await fetch('/api/payment/simulate', {
+      // FIXED: Changed from /api/payment/simulate to /api/payments/simulate
+      const response = await fetch('/api/payments/simulate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +146,6 @@ export default function ImprovedCartModal({
 
       if (isSuccess && data.success) {
         setStep('success');
-        // Clear cart after successful payment
         setTimeout(() => {
           onClearCart();
         }, 500);
@@ -167,9 +178,6 @@ export default function ImprovedCartModal({
       >
         {/* Header */}
         <div className="cart-header">
-          <button className="cart-close-btn" onClick={handleClose}>
-            <X size={24} />
-          </button>
           <h2 className="cart-title-new">
             {step === 'cart' && 'Shopping Cart'}
             {step === 'payment' && 'Payment Method'}
@@ -177,6 +185,9 @@ export default function ImprovedCartModal({
             {step === 'success' && 'Payment Successful!'}
             {step === 'failed' && 'Payment Failed'}
           </h2>
+          <button className="cart-close-btn" onClick={handleClose}>
+            <X size={24} />
+          </button>
         </div>
 
         {/* Cart Step */}
@@ -263,7 +274,6 @@ export default function ImprovedCartModal({
         {step === 'payment' && (
           <div className="payment-content">
             <div className="payment-methods-grid">
-              {/* E-Wallet */}
               <div 
                 className={`payment-method-card ${paymentMethod === 'E_WALLET' ? 'active' : ''}`}
                 onClick={() => handlePaymentMethodChange('E_WALLET')}
@@ -273,7 +283,6 @@ export default function ImprovedCartModal({
                 <p>DANA, OVO, GoPay, ShopeePay</p>
               </div>
 
-              {/* Bank Transfer */}
               <div 
                 className={`payment-method-card ${paymentMethod === 'BANK_TRANSFER' ? 'active' : ''}`}
                 onClick={() => handlePaymentMethodChange('BANK_TRANSFER')}
@@ -283,7 +292,6 @@ export default function ImprovedCartModal({
                 <p>BCA, Mandiri, BNI, BRI</p>
               </div>
 
-              {/* QRIS */}
               <div 
                 className={`payment-method-card ${paymentMethod === 'QRIS' ? 'active' : ''}`}
                 onClick={() => handlePaymentMethodChange('QRIS')}
@@ -293,7 +301,6 @@ export default function ImprovedCartModal({
                 <p>Scan QR Code</p>
               </div>
 
-              {/* Credit Card */}
               <div 
                 className={`payment-method-card ${paymentMethod === 'CREDIT_CARD' ? 'active' : ''}`}
                 onClick={() => handlePaymentMethodChange('CREDIT_CARD')}
@@ -304,7 +311,6 @@ export default function ImprovedCartModal({
               </div>
             </div>
 
-            {/* Provider Selection */}
             {paymentMethod === 'E_WALLET' && (
               <div className="provider-selection">
                 <h4>Select E-Wallet Provider</h4>
@@ -363,7 +369,7 @@ export default function ImprovedCartModal({
           </div>
         )}
 
-        {/* Processing Step */}
+        {/* Processing, Success, Failed steps remain the same */}
         {step === 'processing' && (
           <div className="processing-content">
             <div className="processing-spinner"></div>
@@ -380,7 +386,6 @@ export default function ImprovedCartModal({
           </div>
         )}
 
-        {/* Success Step */}
         {step === 'success' && (
           <div className="success-content">
             <div className="success-icon">✓</div>
@@ -404,7 +409,6 @@ export default function ImprovedCartModal({
           </div>
         )}
 
-        {/* Failed Step */}
         {step === 'failed' && (
           <div className="failed-content">
             <div className="failed-icon">✕</div>

@@ -1,4 +1,4 @@
-// src/app/api/payment/create/route.ts
+// src/app/api/payments/create/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "@/src/lib/prisma";
@@ -28,6 +28,8 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const { items, paymentMethod, paymentType, username, whatsapp } = body;
+
+    console.log('Payment create request:', { items, paymentMethod, paymentType, username, whatsapp });
 
     // Validate input
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -66,7 +68,7 @@ export async function POST(request: Request) {
       if (!product) {
         throw new Error(`Product ${item.productId} not found`);
       }
-      totalAmount += product.price * item.quantity;
+      totalAmount += product.price * (item.quantity || 1);
       return {
         productId: product.id,
         priceAtPurchase: product.price,

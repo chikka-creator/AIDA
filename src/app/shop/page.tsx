@@ -12,7 +12,6 @@ import { useLanguage } from "../contexts/LanguageContext";
 import "./shop.css";
 import "../globals.css";
 
-// Database Product type (from Prisma)
 type DBProduct = {
   id: string;
   title: string;
@@ -24,7 +23,6 @@ type DBProduct = {
   status: string;
 };
 
-// Component Product type (what your components expect)
 export type Product = {
   id: string;
   title: string;
@@ -36,11 +34,18 @@ export type Product = {
   status: string;
 };
 
+type CartItem = {
+  id: string;
+  productId: string;
+  addedAt: string;
+  product: DBProduct;
+};
+
 export default function Page() {
   const { data: session, status } = useSession();
   const [selected, setSelected] = useState<Product | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState<Record<string, number>>({});
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,29 +54,6 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { t } = useLanguage();
-
-  // Scroll animation observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("reveal");
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px",
-      }
-    );
-
-    cardRefs.current.forEach((card) => {
-      if (card) observer.observe(card);
-    });
-
-    return () => observer.disconnect();
-  }, [products]);
 
   // Check if user is admin
   useEffect(() => {
@@ -92,10 +74,19 @@ export default function Page() {
     }
   }, [session, status]);
 
-  // Fetch products from database
+  // Fetch products
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Fetch cart when user logs in
+  useEffect(() => {
+    if (session?.user) {
+      fetchCart();
+    } else {
+      setCartItems([]);
+    }
+  }, [session]);
 
   const fetchProducts = async () => {
     try {
@@ -107,8 +98,6 @@ export default function Page() {
       }
 
       const data: DBProduct[] = await response.json();
-
-      // Transform database products to component products
       const transformedProducts: Product[] = data.map((p) => ({
         id: p.id,
         title: p.title,
@@ -129,32 +118,98 @@ export default function Page() {
     }
   };
 
+  const fetchCart = async () => {
+    try {
+      const response = await fetch("/api/cart");
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data);
+      }
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+    }
+  };
+
+  const addToCart = async (productId: string) => {
+    if (!session?.user) {
+      alert("Please login to add items to cart");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (response.ok) {
+        await fetchCart();
+      } else {
+        const data = await response.json();
+        if (data.message === "Item already in cart") {
+          alert("Item is already in your cart");
+        } else {
+          throw new Error(data.error || "Failed to add to cart");
+        }
+      }
+    } catch (err: any) {
+      console.error("Error adding to cart:", err);
+      alert(err.message || "Failed to add to cart");
+    }
+  };
+
+  const removeFromCart = async (cartItemId: string) => {
+    try {
+      const response = await fetch(`/api/cart/${cartItemId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        await fetchCart();
+      }
+    } catch (err) {
+      console.error("Error removing from cart:", err);
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      const response = await fetch("/api/cart", {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setCartItems([]);
+      }
+    } catch (err) {
+      console.error("Error clearing cart:", err);
+    }
+  };
+
   const openModal = (p: Product) => setSelected(p);
   const closeModal = () => setSelected(null);
-
-  const addToCart = (id: string) => {
-    setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 }));
-  };
-
-  const removeFromCart = (id: string) => {
-    setCart((c) => {
-      const copy = { ...c };
-      delete copy[id];
-      return copy;
-    });
-  };
-
-  const cartItems = Object.entries(cart).map(([id, qty]) => {
-    const p = products.find((x) => x.id === id)!;
-    return { p, qty };
-  });
 
   const handleProductAdded = () => {
     fetchProducts();
     setShowAdminPanel(false);
   };
 
-  // Filter products based on search
+  // Transform cart items to match CartModal expected format
+  const cartItemsForModal = cartItems.map((item) => ({
+    p: {
+      id: item.product.id,
+      title: item.product.title,
+      subtitle: item.product.subtitle || "",
+      description: item.product.description,
+      price: item.product.price,
+      image: item.product.thumbnailUrl,
+      category: item.product.category,
+      status: item.product.status,
+    },
+    qty: 1, // Since cart_items doesn't have quantity, we use 1
+  }));
+
   const filteredProducts = products.filter(
     (p) =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -171,17 +226,14 @@ export default function Page() {
           </div>
           <div className="cart-icon" onClick={() => setCartOpen(true)}>
             🛒
-            {Object.values(cart).length > 0 && (
-              <span className="badge">
-                {Object.values(cart).reduce((s, n) => s + n, 0)}
-              </span>
+            {cartItems.length > 0 && (
+              <span className="badge">{cartItems.length}</span>
             )}
           </div>
         </nav>
         <h1 className="hero-title">{t.shop.title}</h1>
       </header>
 
-      {/* Admin Controls */}
       {isAdmin && (
         <div
           style={{
@@ -211,7 +263,6 @@ export default function Page() {
         </div>
       )}
 
-      {/* Admin Panel */}
       {isAdmin && showAdminPanel && (
         <div
           style={{
@@ -230,9 +281,7 @@ export default function Page() {
         </div>
       )}
 
-      {/* Products area */}
       <section className="products-wrap">
-        {/* Sticky Search bar */}
         <div className="search-row">
           <input
             className="search-input"
@@ -243,7 +292,6 @@ export default function Page() {
           <button className="search-btn">Search</button>
         </div>
 
-        {/* Grid container */}
         <div className="grid-container">
           {loading ? (
             <div
@@ -290,7 +338,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Product modal */}
       {selected && (
         <ProductModal
           product={selected}
@@ -301,13 +348,15 @@ export default function Page() {
         />
       )}
 
-      {/* Cart modal */}
       {cartOpen && (
         <CartModal
           onClose={() => setCartOpen(false)}
-          items={cartItems}
-          onRemove={(id: string) => removeFromCart(id)}
-          onClearCart={() => setCart({})}
+          items={cartItemsForModal}
+          onRemove={(productId: string) => {
+            const item = cartItems.find((i) => i.product.id === productId);
+            if (item) removeFromCart(item.id);
+          }}
+          onClearCart={clearCart}
         />
       )}
     </main>
