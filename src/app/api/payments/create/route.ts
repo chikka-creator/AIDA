@@ -75,12 +75,15 @@ export async function POST(request: Request) {
       };
     });
 
+    // **FIX: Use paymentType (the method type) instead of paymentProvider**
+    const paymentMethodForDb = paymentType || "E_WALLET";
+
     // Create purchase
     const purchase = await prisma.purchase.create({
       data: {
         userId: user.id,
         totalAmount,
-        paymentMethod: paymentMethod || "E_WALLET",
+        paymentMethod: paymentMethodForDb, // Use E_WALLET, BANK_TRANSFER, etc.
         paymentStatus: "PENDING",
         ipAddress: request.headers.get("x-forwarded-for") || "unknown",
         userAgent: request.headers.get("user-agent") || "unknown",
@@ -107,18 +110,20 @@ export async function POST(request: Request) {
         expiryTime: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
       };
     } else if (paymentType === 'BANK_TRANSFER') {
-      const bankAccounts = {
+      const bankAccounts: Record<string, { accountNumber: string; accountName: string }> = {
         BCA: { accountNumber: '8880012345678', accountName: 'AIDA CREATIVE' },
         MANDIRI: { accountNumber: '1370012345678', accountName: 'AIDA CREATIVE' },
         BNI: { accountNumber: '0012345678', accountName: 'AIDA CREATIVE' },
         BRI: { accountNumber: '012345678901234', accountName: 'AIDA CREATIVE' },
       };
       
-      const selectedBank = paymentMethod as keyof typeof bankAccounts;
+      const selectedBank = paymentMethod as string;
+      const bankInfo = bankAccounts[selectedBank] || bankAccounts['BCA'];
+      
       paymentData = {
         type: 'BANK_TRANSFER',
         bank: selectedBank,
-        ...bankAccounts[selectedBank],
+        ...bankInfo,
         amount: totalAmount,
         expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       };
@@ -139,8 +144,8 @@ export async function POST(request: Request) {
         details: {
           purchaseId: purchase.id,
           totalAmount,
-          paymentMethod,
-          paymentType,
+          paymentMethod: paymentMethodForDb,
+          paymentProvider: paymentMethod,
           username,
           whatsapp,
         },
