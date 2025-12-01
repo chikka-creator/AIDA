@@ -122,21 +122,28 @@ export async function POST(request: Request) {
         callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/xendit-callback`,
       });
 
-      if (!qrisResult.success) {
+      if (!qrisResult.success || !qrisResult.data) {
         throw new Error(qrisResult.error || 'Failed to create QRIS payment');
       }
 
       paymentData = {
         type: 'QRIS',
         qrString: qrisResult.data.qr_string,
-        qrCodeUrl: qrisResult.data.qr_string, // You can generate QR image from this
+        qrCodeUrl: qrisResult.data.qr_string,
         amount: totalAmount,
         expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
         xenditId: qrisResult.data.id,
+        merchantName: 'AIDA Creative',
+        instructions: [
+          'Open your mobile banking or e-wallet app',
+          'Select "Scan QR" or "QRIS"',
+          'Scan the QR code displayed',
+          'Confirm the payment amount',
+          'Enter your PIN to complete payment'
+        ]
       };
 
     } else if (paymentType === 'BANK_TRANSFER') {
-      // Map payment method to bank code
       const bankCodeMap: { [key: string]: string } = {
         'BCA': 'BCA',
         'MANDIRI': 'MANDIRI',
@@ -153,7 +160,7 @@ export async function POST(request: Request) {
         amount: totalAmount,
       });
 
-      if (!vaResult.success) {
+      if (!vaResult.success || !vaResult.data) {
         throw new Error(vaResult.error || 'Failed to create virtual account');
       }
 
@@ -175,7 +182,7 @@ export async function POST(request: Request) {
         ewalletType: paymentMethod as any,
       });
 
-      if (!ewalletResult.success) {
+      if (!ewalletResult.success || !ewalletResult.data) {
         throw new Error(ewalletResult.error || 'Failed to create e-wallet payment');
       }
 
@@ -189,7 +196,7 @@ export async function POST(request: Request) {
       };
 
     } else {
-      // Use Invoice for other payment methods (supports multiple payment options)
+      // Use Invoice for other payment methods
       const invoiceResult = await xenditService.createInvoice({
         externalId: purchase.id,
         amount: totalAmount,
@@ -198,14 +205,14 @@ export async function POST(request: Request) {
         items: xenditItems,
       });
 
-      if (!invoiceResult.success) {
+      if (!invoiceResult.success || !invoiceResult.data) {
         throw new Error(invoiceResult.error || 'Failed to create invoice');
       }
 
       paymentData = {
         type: 'INVOICE',
-        invoiceUrl: invoiceResult.data.invoice_url,
-        expiryTime: new Date(invoiceResult.data.expiry_date),
+        invoiceUrl: invoiceResult.data.invoiceUrl,
+        expiryTime: invoiceResult.data.expiryDate ? new Date(invoiceResult.data.expiryDate) : new Date(Date.now() + 24 * 60 * 60 * 1000),
         xenditId: invoiceResult.data.id,
       };
     }
