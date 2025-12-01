@@ -1,11 +1,15 @@
-// src/app/shop/CartModal.tsx
-"use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import type { Product } from "./page";
-import { X, Wallet, Building2, QrCode, CreditCard } from "lucide-react";
-import "./Cart.css";
+import {
+  X,
+  Wallet,
+  Building2,
+  QrCode,
+  CreditCard,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 
 type PaymentMethod = "E_WALLET" | "BANK_TRANSFER" | "QRIS" | "CREDIT_CARD";
 type PaymentProvider =
@@ -18,7 +22,18 @@ type PaymentProvider =
   | "BNI"
   | "BRI";
 
-interface ImprovedCartModalProps {
+interface Product {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  status: string;
+}
+
+interface CartModalProps {
   onClose: () => void;
   items: { p: Product; qty: number }[];
   onRemove: (id: string) => void;
@@ -30,12 +45,12 @@ export default function ImprovedCartModal({
   items,
   onRemove,
   onClearCart,
-}: ImprovedCartModalProps) {
+}: CartModalProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [closing, setClosing] = useState(false);
   const [step, setStep] = useState<
-    "cart" | "payment" | "processing" | "success" | "failed"
+    "cart" | "payment" | "awaiting" | "success" | "failed"
   >("cart");
 
   const [username, setUsername] = useState("");
@@ -47,10 +62,39 @@ export default function ImprovedCartModal({
     useState<PaymentProvider>("DANA");
 
   const [purchaseId, setPurchaseId] = useState("");
+  const [transactionId, setTransactionId] = useState("");
   const [paymentData, setPaymentData] = useState<any>(null);
   const [error, setError] = useState("");
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
 
   const total = items.reduce((s, it) => s + it.qty * it.p.price, 0);
+
+  // Timer for payment expiration
+  useEffect(() => {
+    if (step === "awaiting" && timeRemaining > 0) {
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setError("Payment time expired. Please try again.");
+            setStep("failed");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [step, timeRemaining]);
+
+  // Format time remaining
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const handleClose = () => {
     setClosing(true);
@@ -79,105 +123,110 @@ export default function ImprovedCartModal({
   };
 
   const handleCreatePayment = async () => {
-  setStep('processing');
-  setError('');
+    setError("");
 
-  try {
-    console.log('Creating payment...');
-    console.log('Items:', items);
-    console.log('Payment Method:', paymentProvider);
-    console.log('Payment Type:', paymentMethod);
-    
-    const response = await fetch('/api/payments/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        items: items.map(item => ({
-          productId: item.p.id,
-          quantity: item.qty,
-        })),
-        paymentMethod: paymentProvider,
-        paymentType: paymentMethod,
-        username,
-        whatsapp,
-      }),
-    });
-
-    console.log('Response status:', response.status);
-    
-    // Get response text first
-    const responseText = await response.text();
-    console.log('Response text:', responseText);
-    
-    // Try to parse as JSON
-    let data;
     try {
-      data = JSON.parse(responseText);
-    } catch (e) {
-      console.error('Failed to parse response as JSON:', e);
-      throw new Error(`Server returned invalid JSON: ${responseText.substring(0, 100)}`);
-    }
-
-    console.log('Response data:', data);
-
-    if (!response.ok) {
-      // Show the actual error from server
-      throw new Error(data.details || data.error || 'Failed to create payment');
-    }
-
-    setPurchaseId(data.purchase.id);
-    setPaymentData(data.paymentData);
-
-    // Auto-simulate payment after 3 seconds
-    setTimeout(() => {
-      simulatePaymentResult(data.purchase.id);
-    }, 3000);
-
-  } catch (err: any) {
-    console.error('Payment creation error:', err);
-    setError(err.message || 'Failed to create payment');
-    setStep('payment'); // Go back to payment selection
-  }
-};
-
-  const simulatePaymentResult = async (purchaseId: string) => {
-    try {
-      const isSuccess = Math.random() > 0.2;
-
-      // FIXED: Changed from /api/payment/simulate to /api/payments/simulate
-      const response = await fetch("/api/payments/simulate", {
+      const response = await fetch("/api/payments/create", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          purchaseId,
-          status: isSuccess ? "success" : "failed",
+          items: items.map((item) => ({
+            productId: item.p.id,
+            quantity: item.qty,
+          })),
+          paymentMethod: paymentProvider,
+          paymentType: paymentMethod,
+          username,
+          whatsapp,
         }),
       });
 
       const data = await response.json();
 
-      if (isSuccess && data.success) {
+      if (!response.ok) {
+        throw new Error(
+          data.details || data.error || "Failed to create payment"
+        );
+      }
+
+      setPurchaseId(data.purchase.id);
+      setPaymentData(data.paymentData);
+      setStep("awaiting");
+      setTimeRemaining(900); // Reset timer to 15 minutes
+
+      // Start checking payment status
+      startPaymentCheck(data.purchase.id);
+    } catch (err: any) {
+      setError(err.message || "Failed to create payment");
+    }
+  };
+
+  const startPaymentCheck = (purchaseId: string) => {
+    // Check payment status every 5 seconds
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/payments/check/${purchaseId}`);
+        const data = await response.json();
+
+        if (data.status === "COMPLETED") {
+          clearInterval(interval);
+          setTransactionId(data.transactionId);
+          setStep("success");
+          setTimeout(() => {
+            onClearCart();
+          }, 500);
+        } else if (data.status === "FAILED") {
+          clearInterval(interval);
+          setError("Payment verification failed");
+          setStep("failed");
+        }
+      } catch (err) {
+        console.error("Error checking payment:", err);
+      }
+    }, 5000);
+
+    // Store interval ID to clear it when component unmounts
+    return () => clearInterval(interval);
+  };
+
+  const handleManualVerify = async () => {
+    setCheckingPayment(true);
+    setError("");
+
+    try {
+      // Simulate payment verification
+      // In production, this would check with actual payment gateway
+      const response = await fetch("/api/payments/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          purchaseId,
+          status: "success", // This would come from actual payment gateway
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTransactionId(data.purchase.transactionId);
         setStep("success");
         setTimeout(() => {
           onClearCart();
         }, 500);
       } else {
-        setStep("failed");
+        setError("Payment not yet received. Please complete the payment.");
       }
     } catch (err: any) {
-      console.error("Payment simulation error:", err);
-      setError(err.message || "Payment processing failed");
-      setStep("failed");
+      setError(err.message || "Failed to verify payment");
+    } finally {
+      setCheckingPayment(false);
     }
   };
 
   const handleRetry = () => {
     setStep("payment");
     setError("");
+    setTimeRemaining(900);
   };
 
   const handleGoToLibrary = () => {
@@ -199,7 +248,7 @@ export default function ImprovedCartModal({
           <h2 className="cart-title-new">
             {step === "cart" && "Shopping Cart"}
             {step === "payment" && "Payment Method"}
-            {step === "processing" && "Processing Payment"}
+            {step === "awaiting" && "Complete Your Payment"}
             {step === "success" && "Payment Successful!"}
             {step === "failed" && "Payment Failed"}
           </h2>
@@ -231,7 +280,6 @@ export default function ImprovedCartModal({
                   </button>
                 </div>
               ))}
-
               <div className="cart-total">
                 <span>Total:</span>
                 <span className="cart-total-amount">
@@ -242,7 +290,6 @@ export default function ImprovedCartModal({
 
             <div className="cart-form-section">
               <h3>Contact Information</h3>
-
               <div className="form-group">
                 <label>Username *</label>
                 <input
@@ -253,7 +300,6 @@ export default function ImprovedCartModal({
                   className="form-input"
                 />
               </div>
-
               <div className="form-group">
                 <label>WhatsApp Number *</label>
                 <input
@@ -264,7 +310,6 @@ export default function ImprovedCartModal({
                   className="form-input"
                 />
               </div>
-
               <div className="form-group">
                 <label>Email</label>
                 <input
@@ -276,9 +321,7 @@ export default function ImprovedCartModal({
                   disabled={!!session?.user?.email}
                 />
               </div>
-
               {error && <div className="error-message">{error}</div>}
-
               <button
                 className="proceed-btn"
                 onClick={handleProceedToPayment}
@@ -290,7 +333,7 @@ export default function ImprovedCartModal({
           </div>
         )}
 
-        {/* Payment Method Selection Step */}
+        {/* Payment Method Selection */}
         {step === "payment" && (
           <div className="payment-content">
             <div className="payment-methods-grid">
@@ -304,7 +347,6 @@ export default function ImprovedCartModal({
                 <h4>E-Wallet</h4>
                 <p>DANA, OVO, GoPay, ShopeePay</p>
               </div>
-
               <div
                 className={`payment-method-card ${
                   paymentMethod === "BANK_TRANSFER" ? "active" : ""
@@ -315,7 +357,6 @@ export default function ImprovedCartModal({
                 <h4>Bank Transfer</h4>
                 <p>BCA, Mandiri, BNI, BRI</p>
               </div>
-
               <div
                 className={`payment-method-card ${
                   paymentMethod === "QRIS" ? "active" : ""
@@ -326,7 +367,6 @@ export default function ImprovedCartModal({
                 <h4>QRIS</h4>
                 <p>Scan QR Code</p>
               </div>
-
               <div
                 className={`payment-method-card ${
                   paymentMethod === "CREDIT_CARD" ? "active" : ""
@@ -399,171 +439,155 @@ export default function ImprovedCartModal({
                 Back
               </button>
               <button className="pay-btn" onClick={handleCreatePayment}>
-                Pay Now
+                Continue to Payment
               </button>
             </div>
           </div>
         )}
 
-        {/* Processing, Success, Failed steps remain the same */}
-        {step === "processing" && (
+        {/* Awaiting Payment Completion */}
+        {step === "awaiting" && (
           <div className="processing-content">
-            <div className="processing-spinner"></div>
-            <h3>Processing Your Payment</h3>
-            <p>Please wait while we process your payment...</p>
+            <div
+              style={{
+                background: "#fff3cd",
+                border: "2px solid #ffc107",
+                borderRadius: "12px",
+                padding: "16px",
+                marginBottom: "24px",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              <AlertCircle size={24} color="#856404" />
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#856404",
+                    fontWeight: "600",
+                    fontSize: "16px",
+                  }}
+                >
+                  Please Complete Your Payment
+                </p>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    color: "#856404",
+                    fontSize: "14px",
+                  }}
+                >
+                  Time remaining: {formatTime(timeRemaining)}
+                </p>
+              </div>
+            </div>
 
-            {/* QRIS QR Code Display */}
             {paymentData && paymentData.type === "QRIS" && (
-              <div className="qris-container" style={{ marginTop: "32px" }}>
-                {/* Display the actual QR code image */}
-                {paymentData.qrCodeUrl ? (
+              <div
+                style={{
+                  background: "white",
+                  padding: "32px",
+                  borderRadius: "16px",
+                  textAlign: "center",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  marginBottom: "24px",
+                }}
+              >
+                <h3 style={{ marginBottom: "16px", color: "#111827" }}>
+                  Scan QR Code to Pay
+                </h3>
+                <img
+                  src="/qris_payment.webp"
+                  alt="QRIS Payment"
+                  style={{
+                    width: "300px",
+                    height: "300px",
+                    margin: "0 auto",
+                    display: "block",
+                    border: "3px solid #e5e7eb",
+                    borderRadius: "12px",
+                  }}
+                />
+                <p
+                  style={{
+                    marginTop: "16px",
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: "#111827",
+                  }}
+                >
+                  {paymentData.merchantName || "AIDA Creative"}
+                </p>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    color: "#6b7280",
+                    marginTop: "8px",
+                  }}
+                >
+                  Amount: IDR {paymentData.amount?.toLocaleString()}
+                </p>
+
+                {paymentData.instructions && (
                   <div
                     style={{
-                      background: "white",
-                      padding: "24px",
-                      borderRadius: "16px",
-                      textAlign: "center",
-                      maxWidth: "400px",
-                      margin: "0 auto",
+                      marginTop: "24px",
+                      textAlign: "left",
+                      background: "#f9fafb",
+                      padding: "16px",
+                      borderRadius: "8px",
                     }}
                   >
-                    <img
-                      src={paymentData.qrCodeUrl}
-                      alt="QRIS QR Code"
-                      style={{
-                        width: "280px",
-                        height: "280px",
-                        margin: "0 auto",
-                        display: "block",
-                        border: "2px solid #e5e7eb",
-                        borderRadius: "8px",
-                      }}
-                    />
                     <p
                       style={{
-                        marginTop: "16px",
-                        fontSize: "18px",
                         fontWeight: "600",
+                        marginBottom: "12px",
                         color: "#111827",
                       }}
                     >
-                      {paymentData.merchantName || "AIDA Creative"}
+                      How to pay:
                     </p>
-                    <p
+                    <ol
                       style={{
-                        fontSize: "16px",
+                        margin: 0,
+                        paddingLeft: "20px",
                         color: "#6b7280",
-                        marginTop: "4px",
+                        lineHeight: "1.8",
                       }}
                     >
-                      Amount: IDR {paymentData.amount?.toLocaleString()}
-                    </p>
-
-                    {/* Payment Instructions */}
-                    {paymentData.instructions && (
-                      <div
-                        style={{
-                          marginTop: "20px",
-                          textAlign: "left",
-                          background: "#f9fafb",
-                          padding: "16px",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <p
-                          style={{
-                            fontWeight: "600",
-                            marginBottom: "12px",
-                            color: "#111827",
-                            fontSize: "14px",
-                          }}
-                        >
-                          How to pay:
-                        </p>
-                        <ol
-                          style={{
-                            margin: 0,
-                            paddingLeft: "20px",
-                            color: "#6b7280",
-                            fontSize: "13px",
-                            lineHeight: "1.8",
-                          }}
-                        >
-                          {paymentData.instructions.map(
-                            (instruction: string, index: number) => (
-                              <li key={index}>{instruction}</li>
-                            )
-                          )}
-                        </ol>
-                      </div>
-                    )}
-
-                    {/* Expiry Timer */}
-                    {paymentData.expiryTime && (
-                      <p
-                        style={{
-                          marginTop: "16px",
-                          fontSize: "13px",
-                          color: "#ef4444",
-                          fontWeight: "500",
-                        }}
-                      >
-                        ⏰ Expires:{" "}
-                        {new Date(paymentData.expiryTime).toLocaleTimeString()}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  // Fallback if no QR code URL provided
-                  <div
-                    className="qris-placeholder"
-                    style={{
-                      background: "#f9fafb",
-                      padding: "40px",
-                      borderRadius: "16px",
-                      border: "2px dashed #d1d5db",
-                      textAlign: "center",
-                    }}
-                  >
-                    <QrCode
-                      size={200}
-                      style={{ color: "#246E76", margin: "0 auto 16px" }}
-                    />
-                    <p
-                      style={{ fontSize: "16px", color: "#6b7280", margin: 0 }}
-                    >
-                      Scan with your mobile banking app
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "14px",
-                        color: "#ef4444",
-                        marginTop: "12px",
-                      }}
-                    >
-                      ⚠️ QR Code image not configured. Please contact support.
-                    </p>
+                      {paymentData.instructions.map(
+                        (instruction: string, index: number) => (
+                          <li key={index}>{instruction}</li>
+                        )
+                      )}
+                    </ol>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Other payment types */}
             {paymentData && paymentData.type === "BANK_TRANSFER" && (
               <div
                 style={{
-                  marginTop: "24px",
-                  background: "#f9fafb",
-                  padding: "24px",
-                  borderRadius: "12px",
-                  maxWidth: "400px",
-                  margin: "24px auto 0",
+                  background: "white",
+                  padding: "32px",
+                  borderRadius: "16px",
+                  marginBottom: "24px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
               >
-                <h4 style={{ marginBottom: "16px", color: "#111827" }}>
+                <h3
+                  style={{
+                    marginBottom: "24px",
+                    color: "#111827",
+                    textAlign: "center",
+                  }}
+                >
                   Transfer to {paymentData.bank}
-                </h4>
-                <div style={{ marginBottom: "12px" }}>
+                </h3>
+                <div style={{ marginBottom: "16px" }}>
                   <p
                     style={{
                       fontSize: "14px",
@@ -575,15 +599,15 @@ export default function ImprovedCartModal({
                   </p>
                   <p
                     style={{
-                      fontSize: "18px",
-                      fontWeight: "600",
+                      fontSize: "24px",
+                      fontWeight: "700",
                       color: "#111827",
                     }}
                   >
                     {paymentData.accountNumber}
                   </p>
                 </div>
-                <div style={{ marginBottom: "12px" }}>
+                <div style={{ marginBottom: "16px" }}>
                   <p
                     style={{
                       fontSize: "14px",
@@ -595,7 +619,7 @@ export default function ImprovedCartModal({
                   </p>
                   <p
                     style={{
-                      fontSize: "16px",
+                      fontSize: "18px",
                       fontWeight: "600",
                       color: "#111827",
                     }}
@@ -615,7 +639,7 @@ export default function ImprovedCartModal({
                   </p>
                   <p
                     style={{
-                      fontSize: "18px",
+                      fontSize: "24px",
                       fontWeight: "700",
                       color: "#246E76",
                     }}
@@ -625,9 +649,124 @@ export default function ImprovedCartModal({
                 </div>
               </div>
             )}
+
+            <button
+              onClick={handleManualVerify}
+              disabled={checkingPayment}
+              style={{
+                width: "100%",
+                padding: "16px",
+                background: checkingPayment ? "#9ca3af" : "#246E76",
+                color: "white",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "18px",
+                fontWeight: "600",
+                cursor: checkingPayment ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              {checkingPayment ? (
+                <>
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      border: "3px solid rgba(255,255,255,0.3)",
+                      borderTop: "3px solid white",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite",
+                    }}
+                  />
+                  Verifying Payment...
+                </>
+              ) : (
+                <>I've Already Paid</>
+              )}
+            </button>
+
+            {error && (
+              <div
+                style={{
+                  marginTop: "16px",
+                  padding: "12px",
+                  background: "#fee2e2",
+                  borderRadius: "8px",
+                  color: "#991b1b",
+                  textAlign: "center",
+                }}
+              >
+                {error}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Success Screen */}
+        {step === "success" && (
+          <div className="success-content">
+            <div className="success-icon">
+              <CheckCircle size={60} />
+            </div>
+            <h3>Payment Successful!</h3>
+            <p>
+              Your payment has been processed successfully. Thank you for your
+              purchase!
+            </p>
+
+            <div className="success-details">
+              <div className="detail-row">
+                <span>Transaction ID:</span>
+                <span style={{ fontWeight: "600" }}>{transactionId}</span>
+              </div>
+              <div className="detail-row">
+                <span>Amount:</span>
+                <span style={{ fontWeight: "600" }}>
+                  IDR {total.toLocaleString()}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span>Items:</span>
+                <span style={{ fontWeight: "600" }}>
+                  {items.length} product(s)
+                </span>
+              </div>
+            </div>
+
+            <button className="library-btn" onClick={handleGoToLibrary}>
+              Go to My Library
+            </button>
+          </div>
+        )}
+
+        {/* Failed Screen */}
+        {step === "failed" && (
+          <div className="failed-content">
+            <div className="failed-icon">✕</div>
+            <h3>Payment Failed</h3>
+            <p>We couldn't process your payment.</p>
+            {error && <p className="error-detail">{error}</p>}
+
+            <div className="failed-actions">
+              <button className="retry-btn" onClick={handleRetry}>
+                Try Again
+              </button>
+              <button className="cancel-btn" onClick={handleClose}>
+                Cancel
+              </button>
+            </div>
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
