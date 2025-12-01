@@ -3,12 +3,13 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "@/src/lib/prisma";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import xenditService from "@/src/lib/xendit";
 
-// Add this type definition at the top
 type ProductItem = {
   id: string;
   price: number;
   status: string;
+  title: string;
 };
 
 export async function POST(request: Request) {
@@ -38,7 +39,6 @@ export async function POST(request: Request) {
 
     console.log('Payment create request:', { items, paymentMethod, paymentType, username, whatsapp });
 
-    // Validate input
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "Items are required" },
@@ -53,14 +53,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Calculate total
+    // Get products
     const productIds = items.map((item: any) => item.productId);
     const products = await prisma.product.findMany({
       where: {
         id: { in: productIds },
         status: "ACTIVE",
       },
-    }) as ProductItem[]; // Type assertion here
+    }) as ProductItem[];
 
     if (products.length !== items.length) {
       return NextResponse.json(
@@ -69,9 +69,9 @@ export async function POST(request: Request) {
       );
     }
 
+    // Calculate total
     let totalAmount = 0;
     const purchaseItemsData = items.map((item: any) => {
-      // Now TypeScript knows 'p' is ProductItem
       const product = products.find((p) => p.id === item.productId);
       if (!product) {
         throw new Error(`Product ${item.productId} not found`);
@@ -83,14 +83,12 @@ export async function POST(request: Request) {
       };
     });
 
-    const paymentMethodForDb = paymentType || "E_WALLET";
-
-    // Create purchase
+    // Create purchase in database first
     const purchase = await prisma.purchase.create({
       data: {
         userId: user.id,
         totalAmount,
-        paymentMethod: paymentMethodForDb,
+        paymentMethod: paymentType || "E_WALLET",
         paymentStatus: "PENDING",
         ipAddress: request.headers.get("x-forwarded-for") || "unknown",
         userAgent: request.headers.get("user-agent") || "unknown",
@@ -107,51 +105,118 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create payment simulation based on type
-    let paymentData;
-    
+    // Prepare items for Xendit
+    const xenditItems = purchase.items.map(item => ({
+      name: item.product.title,
+      quantity: 1,
+      price: item.priceAtPurchase,
+    }));
+
+    let paymentData: any = null;
+
+    // Create payment based on type
     if (paymentType === 'QRIS') {
+      const qrisResult = await xenditService.createQRIS({
+        externalId: purchase.id,
+        amount: totalAmount,
+        callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/xendit-callback`,
+      });
+
+      if (!qrisResult.success) {
+        throw new Error(qrisResult.error || 'Failed to create QRIS payment');
+      }
+
       paymentData = {
         type: 'QRIS',
-        qrCodeUrl: '/qris-payment.png',
-        qrString: `QRIS-${purchase.id}-${Date.now()}`,
-        amount: totalAmount,
-        merchantName: 'AIDA Creative',
-        expiryTime: new Date(Date.now() + 15 * 60 * 1000),
-        instructions: [
-          'Open your mobile banking or e-wallet app',
-          'Select QRIS payment option',
-          'Scan the QR code above',
-          'Verify the amount and merchant name',
-          'Complete the payment'
-        ]
-      };
-    } else if (paymentType === 'BANK_TRANSFER') {
-      const bankAccounts: Record<string, { accountNumber: string; accountName: string }> = {
-        BCA: { accountNumber: '8880012345678', accountName: 'AIDA CREATIVE' },
-        MANDIRI: { accountNumber: '1370012345678', accountName: 'AIDA CREATIVE' },
-        BNI: { accountNumber: '0012345678', accountName: 'AIDA CREATIVE' },
-        BRI: { accountNumber: '012345678901234', accountName: 'AIDA CREATIVE' },
-      };
-      
-      const selectedBank = paymentMethod as string;
-      const bankInfo = bankAccounts[selectedBank] || bankAccounts['BCA'];
-      
-      paymentData = {
-        type: 'BANK_TRANSFER',
-        bank: selectedBank,
-        ...bankInfo,
+        qrString: qrisResult.data.qr_string,
+        qrCodeUrl: qrisResult.data.qr_string, // You can generate QR image from this
         amount: totalAmount,
         expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        xenditId: qrisResult.data.id,
       };
+
+    } else if (paymentType === 'BANK_TRANSFER') {
+      // Map payment method to bank code
+      const bankCodeMap: { [key: string]: string } = {
+        'BCA': 'BCA',
+        'MANDIRI': 'MANDIRI',
+        'BNI': 'BNI',
+        'BRI': 'BRI',
+      };
+
+      const bankCode = bankCodeMap[paymentMethod] || 'BCA';
+
+      const vaResult = await xenditService.createVirtualAccount({
+        externalId: purchase.id,
+        bankCode: bankCode,
+        name: user.name || username,
+        amount: totalAmount,
+      });
+
+      if (!vaResult.success) {
+        throw new Error(vaResult.error || 'Failed to create virtual account');
+      }
+
+      paymentData = {
+        type: 'BANK_TRANSFER',
+        bank: paymentMethod,
+        accountNumber: vaResult.data.account_number,
+        accountName: vaResult.data.name,
+        amount: totalAmount,
+        expiryTime: new Date(vaResult.data.expiration_date),
+        xenditId: vaResult.data.id,
+      };
+
     } else if (paymentType === 'E_WALLET') {
+      const ewalletResult = await xenditService.createEWallet({
+        externalId: purchase.id,
+        amount: totalAmount,
+        phone: whatsapp,
+        ewalletType: paymentMethod as any,
+      });
+
+      if (!ewalletResult.success) {
+        throw new Error(ewalletResult.error || 'Failed to create e-wallet payment');
+      }
+
       paymentData = {
         type: 'E_WALLET',
         provider: paymentMethod,
-        deeplink: `${paymentMethod.toLowerCase()}://pay?id=${purchase.id}&amount=${totalAmount}`,
+        checkoutUrl: ewalletResult.data.actions?.desktop_web_checkout_url || ewalletResult.data.actions?.mobile_web_checkout_url,
+        mobileUrl: ewalletResult.data.actions?.mobile_deeplink,
         expiryTime: new Date(Date.now() + 15 * 60 * 1000),
+        xenditId: ewalletResult.data.id,
+      };
+
+    } else {
+      // Use Invoice for other payment methods (supports multiple payment options)
+      const invoiceResult = await xenditService.createInvoice({
+        externalId: purchase.id,
+        amount: totalAmount,
+        payerEmail: user.email,
+        description: `Purchase ${purchase.id}`,
+        items: xenditItems,
+      });
+
+      if (!invoiceResult.success) {
+        throw new Error(invoiceResult.error || 'Failed to create invoice');
+      }
+
+      paymentData = {
+        type: 'INVOICE',
+        invoiceUrl: invoiceResult.data.invoice_url,
+        expiryTime: new Date(invoiceResult.data.expiry_date),
+        xenditId: invoiceResult.data.id,
       };
     }
+
+    // Update purchase with xendit ID
+    await prisma.purchase.update({
+      where: { id: purchase.id },
+      data: {
+        transactionId: paymentData.xenditId,
+      },
+    });
 
     // Log activity
     await prisma.activityLog.create({
@@ -161,10 +226,11 @@ export async function POST(request: Request) {
         details: {
           purchaseId: purchase.id,
           totalAmount,
-          paymentMethod: paymentMethodForDb,
+          paymentMethod: paymentType,
           paymentProvider: paymentMethod,
           username,
           whatsapp,
+          xenditId: paymentData.xenditId,
         },
       },
     });
@@ -188,7 +254,6 @@ export async function POST(request: Request) {
       { 
         error: "Failed to create payment", 
         details: error instanceof Error ? error.message : "Unknown error",
-        stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : null) : undefined
       },
       { status: 500 }
     );
