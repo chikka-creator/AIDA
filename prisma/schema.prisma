@@ -165,7 +165,7 @@ enum PaymentMethod {
   E_WALLET
   BANK_TRANSFER
   CREDIT_CARD
-  QR_CODE
+  QRIS
 }
 
 model Purchase {

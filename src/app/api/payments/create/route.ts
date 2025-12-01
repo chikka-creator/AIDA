@@ -75,7 +75,6 @@ export async function POST(request: Request) {
       };
     });
 
-    // **FIX: Use paymentType (the method type) instead of paymentProvider**
     const paymentMethodForDb = paymentType || "E_WALLET";
 
     // Create purchase
@@ -83,7 +82,7 @@ export async function POST(request: Request) {
       data: {
         userId: user.id,
         totalAmount,
-        paymentMethod: paymentMethodForDb, // Use E_WALLET, BANK_TRANSFER, etc.
+        paymentMethod: paymentMethodForDb,
         paymentStatus: "PENDING",
         ipAddress: request.headers.get("x-forwarded-for") || "unknown",
         userAgent: request.headers.get("user-agent") || "unknown",
@@ -106,8 +105,24 @@ export async function POST(request: Request) {
     if (paymentType === 'QRIS') {
       paymentData = {
         type: 'QRIS',
+        // 🔴 CHANGE THIS: Replace with your actual QRIS image URL
+        // Upload your QR code to /public folder or use an external URL
+        qrCodeUrl: '/qris-payment.png', // 👈 PUT YOUR QRIS QR CODE IMAGE HERE
+        
+        // Alternative: If you have the QR code in Supabase or another CDN
+        // qrCodeUrl: 'https://your-supabase-url.supabase.co/storage/v1/object/public/qris/qr-code.png',
+        
         qrString: `QRIS-${purchase.id}-${Date.now()}`,
+        amount: totalAmount,
+        merchantName: 'AIDA Creative', // 👈 CHANGE THIS to your business name
         expiryTime: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+        instructions: [
+          'Open your mobile banking or e-wallet app',
+          'Select QRIS payment option',
+          'Scan the QR code above',
+          'Verify the amount and merchant name',
+          'Complete the payment'
+        ]
       };
     } else if (paymentType === 'BANK_TRANSFER') {
       const bankAccounts: Record<string, { accountNumber: string; accountName: string }> = {
@@ -125,7 +140,7 @@ export async function POST(request: Request) {
         bank: selectedBank,
         ...bankInfo,
         amount: totalAmount,
-        expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
     } else if (paymentType === 'E_WALLET') {
       paymentData = {
@@ -161,8 +176,19 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error("Error creating payment:", error);
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    
     return NextResponse.json(
-      { error: "Failed to create payment", details: error instanceof Error ? error.message : "Unknown error" },
+      { 
+        error: "Failed to create payment", 
+        details: error instanceof Error ? error.message : "Unknown error",
+        stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : null) : undefined
+      },
       { status: 500 }
     );
   }
