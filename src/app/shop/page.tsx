@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import ProductCard from "./ProductCard";
 import ProductModal from "./ProductModal";
 import CartModal from "./CartModal";
+import "./Cart.css";
 import Navbar from "./Navbar";
 import AuthButton from "../components/AuthButton";
 import AdminProductManager from "../components/AdminProductManager";
@@ -130,6 +131,20 @@ export default function Page() {
     }
   };
 
+  const handleCartClick = () => {
+    console.log("Cart clicked! Session:", session);
+    console.log("Cart items:", cartItems);
+    console.log("Current cartOpen state:", cartOpen);
+    
+    if (!session?.user) {
+      alert("Please login to view your cart");
+      return;
+    }
+    
+    console.log("Opening cart...");
+    setCartOpen(true);
+  };
+
   const addToCart = async (productId: string) => {
     if (!session?.user) {
       alert("Please login to add items to cart");
@@ -145,6 +160,7 @@ export default function Page() {
 
       if (response.ok) {
         await fetchCart();
+        alert("Product added to cart!");
       } else {
         const data = await response.json();
         if (data.message === "Item already in cart") {
@@ -207,7 +223,7 @@ export default function Page() {
       category: item.product.category,
       status: item.product.status,
     },
-    qty: 1, // Since cart_items doesn't have quantity, we use 1
+    qty: 1,
   }));
 
   const filteredProducts = products.filter(
@@ -224,12 +240,37 @@ export default function Page() {
             <Navbar />
             <AuthButton />
           </div>
-          <div className="cart-icon" onClick={() => setCartOpen(true)}>
+          {/* FIXED: Better positioned cart icon with click handler */}
+          <button
+            onClick={handleCartClick}
+            className="cart-icon"
+            style={{
+              position: 'fixed',
+              right: session?.user ? '90px' : '140px',
+              top: '20px',
+              fontSize: '1.4rem',
+              cursor: 'pointer',
+              background: 'rgba(0, 0, 0, 0.8)',
+              borderRadius: '50px',
+              padding: '10px',
+              border: 'none',
+              zIndex: 200,
+              transition: 'transform 0.3s ease, background 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+            }}
+          >
             🛒
             {cartItems.length > 0 && (
               <span className="badge">{cartItems.length}</span>
             )}
-          </div>
+          </button>
         </nav>
         <h1 className="hero-title">{t.shop.title}</h1>
       </header>
@@ -349,15 +390,21 @@ export default function Page() {
       )}
 
       {cartOpen && (
-        <CartModal
-          onClose={() => setCartOpen(false)}
-          items={cartItemsForModal}
-          onRemove={(productId: string) => {
-            const item = cartItems.find((i) => i.product.id === productId);
-            if (item) removeFromCart(item.id);
-          }}
-          onClearCart={clearCart}
-        />
+        <>
+          {console.log("Rendering CartModal with:", { cartOpen, itemsCount: cartItemsForModal.length })}
+          <CartModal
+            onClose={() => {
+              console.log("Closing cart");
+              setCartOpen(false);
+            }}
+            items={cartItemsForModal}
+            onRemove={(productId: string) => {
+              const item = cartItems.find((i) => i.product.id === productId);
+              if (item) removeFromCart(item.id);
+            }}
+            onClearCart={clearCart}
+          />
+        </>
       )}
     </main>
   );

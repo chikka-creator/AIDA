@@ -66,7 +66,9 @@ export default function ImprovedCartModal({
   const [paymentData, setPaymentData] = useState<any>(null);
   const [error, setError] = useState("");
   const [checkingPayment, setCheckingPayment] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(900); // 15 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(900);
+  const [autoCheckInterval, setAutoCheckInterval] =
+    useState<NodeJS.Timeout | null>(null);
 
   const total = items.reduce((s, it) => s + it.qty * it.p.price, 0);
 
@@ -89,7 +91,62 @@ export default function ImprovedCartModal({
     }
   }, [step, timeRemaining]);
 
-  // Format time remaining
+  // Auto-check payment status every 3 seconds
+  useEffect(() => {
+    if (step === "awaiting" && purchaseId) {
+      const checkPayment = async () => {
+        try {
+          const response = await fetch(`/api/payments/check/${purchaseId}`);
+          if (!response.ok) return;
+
+          const data = await response.json();
+          console.log("Payment check result:", data);
+
+          if (data.status === "COMPLETED") {
+            if (autoCheckInterval) {
+              clearInterval(autoCheckInterval);
+              setAutoCheckInterval(null);
+            }
+            setTransactionId(data.transactionId);
+            setStep("success");
+            setTimeout(() => {
+              onClearCart();
+            }, 500);
+          } else if (data.status === "FAILED") {
+            if (autoCheckInterval) {
+              clearInterval(autoCheckInterval);
+              setAutoCheckInterval(null);
+            }
+            setError("Payment verification failed");
+            setStep("failed");
+          }
+        } catch (err) {
+          console.error("Error checking payment:", err);
+        }
+      };
+
+      // Initial check
+      checkPayment();
+
+      // Set up interval for automatic checks
+      const interval = setInterval(checkPayment, 3000);
+      setAutoCheckInterval(interval);
+
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }
+  }, [step, purchaseId]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCheckInterval) {
+        clearInterval(autoCheckInterval);
+      }
+    };
+  }, [autoCheckInterval]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -97,6 +154,9 @@ export default function ImprovedCartModal({
   };
 
   const handleClose = () => {
+    if (autoCheckInterval) {
+      clearInterval(autoCheckInterval);
+    }
     setClosing(true);
     setTimeout(() => onClose(), 300);
   };
@@ -152,41 +212,10 @@ export default function ImprovedCartModal({
       setPurchaseId(data.purchase.id);
       setPaymentData(data.paymentData);
       setStep("awaiting");
-      setTimeRemaining(900); // Reset timer to 15 minutes
-
-      // Start checking payment status
-      startPaymentCheck(data.purchase.id);
+      setTimeRemaining(900);
     } catch (err: any) {
       setError(err.message || "Failed to create payment");
     }
-  };
-
-  const startPaymentCheck = (purchaseId: string) => {
-    // Check payment status every 5 seconds
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/payments/check/${purchaseId}`);
-        const data = await response.json();
-
-        if (data.status === "COMPLETED") {
-          clearInterval(interval);
-          setTransactionId(data.transactionId);
-          setStep("success");
-          setTimeout(() => {
-            onClearCart();
-          }, 500);
-        } else if (data.status === "FAILED") {
-          clearInterval(interval);
-          setError("Payment verification failed");
-          setStep("failed");
-        }
-      } catch (err) {
-        console.error("Error checking payment:", err);
-      }
-    }, 5000);
-
-    // Store interval ID to clear it when component unmounts
-    return () => clearInterval(interval);
   };
 
   const handleManualVerify = async () => {
@@ -194,20 +223,22 @@ export default function ImprovedCartModal({
     setError("");
 
     try {
-      // Simulate payment verification
-      // In production, this would check with actual payment gateway
       const response = await fetch("/api/payments/simulate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           purchaseId,
-          status: "success", // This would come from actual payment gateway
+          status: "success",
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
+        if (autoCheckInterval) {
+          clearInterval(autoCheckInterval);
+          setAutoCheckInterval(null);
+        }
         setTransactionId(data.purchase.transactionId);
         setStep("success");
         setTimeout(() => {
@@ -224,6 +255,10 @@ export default function ImprovedCartModal({
   };
 
   const handleRetry = () => {
+    if (autoCheckInterval) {
+      clearInterval(autoCheckInterval);
+      setAutoCheckInterval(null);
+    }
     setStep("payment");
     setError("");
     setTimeRemaining(900);
@@ -481,6 +516,15 @@ export default function ImprovedCartModal({
                 >
                   Time remaining: {formatTime(timeRemaining)}
                 </p>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    color: "#856404",
+                    fontSize: "12px",
+                  }}
+                >
+                  ✓ Checking payment automatically every 3 seconds...
+                </p>
               </div>
             </div>
 
@@ -684,7 +728,7 @@ export default function ImprovedCartModal({
                   Verifying Payment...
                 </>
               ) : (
-                <>I've Already Paid</>
+                <>I've Already Paid - Check Now</>
               )}
             </button>
 
