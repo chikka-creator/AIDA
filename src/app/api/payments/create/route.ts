@@ -4,6 +4,13 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "@/src/lib/prisma";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
+// Add this type definition at the top
+type ProductItem = {
+  id: string;
+  price: number;
+  status: string;
+};
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -53,7 +60,7 @@ export async function POST(request: Request) {
         id: { in: productIds },
         status: "ACTIVE",
       },
-    });
+    }) as ProductItem[]; // Type assertion here
 
     if (products.length !== items.length) {
       return NextResponse.json(
@@ -64,7 +71,8 @@ export async function POST(request: Request) {
 
     let totalAmount = 0;
     const purchaseItemsData = items.map((item: any) => {
-      const product = products.find(p => p.id === item.productId);
+      // Now TypeScript knows 'p' is ProductItem
+      const product = products.find((p) => p.id === item.productId);
       if (!product) {
         throw new Error(`Product ${item.productId} not found`);
       }
@@ -105,17 +113,11 @@ export async function POST(request: Request) {
     if (paymentType === 'QRIS') {
       paymentData = {
         type: 'QRIS',
-        // 🔴 CHANGE THIS: Replace with your actual QRIS image URL
-        // Upload your QR code to /public folder or use an external URL
-        qrCodeUrl: '/qris-payment.png', // 👈 PUT YOUR QRIS QR CODE IMAGE HERE
-        
-        // Alternative: If you have the QR code in Supabase or another CDN
-        // qrCodeUrl: 'https://your-supabase-url.supabase.co/storage/v1/object/public/qris/qr-code.png',
-        
+        qrCodeUrl: '/qris-payment.png',
         qrString: `QRIS-${purchase.id}-${Date.now()}`,
         amount: totalAmount,
-        merchantName: 'AIDA Creative', // 👈 CHANGE THIS to your business name
-        expiryTime: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+        merchantName: 'AIDA Creative',
+        expiryTime: new Date(Date.now() + 15 * 60 * 1000),
         instructions: [
           'Open your mobile banking or e-wallet app',
           'Select QRIS payment option',
@@ -177,7 +179,6 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating payment:", error);
     
-    // More detailed error logging
     if (error instanceof Error) {
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);

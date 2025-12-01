@@ -1,4 +1,4 @@
-// src/lib/prisma.ts
+// src/lib/prisma.ts (for Prisma 7+)
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
@@ -9,8 +9,7 @@ export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     log: ["query", "error", "warn"],
-    // If you're using Prisma Accelerate, add:
-    // adapter: yourAdapterHere,
+    datasourceUrl: process.env.DATABASE_URL,
   });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

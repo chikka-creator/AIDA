@@ -1,14 +1,10 @@
-// This is your Prisma schema file for photography template e-commerce
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 // ========================================
@@ -26,68 +22,66 @@ enum UserRole {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  username      String?       @unique
-  password      String?       // hashed password (null for OAuth users)
+  id            String         @id @default(cuid())
+  email         String         @unique
+  username      String?        @unique
+  password      String?
   name          String?
-  
-  authProvider  AuthProvider  @default(EMAIL)
-  role          UserRole      @default(CUSTOMER)
-  
-  emailVerified Boolean       @default(false)
-  isActive      Boolean       @default(true)
-  
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+
+  authProvider  AuthProvider   @default(EMAIL)
+  role          UserRole       @default(CUSTOMER)
+
+  emailVerified Boolean        @default(false)
+  isActive      Boolean        @default(true)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   lastLogin     DateTime?
-  
-  // Relations
+
   accounts      Account[]
   sessions      Session[]
   purchases     Purchase[]
   ownedProducts UserProduct[]
   cart          CartItem[]
-  
+
   @@index([email])
   @@map("users")
 }
 
-// For OAuth providers (NextAuth compatibility)
 model Account {
-  id                String  @id @default(cuid())
+  id                String   @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?  @db.Text
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
+  id           String    @id @default(cuid())
+  sessionToken String    @unique
   userId       String
   expires      DateTime
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
 
 model VerificationToken {
   identifier String
-  token      String   @unique
+  token      String    @unique
   expires    DateTime
 
   @@unique([identifier, token])
@@ -114,37 +108,33 @@ enum ProductStatus {
 }
 
 model Product {
-  id          String          @id @default(cuid())
-  title       String
-  subtitle    String?
-  description String          @db.Text
-  
-  price       Int             // in smallest currency unit (e.g., cents, rupiah)
-  
-  category    ProductCategory @default(LIGHTROOM_PRESET)
-  status      ProductStatus   @default(DRAFT)
-  
-  // Image URLs (stored in Supabase Storage or CDN)
-  thumbnailUrl String
-  imageUrls    String[]       // Multiple preview images
-  
-  // Download file info
-  fileUrl      String?        // URL to the actual preset/template file
-  fileSize     Int?           // in bytes
-  
-  // Metadata
-  tags         String[]
-  featured     Boolean        @default(false)
-  viewCount    Int            @default(0)
-  
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  
-  // Relations
+  id            String           @id @default(cuid())
+  title         String
+  subtitle      String?
+  description   String           @db.Text
+
+  price         Int
+
+  category      ProductCategory  @default(LIGHTROOM_PRESET)
+  status        ProductStatus    @default(DRAFT)
+
+  thumbnailUrl  String
+  imageUrls     String[]
+
+  fileUrl       String?
+  fileSize      Int?
+
+  tags          String[]
+  featured      Boolean          @default(false)
+  viewCount     Int              @default(0)
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
   purchaseItems PurchaseItem[]
   userProducts  UserProduct[]
   cartItems     CartItem[]
-  
+
   @@index([status, featured])
   @@index([category])
   @@map("products")
@@ -169,66 +159,60 @@ enum PaymentMethod {
 }
 
 model Purchase {
-  id              String         @id @default(cuid())
-  userId          String
-  
-  // Payment info
-  totalAmount     Int
-  paymentMethod   PaymentMethod?
-  paymentStatus   PurchaseStatus @default(PENDING)
-  
-  // Transaction details
-  transactionId   String?        @unique // from payment gateway
-  paymentProof    String?        // URL to payment proof image
-  
-  // Metadata
-  ipAddress       String?
-  userAgent       String?        @db.Text
-  
-  completedAt     DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  
-  // Relations
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items           PurchaseItem[]
-  
+  id            String          @id @default(cuid())
+  userId        String
+
+  totalAmount   Int
+  paymentMethod PaymentMethod?
+  paymentStatus PurchaseStatus  @default(PENDING)
+
+  transactionId String?         @unique
+  paymentProof  String?
+
+  ipAddress     String?
+  userAgent     String?         @db.Text
+
+  completedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items         PurchaseItem[]
+
   @@index([userId])
   @@index([paymentStatus])
   @@map("purchases")
 }
 
-// Individual items in a purchase
 model PurchaseItem {
-  id         String   @id @default(cuid())
-  purchaseId String
-  productId  String
-  
-  priceAtPurchase Int  // Store price at time of purchase
-  
-  createdAt  DateTime @default(now())
-  
-  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  
+  id              String    @id @default(cuid())
+  purchaseId      String
+  productId       String
+
+  priceAtPurchase Int
+
+  createdAt       DateTime  @default(now())
+
+  purchase        Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
   @@unique([purchaseId, productId])
   @@map("purchase_items")
 }
 
-// User's owned products (unlocked forever)
 model UserProduct {
-  id         String   @id @default(cuid())
-  userId     String
-  productId  String
-  
-  purchasedAt DateTime @default(now())
-  downloadCount Int    @default(0)
+  id             String     @id @default(cuid())
+  userId         String
+  productId      String
+
+  purchasedAt    DateTime   @default(now())
+  downloadCount  Int        @default(0)
   lastDownloadAt DateTime?
-  
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  
-  @@unique([userId, productId]) // One user can own a product only once
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, productId])
   @@index([userId])
   @@map("user_products")
 }
@@ -238,33 +222,33 @@ model UserProduct {
 // ========================================
 
 model CartItem {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   productId String
-  
-  addedAt   DateTime @default(now())
-  
+
+  addedAt   DateTime  @default(now())
+
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+
   @@unique([userId, productId])
   @@map("cart_items")
 }
 
 // ========================================
-// ADMIN & ANALYTICS (Optional)
+// ADMIN & ANALYTICS
 // ========================================
 
 model ActivityLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  action      String   // e.g., "USER_LOGIN", "PRODUCT_DOWNLOAD", "PURCHASE_COMPLETED"
-  details     Json?    // Additional metadata
-  ipAddress   String?
-  userAgent   String?  @db.Text
-  
-  createdAt   DateTime @default(now())
-  
+  id        String    @id @default(cuid())
+  userId    String?
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?   @db.Text
+
+  createdAt DateTime  @default(now())
+
   @@index([userId])
   @@index([action])
   @@map("activity_logs")
