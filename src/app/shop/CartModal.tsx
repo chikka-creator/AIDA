@@ -1180,28 +1180,80 @@ export default function ImprovedCartModal({
 
         {/* Success Screen */}
         {step === "success" && (
-          <div className="success-content">
-            <div className="success-icon">
-              <CheckCircle size={60} />
+          <div className="success-content" style={{
+            padding: "40px 32px",
+            maxHeight: "calc(90vh - 100px)",
+            overflowY: "auto"
+          }}>
+            <div className="success-icon" style={{
+              width: "80px",
+              height: "80px",
+              background: "linear-gradient(135deg, #10b981, #059669)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "48px",
+              color: "white",
+              margin: "0 auto 24px"
+            }}>
+              <CheckCircle size={50} />
             </div>
-            <h3>Payment Successful!</h3>
-            <p>
+            <h3 style={{
+              fontSize: "28px",
+              fontWeight: "700",
+              marginBottom: "12px",
+              color: "#111827"
+            }}>Payment Successful!</h3>
+            <p style={{
+              fontSize: "16px",
+              color: "#6b7280",
+              marginBottom: "24px",
+              maxWidth: "450px",
+              margin: "0 auto 24px"
+            }}>
               Your payment has been processed successfully. Thank you for your
               purchase!
             </p>
 
-            <div className="success-details">
-              <div className="detail-row">
+            <div className="success-details" style={{
+              background: "#f9fafb",
+              padding: "20px",
+              borderRadius: "12px",
+              marginBottom: "24px",
+              width: "100%",
+              maxWidth: "400px",
+              margin: "0 auto 24px"
+            }}>
+              <div className="detail-row" style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "10px 0",
+                fontSize: "15px",
+                color: "#374151"
+              }}>
                 <span>Transaction ID:</span>
                 <span style={{ fontWeight: "600" }}>{transactionId}</span>
               </div>
-              <div className="detail-row">
+              <div className="detail-row" style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "10px 0",
+                fontSize: "15px",
+                color: "#374151"
+              }}>
                 <span>Amount:</span>
                 <span style={{ fontWeight: "600" }}>
                   IDR {total.toLocaleString()}
                 </span>
               </div>
-              <div className="detail-row">
+              <div className="detail-row" style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "10px 0",
+                fontSize: "15px",
+                color: "#374151"
+              }}>
                 <span>Items:</span>
                 <span style={{ fontWeight: "600" }}>
                   {items.length} product(s)
@@ -1209,7 +1261,17 @@ export default function ImprovedCartModal({
               </div>
             </div>
 
-            <button className="library-btn" onClick={handleGoToLibrary}>
+            <button className="library-btn" onClick={handleGoToLibrary} style={{
+              padding: "14px 40px",
+              background: "linear-gradient(135deg, #246E76, #2EB9B9)",
+              color: "white",
+              border: "none",
+              borderRadius: "10px",
+              fontSize: "16px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "all 0.3s ease"
+            }}>
               Go to My Library
             </button>
           </div>
