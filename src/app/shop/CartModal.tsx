@@ -483,132 +483,471 @@ export default function ImprovedCartModal({
         {/* Awaiting Payment Completion */}
         {step === "awaiting" && (
           <div className="processing-content">
-            <div
-              style={{
-                background: "#fff3cd",
-                border: "2px solid #ffc107",
-                borderRadius: "12px",
-                padding: "16px",
-                marginBottom: "24px",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <AlertCircle size={24} color="#856404" />
-              <div>
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#856404",
-                    fontWeight: "600",
-                    fontSize: "16px",
-                  }}
-                >
-                  Please Complete Your Payment
-                </p>
-                <p
-                  style={{
-                    margin: "4px 0 0",
-                    color: "#856404",
-                    fontSize: "14px",
-                  }}
-                >
-                  Time remaining: {formatTime(timeRemaining)}
-                </p>
-                <p
-                  style={{
-                    margin: "4px 0 0",
-                    color: "#856404",
-                    fontSize: "12px",
-                  }}
-                >
-                  ✓ Checking payment automatically every 3 seconds...
-                </p>
-              </div>
-            </div>
-
             {paymentData && paymentData.type === "QRIS" && (
+              <>
+                {/* Timer warning at top for QRIS */}
+                <div
+                  style={{
+                    background: "#fff3cd",
+                    border: "2px solid #ffc107",
+                    borderRadius: "12px",
+                    padding: "16px",
+                    marginBottom: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <AlertCircle size={24} color="#856404" />
+                  <div style={{ flex: 1 }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#856404",
+                        fontWeight: "600",
+                        fontSize: "16px",
+                      }}
+                    >
+                      Please Complete Your Payment
+                    </p>
+                    <p
+                      style={{
+                        margin: "4px 0 0",
+                        color: "#856404",
+                        fontSize: "14px",
+                      }}
+                    >
+                      Time remaining: {formatTime(timeRemaining)}
+                    </p>
+                    <p
+                      style={{
+                        margin: "4px 0 0",
+                        color: "#856404",
+                        fontSize: "12px",
+                      }}
+                    >
+                      ✓ Checking payment automatically every 3 seconds...
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: "white",
+                    padding: "32px",
+                    borderRadius: "16px",
+                    textAlign: "center",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    marginBottom: "24px",
+                  }}
+                >
+                  <h3 style={{ marginBottom: "16px", color: "#111827" }}>
+                    Scan QR Code to Pay
+                  </h3>
+                  <img
+                    src="/qris_payment.webp"
+                    alt="QRIS Payment"
+                    style={{
+                      width: "300px",
+                      height: "300px",
+                      margin: "0 auto",
+                      display: "block",
+                      border: "3px solid #e5e7eb",
+                      borderRadius: "12px",
+                    }}
+                  />
+                  <p
+                    style={{
+                      marginTop: "16px",
+                      fontSize: "18px",
+                      fontWeight: "600",
+                      color: "#111827",
+                    }}
+                  >
+                    {paymentData.merchantName || "AIDA Creative"}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "16px",
+                      color: "#6b7280",
+                      marginTop: "8px",
+                    }}
+                  >
+                    Amount: IDR {paymentData.amount?.toLocaleString()}
+                  </p>
+
+                  {paymentData.instructions && (
+                    <div
+                      style={{
+                        marginTop: "24px",
+                        textAlign: "left",
+                        background: "#f9fafb",
+                        padding: "16px",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <p
+                        style={{
+                          fontWeight: "600",
+                          marginBottom: "12px",
+                          color: "#111827",
+                        }}
+                      >
+                        How to pay:
+                      </p>
+                      <ol
+                        style={{
+                          margin: 0,
+                          paddingLeft: "20px",
+                          color: "#6b7280",
+                          lineHeight: "1.8",
+                        }}
+                      >
+                        {paymentData.instructions.map(
+                          (instruction: string, index: number) => (
+                            <li key={index}>{instruction}</li>
+                          )
+                        )}
+                      </ol>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {paymentData && paymentData.type === "E_WALLET" && (
               <div
                 style={{
                   background: "white",
-                  padding: "32px",
+                  padding: "24px",
                   borderRadius: "16px",
-                  textAlign: "center",
+                  marginBottom: "20px",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  marginBottom: "24px",
                 }}
               >
-                <h3 style={{ marginBottom: "16px", color: "#111827" }}>
-                  Scan QR Code to Pay
-                </h3>
-                <img
-                  src="/qris_payment.webp"
-                  alt="QRIS Payment"
+                {/* Header with timer */}
+                <div
                   style={{
-                    width: "300px",
-                    height: "300px",
-                    margin: "0 auto",
-                    display: "block",
-                    border: "3px solid #e5e7eb",
-                    borderRadius: "12px",
-                  }}
-                />
-                <p
-                  style={{
-                    marginTop: "16px",
-                    fontSize: "18px",
-                    fontWeight: "600",
-                    color: "#111827",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "20px",
+                    gap: "16px",
                   }}
                 >
-                  {paymentData.merchantName || "AIDA Creative"}
-                </p>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    color: "#6b7280",
-                    marginTop: "8px",
-                  }}
-                >
-                  Amount: IDR {paymentData.amount?.toLocaleString()}
-                </p>
-
-                {paymentData.instructions && (
+                  <h3
+                    style={{
+                      margin: 0,
+                      color: "#111827",
+                      fontSize: "20px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {paymentProvider} Payment
+                  </h3>
                   <div
                     style={{
-                      marginTop: "24px",
-                      textAlign: "left",
-                      background: "#f9fafb",
-                      padding: "16px",
+                      background: "#fff3cd",
+                      border: "2px solid #ffc107",
                       borderRadius: "8px",
+                      padding: "8px 12px",
+                      minWidth: "120px",
+                      textAlign: "center",
                     }}
                   >
                     <p
                       style={{
+                        margin: 0,
+                        color: "#856404",
+                        fontSize: "12px",
                         fontWeight: "600",
-                        marginBottom: "12px",
-                        color: "#111827",
                       }}
                     >
-                      How to pay:
+                      Time Left
                     </p>
-                    <ol
+                    <p
+                      style={{
+                        margin: "2px 0 0",
+                        color: "#856404",
+                        fontSize: "18px",
+                        fontWeight: "700",
+                      }}
+                    >
+                      {formatTime(timeRemaining)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Payment details */}
+                <div
+                  style={{
+                    marginBottom: "16px",
+                    textAlign: "center",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b7280",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Total Amount
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: "700",
+                      color: "#246E76",
+                      margin: "0 0 16px 0",
+                    }}
+                  >
+                    IDR {paymentData.amount?.toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Action button or QR */}
+                {paymentData.checkoutUrl ? (
+                  <a
+                    href={paymentData.checkoutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      padding: "14px",
+                      background: "#246E76",
+                      color: "white",
+                      textAlign: "center",
+                      borderRadius: "10px",
+                      textDecoration: "none",
+                      fontWeight: "600",
+                      fontSize: "16px",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    Open {paymentProvider} App →
+                  </a>
+                ) : (
+                  <div
+                    style={{
+                      padding: "20px",
+                      background: "#f9fafb",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <p
                       style={{
                         margin: 0,
-                        paddingLeft: "20px",
                         color: "#6b7280",
-                        lineHeight: "1.8",
+                        fontSize: "14px",
                       }}
                     >
-                      {paymentData.instructions.map(
-                        (instruction: string, index: number) => (
-                          <li key={index}>{instruction}</li>
-                        )
-                      )}
-                    </ol>
+                      Please complete payment in your {paymentProvider} app
+                    </p>
                   </div>
                 )}
+
+                {/* Auto-check indicator */}
+                <div
+                  style={{
+                    padding: "10px",
+                    background: "#f0f9ff",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      background: "#3b82f6",
+                      borderRadius: "50%",
+                      animation: "pulse 2s infinite",
+                    }}
+                  />
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "12px",
+                      color: "#1e40af",
+                    }}
+                  >
+                    Checking payment automatically every 3 seconds...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {paymentData && (paymentData.type === "CREDIT_CARD" || paymentData.type === "INVOICE") && (
+              <div
+                style={{
+                  background: "white",
+                  padding: "24px",
+                  borderRadius: "16px",
+                  marginBottom: "20px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                }}
+              >
+                {/* Header with timer */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "20px",
+                    gap: "16px",
+                  }}
+                >
+                  <h3
+                    style={{
+                      margin: 0,
+                      color: "#111827",
+                      fontSize: "20px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Complete Payment
+                  </h3>
+                  <div
+                    style={{
+                      background: "#fff3cd",
+                      border: "2px solid #ffc107",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      minWidth: "120px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#856404",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Time Left
+                    </p>
+                    <p
+                      style={{
+                        margin: "2px 0 0",
+                        color: "#856404",
+                        fontSize: "18px",
+                        fontWeight: "700",
+                      }}
+                    >
+                      {formatTime(timeRemaining)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Payment details */}
+                <div
+                  style={{
+                    marginBottom: "16px",
+                    textAlign: "center",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      color: "#6b7280",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Total Amount
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "32px",
+                      fontWeight: "700",
+                      color: "#246E76",
+                      margin: "0 0 16px 0",
+                    }}
+                  >
+                    IDR {paymentData.amount?.toLocaleString() || total.toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Invoice URL if available */}
+                {paymentData.invoiceUrl ? (
+                  <a
+                    href={paymentData.invoiceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      padding: "14px",
+                      background: "#246E76",
+                      color: "white",
+                      textAlign: "center",
+                      borderRadius: "10px",
+                      textDecoration: "none",
+                      fontWeight: "600",
+                      fontSize: "16px",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    Open Payment Page →
+                  </a>
+                ) : (
+                  <div
+                    style={{
+                      padding: "20px",
+                      background: "#f9fafb",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#6b7280",
+                        fontSize: "14px",
+                      }}
+                    >
+                      Please complete the payment process
+                    </p>
+                  </div>
+                )}
+
+                {/* Auto-check indicator */}
+                <div
+                  style={{
+                    padding: "10px",
+                    background: "#f0f9ff",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      background: "#3b82f6",
+                      borderRadius: "50%",
+                      animation: "pulse 2s infinite",
+                    }}
+                  />
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "12px",
+                      color: "#1e40af",
+                    }}
+                  >
+                    Checking payment automatically every 3 seconds...
+                  </p>
+                </div>
               </div>
             )}
 
@@ -616,79 +955,169 @@ export default function ImprovedCartModal({
               <div
                 style={{
                   background: "white",
-                  padding: "32px",
+                  padding: "24px",
                   borderRadius: "16px",
-                  marginBottom: "24px",
+                  marginBottom: "20px",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
               >
-                <h3
+                {/* Header with timer on the right */}
+                <div
                   style={{
-                    marginBottom: "24px",
-                    color: "#111827",
-                    textAlign: "center",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "20px",
+                    gap: "16px",
                   }}
                 >
-                  Transfer to {paymentData.bank}
-                </h3>
-                <div style={{ marginBottom: "16px" }}>
-                  <p
+                  <h3
                     style={{
-                      fontSize: "14px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Account Number:
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: "700",
+                      margin: 0,
                       color: "#111827",
+                      fontSize: "20px",
+                      fontWeight: "600",
                     }}
                   >
-                    {paymentData.accountNumber}
-                  </p>
+                    Transfer to {paymentData.bank}
+                  </h3>
+                  <div
+                    style={{
+                      background: "#fff3cd",
+                      border: "2px solid #ffc107",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      minWidth: "120px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <p
+                      style={{
+                        margin: 0,
+                        color: "#856404",
+                        fontSize: "12px",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Time Left
+                    </p>
+                    <p
+                      style={{
+                        margin: "2px 0 0",
+                        color: "#856404",
+                        fontSize: "18px",
+                        fontWeight: "700",
+                      }}
+                    >
+                      {formatTime(timeRemaining)}
+                    </p>
+                  </div>
                 </div>
-                <div style={{ marginBottom: "16px" }}>
+
+                {/* Payment details in compact grid */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "16px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <div>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#6b7280",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      Account Number
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "700",
+                        color: "#111827",
+                        margin: 0,
+                      }}
+                    >
+                      {paymentData.accountNumber}
+                    </p>
+                  </div>
+                  <div>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#6b7280",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      Amount
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: "700",
+                        color: "#246E76",
+                        margin: 0,
+                      }}
+                    >
+                      IDR {paymentData.amount?.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
                   <p
                     style={{
-                      fontSize: "14px",
+                      fontSize: "13px",
                       color: "#6b7280",
                       marginBottom: "4px",
                     }}
                   >
-                    Account Name:
+                    Account Name
                   </p>
                   <p
                     style={{
-                      fontSize: "18px",
+                      fontSize: "16px",
                       fontWeight: "600",
                       color: "#111827",
+                      margin: 0,
                     }}
                   >
                     {paymentData.accountName}
                   </p>
                 </div>
-                <div>
+
+                {/* Auto-check indicator */}
+                <div
+                  style={{
+                    marginTop: "16px",
+                    padding: "10px",
+                    background: "#f0f9ff",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      background: "#3b82f6",
+                      borderRadius: "50%",
+                      animation: "pulse 2s infinite",
+                    }}
+                  />
                   <p
                     style={{
-                      fontSize: "14px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
+                      margin: 0,
+                      fontSize: "12px",
+                      color: "#1e40af",
                     }}
                   >
-                    Amount:
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: "700",
-                      color: "#246E76",
-                    }}
-                  >
-                    IDR {paymentData.amount?.toLocaleString()}
+                    Checking payment automatically every 3 seconds...
                   </p>
                 </div>
               </div>
