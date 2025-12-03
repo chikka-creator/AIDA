@@ -1,5 +1,5 @@
 // src/lib/xendit.ts
-// Using direct HTTP calls to Xendit API for better compatibility
+// Fixed version with correct Xendit API endpoints and parameters
 
 const XENDIT_SECRET_KEY = process.env.XENDIT_SECRET_KEY || '';
 const XENDIT_API_URL = 'https://api.xendit.co';
@@ -59,6 +59,7 @@ export const xenditService = {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error('Xendit invoice error:', error);
         throw new Error(error.message || 'Failed to create invoice');
       }
 
@@ -77,26 +78,42 @@ export const xenditService = {
     }
   },
 
-  // Create QRIS Payment
+  // Create QRIS Payment - FIXED VERSION
   async createQRIS(params: CreateQRISParams) {
     try {
-      const response = await fetch(`${XENDIT_API_URL}/v2/qr_codes`, {
+      // Ensure amount is an integer
+      const amount = Math.round(params.amount);
+      
+      const requestBody = {
+        external_id: params.externalId,
+        type: 'DYNAMIC',
+        callback_url: params.callbackUrl || `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/xendit-callback`,
+        amount: amount.toString(), // Xendit expects string for QRIS
+      };
+
+      console.log('QRIS request:', JSON.stringify(requestBody, null, 2));
+
+      const response = await fetch(`${XENDIT_API_URL}/qr_codes`, {
         method: 'POST',
         headers: xenditHeaders,
-        body: JSON.stringify({
-          external_id: params.externalId,
-          type: 'DYNAMIC',
-          callback_url: params.callbackUrl || `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/xendit-callback`,
-          amount: params.amount.toString(),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      const responseText = await response.text();
+      console.log('QRIS response:', responseText);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create QRIS');
+        let error;
+        try {
+          error = JSON.parse(responseText);
+        } catch {
+          error = { message: responseText };
+        }
+        console.error('Xendit QRIS error:', error);
+        throw new Error(JSON.stringify(error));
       }
 
-      const result = await response.json();
+      const result = JSON.parse(responseText);
 
       return {
         success: true,
@@ -104,6 +121,7 @@ export const xenditService = {
           id: result.id,
           qr_string: result.qr_string,
           status: result.status,
+          amount: result.amount,
         },
       };
     } catch (error: any) {
@@ -133,6 +151,7 @@ export const xenditService = {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error('Xendit VA error:', error);
         throw new Error(error.message || 'Failed to create virtual account');
       }
 
@@ -157,44 +176,74 @@ export const xenditService = {
     }
   },
 
-  // Create E-Wallet Payment
+  // Create E-Wallet Payment - FIXED VERSION
   async createEWallet(params: {
     externalId: string;
     amount: number;
     phone: string;
-    ewalletType: 'OVO' | 'DANA' | 'LINKAJA' | 'SHOPEEPAY';
+    ewalletType: 'OVO' | 'DANA' | 'GOPAY' | 'SHOPEEPAY' | 'LINKAJA';
   }) {
     try {
+      // Ensure amount is an integer (no decimals)
+      const amount = Math.round(params.amount);
+      
+      // Correct channel codes for Indonesian e-wallets
       const channelCodeMap: Record<string, string> = {
         'OVO': 'ID_OVO',
         'DANA': 'ID_DANA',
         'LINKAJA': 'ID_LINKAJA',
         'SHOPEEPAY': 'ID_SHOPEEPAY',
+        'GOPAY': 'ID_GOPAY',
       };
+
+      // Format phone number - remove any spaces, dashes, or leading zeros
+      let formattedPhone = params.phone.replace(/[\s-]/g, '');
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '+62' + formattedPhone.substring(1);
+      } else if (!formattedPhone.startsWith('+')) {
+        formattedPhone = '+62' + formattedPhone;
+      }
+
+      const requestBody: any = {
+        reference_id: params.externalId,
+        currency: 'IDR',
+        amount: amount, // Use integer amount
+        checkout_method: 'ONE_TIME_PAYMENT',
+        channel_code: channelCodeMap[params.ewalletType],
+        channel_properties: {
+          success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success`,
+          failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/failed`,
+        },
+      };
+
+      // Add mobile number for all e-wallets (Xendit requires it)
+      requestBody.channel_properties.mobile_number = formattedPhone;
+
+      console.log('E-wallet request:', JSON.stringify(requestBody, null, 2));
 
       const response = await fetch(`${XENDIT_API_URL}/ewallets/charges`, {
         method: 'POST',
         headers: xenditHeaders,
-        body: JSON.stringify({
-          reference_id: params.externalId,
-          currency: 'IDR',
-          amount: params.amount,
-          checkout_method: 'ONE_TIME_PAYMENT',
-          channel_code: channelCodeMap[params.ewalletType],
-          channel_properties: {
-            mobile_number: params.phone,
-            success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success`,
-            failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/failed`,
-          },
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      const responseText = await response.text();
+      console.log('E-wallet response:', responseText);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create e-wallet payment');
+        let error;
+        try {
+          error = JSON.parse(responseText);
+        } catch {
+          error = { message: responseText };
+        }
+        console.error('Xendit e-wallet error:', error);
+        // Return detailed error message
+        const errorMsg = error.message || error.error_code || JSON.stringify(error);
+        throw new Error(errorMsg);
       }
 
-      const result = await response.json();
+      const result = JSON.parse(responseText);
 
       return {
         success: true,
@@ -202,6 +251,7 @@ export const xenditService = {
           id: result.id,
           status: result.status,
           actions: result.actions,
+          channel_code: result.channel_code,
         },
       };
     } catch (error: any) {
@@ -223,6 +273,7 @@ export const xenditService = {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error('Xendit get invoice error:', error);
         throw new Error(error.message || 'Failed to get invoice');
       }
 
