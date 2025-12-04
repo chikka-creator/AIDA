@@ -783,173 +783,177 @@ export default function ImprovedCartModal({
               </div>
             )}
 
-            {paymentData && (paymentData.type === "CREDIT_CARD" || paymentData.type === "INVOICE") && (
-              <div
-                style={{
-                  background: "white",
-                  padding: "24px",
-                  borderRadius: "16px",
-                  marginBottom: "20px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                }}
-              >
-                {/* Header with timer */}
+            {paymentData &&
+              (paymentData.type === "CREDIT_CARD" ||
+                paymentData.type === "INVOICE") && (
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
+                    background: "white",
+                    padding: "24px",
+                    borderRadius: "16px",
                     marginBottom: "20px",
-                    gap: "16px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <h3
-                    style={{
-                      margin: 0,
-                      color: "#111827",
-                      fontSize: "20px",
-                      fontWeight: "600",
-                    }}
-                  >
-                    Complete Payment
-                  </h3>
+                  {/* Header with timer */}
                   <div
                     style={{
-                      background: "#fff3cd",
-                      border: "2px solid #ffc107",
-                      borderRadius: "8px",
-                      padding: "8px 12px",
-                      minWidth: "120px",
-                      textAlign: "center",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "20px",
+                      gap: "16px",
                     }}
                   >
-                    <p
+                    <h3
                       style={{
                         margin: 0,
-                        color: "#856404",
-                        fontSize: "12px",
+                        color: "#111827",
+                        fontSize: "20px",
                         fontWeight: "600",
                       }}
                     >
-                      Time Left
+                      Complete Payment
+                    </h3>
+                    <div
+                      style={{
+                        background: "#fff3cd",
+                        border: "2px solid #ffc107",
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        minWidth: "120px",
+                        textAlign: "center",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "#856404",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Time Left
+                      </p>
+                      <p
+                        style={{
+                          margin: "2px 0 0",
+                          color: "#856404",
+                          fontSize: "18px",
+                          fontWeight: "700",
+                        }}
+                      >
+                        {formatTime(timeRemaining)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Payment details */}
+                  <div
+                    style={{
+                      marginBottom: "16px",
+                      textAlign: "center",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#6b7280",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Total Amount
                     </p>
                     <p
                       style={{
-                        margin: "2px 0 0",
-                        color: "#856404",
-                        fontSize: "18px",
+                        fontSize: "32px",
                         fontWeight: "700",
+                        color: "#246E76",
+                        margin: "0 0 16px 0",
                       }}
                     >
-                      {formatTime(timeRemaining)}
+                      IDR{" "}
+                      {paymentData.amount?.toLocaleString() ||
+                        total.toLocaleString()}
                     </p>
                   </div>
-                </div>
 
-                {/* Payment details */}
-                <div
-                  style={{
-                    marginBottom: "16px",
-                    textAlign: "center",
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "#6b7280",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    Total Amount
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "32px",
-                      fontWeight: "700",
-                      color: "#246E76",
-                      margin: "0 0 16px 0",
-                    }}
-                  >
-                    IDR {paymentData.amount?.toLocaleString() || total.toLocaleString()}
-                  </p>
-                </div>
+                  {/* Invoice URL if available */}
+                  {paymentData.invoiceUrl ? (
+                    <a
+                      href={paymentData.invoiceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "14px",
+                        background: "#246E76",
+                        color: "white",
+                        textAlign: "center",
+                        borderRadius: "10px",
+                        textDecoration: "none",
+                        fontWeight: "600",
+                        fontSize: "16px",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      Open Payment Page →
+                    </a>
+                  ) : (
+                    <div
+                      style={{
+                        padding: "20px",
+                        background: "#f9fafb",
+                        borderRadius: "10px",
+                        textAlign: "center",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "#6b7280",
+                          fontSize: "14px",
+                        }}
+                      >
+                        Please complete the payment process
+                      </p>
+                    </div>
+                  )}
 
-                {/* Invoice URL if available */}
-                {paymentData.invoiceUrl ? (
-                  <a
-                    href={paymentData.invoiceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      padding: "14px",
-                      background: "#246E76",
-                      color: "white",
-                      textAlign: "center",
-                      borderRadius: "10px",
-                      textDecoration: "none",
-                      fontWeight: "600",
-                      fontSize: "16px",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    Open Payment Page →
-                  </a>
-                ) : (
+                  {/* Auto-check indicator */}
                   <div
                     style={{
-                      padding: "20px",
-                      background: "#f9fafb",
-                      borderRadius: "10px",
-                      textAlign: "center",
-                      marginBottom: "16px",
+                      padding: "10px",
+                      background: "#f0f9ff",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
                     }}
                   >
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        background: "#3b82f6",
+                        borderRadius: "50%",
+                        animation: "pulse 2s infinite",
+                      }}
+                    />
                     <p
                       style={{
                         margin: 0,
-                        color: "#6b7280",
-                        fontSize: "14px",
+                        fontSize: "12px",
+                        color: "#1e40af",
                       }}
                     >
-                      Please complete the payment process
+                      Checking payment automatically every 3 seconds...
                     </p>
                   </div>
-                )}
-
-                {/* Auto-check indicator */}
-                <div
-                  style={{
-                    padding: "10px",
-                    background: "#f0f9ff",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      background: "#3b82f6",
-                      borderRadius: "50%",
-                      animation: "pulse 2s infinite",
-                    }}
-                  />
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "12px",
-                      color: "#1e40af",
-                    }}
-                  >
-                    Checking payment automatically every 3 seconds...
-                  </p>
                 </div>
-              </div>
-            )}
+              )}
 
             {paymentData && paymentData.type === "BANK_TRANSFER" && (
               <div
@@ -1123,43 +1127,76 @@ export default function ImprovedCartModal({
               </div>
             )}
 
-            <button
-              onClick={handleManualVerify}
-              disabled={checkingPayment}
-              style={{
-                width: "100%",
-                padding: "16px",
-                background: checkingPayment ? "#9ca3af" : "#246E76",
-                color: "white",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "18px",
-                fontWeight: "600",
-                cursor: checkingPayment ? "not-allowed" : "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
-            >
-              {checkingPayment ? (
-                <>
-                  <div
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      border: "3px solid rgba(255,255,255,0.3)",
-                      borderTop: "3px solid white",
-                      borderRadius: "50%",
-                      animation: "spin 1s linear infinite",
-                    }}
-                  />
-                  Verifying Payment...
-                </>
-              ) : (
-                <>I've Already Paid - Check Now</>
+            <div style={{ display: "flex", gap: "12px", width: "100%" }}>
+              <button
+                onClick={handleManualVerify}
+                disabled={checkingPayment}
+                style={{
+                  flex: 1,
+                  padding: "16px",
+                  background: checkingPayment ? "#9ca3af" : "#246E76",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  cursor: checkingPayment ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                }}
+              >
+                {checkingPayment ? (
+                  <>
+                    <div
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        border: "3px solid rgba(255,255,255,0.3)",
+                        borderTop: "3px solid white",
+                        borderRadius: "50%",
+                        animation: "spin 1s linear infinite",
+                      }}
+                    />
+                    Verifying Payment...
+                  </>
+                ) : (
+                  <>I've Already Paid - Check Now</>
+                )}
+              </button>
+
+              {/* Test Button - Only visible in development */}
+              {process.env.NODE_ENV === "development" && (
+                <button
+                  onClick={() => {
+                    if (autoCheckInterval) {
+                      clearInterval(autoCheckInterval);
+                      setAutoCheckInterval(null);
+                    }
+                    setError(
+                      "Payment verification failed. This is a test error."
+                    );
+                    setStep("failed");
+                  }}
+                  disabled={checkingPayment}
+                  style={{
+                    padding: "16px 24px",
+                    background: "#f59e0b",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "12px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    cursor: checkingPayment ? "not-allowed" : "pointer",
+                    opacity: checkingPayment ? 0.5 : 1,
+                  }}
+                  title="Test: Trigger payment failed"
+                >
+                  🧪 Test Fail
+                </button>
               )}
-            </button>
+            </div>
 
             {error && (
               <div
@@ -1180,80 +1217,104 @@ export default function ImprovedCartModal({
 
         {/* Success Screen */}
         {step === "success" && (
-          <div className="success-content" style={{
-            padding: "40px 32px",
-            maxHeight: "calc(90vh - 100px)",
-            overflowY: "auto"
-          }}>
-            <div className="success-icon" style={{
-              width: "80px",
-              height: "80px",
-              background: "linear-gradient(135deg, #10b981, #059669)",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "48px",
-              color: "white",
-              margin: "0 auto 24px"
-            }}>
+          <div
+            className="success-content"
+            style={{
+              padding: "40px 32px",
+              maxHeight: "calc(90vh - 100px)",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              className="success-icon"
+              style={{
+                width: "80px",
+                height: "80px",
+                background: "linear-gradient(135deg, #10b981, #059669)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "48px",
+                color: "white",
+                margin: "0 auto 24px",
+              }}
+            >
               <CheckCircle size={50} />
             </div>
-            <h3 style={{
-              fontSize: "28px",
-              fontWeight: "700",
-              marginBottom: "12px",
-              color: "#111827"
-            }}>Payment Successful!</h3>
-            <p style={{
-              fontSize: "16px",
-              color: "#6b7280",
-              marginBottom: "24px",
-              maxWidth: "450px",
-              margin: "0 auto 24px"
-            }}>
+            <h3
+              style={{
+                fontSize: "28px",
+                fontWeight: "700",
+                marginBottom: "12px",
+                color: "#111827",
+              }}
+            >
+              Payment Successful!
+            </h3>
+            <p
+              style={{
+                fontSize: "16px",
+                color: "#6b7280",
+                marginBottom: "24px",
+                maxWidth: "450px",
+                margin: "0 auto 24px",
+              }}
+            >
               Your payment has been processed successfully. Thank you for your
               purchase!
             </p>
 
-            <div className="success-details" style={{
-              background: "#f9fafb",
-              padding: "20px",
-              borderRadius: "12px",
-              marginBottom: "24px",
-              width: "100%",
-              maxWidth: "400px",
-              margin: "0 auto 24px"
-            }}>
-              <div className="detail-row" style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "10px 0",
-                fontSize: "15px",
-                color: "#374151"
-              }}>
+            <div
+              className="success-details"
+              style={{
+                background: "#f9fafb",
+                padding: "20px",
+                borderRadius: "12px",
+                marginBottom: "24px",
+                width: "100%",
+                maxWidth: "400px",
+                margin: "0 auto 24px",
+              }}
+            >
+              <div
+                className="detail-row"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "10px 0",
+                  fontSize: "15px",
+                  color: "#374151",
+                }}
+              >
                 <span>Transaction ID:</span>
                 <span style={{ fontWeight: "600" }}>{transactionId}</span>
               </div>
-              <div className="detail-row" style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "10px 0",
-                fontSize: "15px",
-                color: "#374151"
-              }}>
+              <div
+                className="detail-row"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "10px 0",
+                  fontSize: "15px",
+                  color: "#374151",
+                }}
+              >
                 <span>Amount:</span>
                 <span style={{ fontWeight: "600" }}>
                   IDR {total.toLocaleString()}
                 </span>
               </div>
-              <div className="detail-row" style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "10px 0",
-                fontSize: "15px",
-                color: "#374151"
-              }}>
+              <div
+                className="detail-row"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "10px 0",
+                  fontSize: "15px",
+                  color: "#374151",
+                }}
+              >
                 <span>Items:</span>
                 <span style={{ fontWeight: "600" }}>
                   {items.length} product(s)
@@ -1261,17 +1322,21 @@ export default function ImprovedCartModal({
               </div>
             </div>
 
-            <button className="library-btn" onClick={handleGoToLibrary} style={{
-              padding: "14px 40px",
-              background: "linear-gradient(135deg, #246E76, #2EB9B9)",
-              color: "white",
-              border: "none",
-              borderRadius: "10px",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "all 0.3s ease"
-            }}>
+            <button
+              className="library-btn"
+              onClick={handleGoToLibrary}
+              style={{
+                padding: "14px 40px",
+                background: "linear-gradient(135deg, #246E76, #2EB9B9)",
+                color: "white",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "16px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+              }}
+            >
               Go to My Library
             </button>
           </div>
